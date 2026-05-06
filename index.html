@@ -158,6 +158,45 @@
   .confirm-items{background:var(--bg);border-radius:10px;padding:12px 16px;margin-bottom:24px;max-height:150px;overflow-y:auto;text-align:left;font-size:13px}
   .confirm-item{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
   .confirm-item:last-child{border-bottom:none}
+
+  /* ── FACTURAS ── */
+  .facturas-resumen{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;margin-bottom:24px}
+  .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .facturas-resumen-label{font-size:13px;color:var(--text-muted)}
+  .facturas-total-pendiente{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--danger);font-weight:700}
+  .facturas-total-pendiente.ok{color:#0A5C36}
+  .factura-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s,box-shadow .15s}
+  .factura-card:hover{box-shadow:var(--shadow)}
+  .factura-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .factura-card.vencida{border-color:#F5C6CB}
+  .factura-card.vencida.selected{border-color:var(--danger);background:#FFF5F5}
+  .factura-check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .factura-card.selected .factura-check{background:var(--primary);border-color:var(--primary);color:white}
+  .factura-card.vencida.selected .factura-check{background:var(--danger);border-color:var(--danger)}
+  .factura-info{flex:1}
+  .factura-ref{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--primary)}
+  .factura-dates{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .factura-vencida-badge{display:inline-block;background:#F8D7DA;color:#842029;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .factura-importes{text-align:right}
+  .factura-total{font-size:13px;color:var(--text-muted)}
+  .factura-pendiente{font-size:18px;font-weight:700;color:var(--primary)}
+  .factura-pendiente.vencida{color:var(--danger)}
+  .facturas-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .cobro-panel{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;position:sticky;bottom:24px;box-shadow:var(--shadow-lg)}
+  .cobro-panel-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-bottom:16px}
+  .cobro-seleccion{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+  .cobro-seleccion strong{color:var(--primary)}
+  .cobro-metodo{display:flex;gap:10px;margin-bottom:20px}
+  .metodo-btn{flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text-muted)}
+  .metodo-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .metodo-btn.active{border-color:var(--primary);background:var(--primary);color:white}
+  .cobro-ref-wrap{margin-bottom:20px;display:none}
+  .cobro-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .cobro-total-label{font-size:13px;color:var(--text-muted)}
+  .cobro-total-amount{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--primary);display:block}
+  .btn-cobrar{background:var(--accent);color:white;border:none;padding:14px 32px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+  .btn-cobrar:hover{background:#C07828}
+  .btn-cobrar:disabled{background:#CCC;cursor:not-allowed}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -253,11 +292,45 @@
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" id="tab-pedido">🛒 Hacer pedido</button>
       <button class="tab-btn" id="tab-historial">📋 Pedidos del cliente</button>
+      <button class="tab-btn" id="tab-facturas">💶 Facturas y cobros</button>
     </div>
 
     <div id="panel-historial" style="display:none">
       <div class="history-list" id="history-list">
         <div class="loading-box"><div class="big-spinner"></div>Cargando historial...</div>
+      </div>
+    </div>
+
+
+    <div id="panel-facturas" style="display:none">
+      <div class="facturas-resumen">
+        <div class="facturas-resumen-top">
+          <span class="facturas-resumen-label">Total pendiente de cobro</span>
+          <button class="btn-back" id="btn-reload-facturas" style="font-size:12px;padding:5px 10px">↻ Actualizar</button>
+        </div>
+        <div class="facturas-total-pendiente" id="facturas-total-pendiente">—</div>
+      </div>
+      <div class="facturas-list" id="facturas-list">
+        <div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>
+      </div>
+      <div class="cobro-panel" id="cobro-panel" style="display:none">
+        <div class="cobro-panel-title">Registrar cobro</div>
+        <div class="cobro-seleccion" id="cobro-seleccion">Ninguna factura seleccionada</div>
+        <div class="cobro-metodo">
+          <button class="metodo-btn active" id="metodo-efectivo" data-journal="">💵 Efectivo</button>
+          <button class="metodo-btn" id="metodo-pagare" data-journal="">📄 Pagaré</button>
+        </div>
+        <div class="cobro-ref-wrap" id="cobro-ref-wrap">
+          <label class="field-label">Referencia del pagaré</label>
+          <input class="field-input" id="cobro-ref" type="text" placeholder="Nº pagaré o referencia...">
+        </div>
+        <div class="cobro-footer">
+          <div>
+            <span class="cobro-total-label">Total a cobrar</span>
+            <span class="cobro-total-amount" id="cobro-total-amount">0,00 €</span>
+          </div>
+          <button class="btn-cobrar" id="btn-cobrar" disabled>Registrar cobro</button>
+        </div>
       </div>
     </div>
 
@@ -310,6 +383,17 @@
 </div>
 
 <!-- Modal: error -->
+
+<div class="modal-overlay" id="modal-cobro-ok">
+  <div class="modal">
+    <div class="modal-icon">💶</div>
+    <h2>¡Cobro registrado!</h2>
+    <p id="modal-cobro-msg">El pago ha sido registrado en Odoo correctamente.</p>
+    <div class="modal-ref" id="modal-cobro-ref"></div>
+    <button class="btn-primary" id="btn-cobro-ok-close">Aceptar</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-err">
   <div class="modal">
     <div class="modal-icon err">❌</div>
@@ -509,6 +593,10 @@
     }
 
     // Reset estado del pedido
+    facturasLoaded = false;
+    selectedInvoices = {};
+    document.getElementById('panel-facturas').style.display = 'none';
+    document.getElementById('tab-facturas').classList.remove('active');
     quantities = {};
     allProducts = [];
     modifyingOrderId = null;
@@ -529,6 +617,7 @@
   // ── Botón "← Mis clientes" ──
   document.getElementById('btn-back-clients').addEventListener('click', function () {
     appScreen.style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'none';
     clientsScreen.style.display = 'block';
     // Limpiar búsqueda de cliente
     clientSearch.value = '';
@@ -545,6 +634,7 @@
     token = null; vendorName = ''; allClients = []; selectedClient = null;
     quantities = {}; allProducts = [];
     appScreen.style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'none';
     clientsScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
     document.getElementById('login-user').value = '';
@@ -858,6 +948,220 @@
     document.body.appendChild(toast);
     setTimeout(function () { toast.remove(); }, 3500);
   }
+
+
+  // ═══════════════════════════════════════════════
+  // FACTURAS Y COBROS
+  // ═══════════════════════════════════════════════
+
+  var facturasLoaded = false;
+  var selectedInvoices = {};   // id -> objeto factura
+  var journals = [];           // diarios disponibles
+  var selectedJournalId = null;
+  var selectedMetodo = 'efectivo';
+
+  // Tab facturas
+  document.getElementById('tab-facturas').addEventListener('click', function () {
+    document.getElementById('tab-facturas').classList.add('active');
+    document.getElementById('tab-pedido').classList.remove('active');
+    document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('panel-pedido').style.display = 'none';
+    document.getElementById('panel-historial').style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'block';
+    if (!facturasLoaded) loadFacturas();
+  });
+
+  // Reload facturas
+  document.getElementById('btn-reload-facturas').addEventListener('click', function () {
+    facturasLoaded = false;
+    selectedInvoices = {};
+    loadFacturas();
+  });
+
+  function loadFacturas() {
+    var list = document.getElementById('facturas-list');
+    var totalEl = document.getElementById('facturas-total-pendiente');
+    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>';
+    totalEl.textContent = '—';
+    document.getElementById('cobro-panel').style.display = 'none';
+    selectedInvoices = {};
+
+    // Cargar diarios y facturas en paralelo
+    Promise.all([
+      fetch(API + '/payment-journals', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
+      fetch(API + '/invoices?partner_id=' + selectedClient.id, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
+    ])
+    .then(function(results) {
+      var journalsData = results[0];
+      var invoicesData = results[1];
+
+      journals = journalsData.journals || [];
+      setupJournalButtons();
+
+      facturasLoaded = true;
+      var invoices = invoicesData.invoices || [];
+      var totalPendiente = invoicesData.total_pendiente || 0;
+
+      totalEl.textContent = fmt(totalPendiente) + ' €';
+      totalEl.className = 'facturas-total-pendiente' + (totalPendiente > 0 ? '' : ' ok');
+
+      if (!invoices.length) {
+        list.innerHTML = '<div class="history-empty">✅ Este cliente no tiene facturas pendientes.</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      invoices.forEach(function(inv) {
+        var card = document.createElement('div');
+        card.className = 'factura-card' + (inv.vencida ? ' vencida' : '');
+        card.dataset.id = inv.id;
+        card.innerHTML =
+          '<div class="factura-check" id="fcheck-' + inv.id + '"></div>' +
+          '<div class="factura-info">' +
+            '<div class="factura-ref">' + inv.name +
+              (inv.vencida ? '<span class="factura-vencida-badge">VENCIDA</span>' : '') +
+            '</div>' +
+            '<div class="factura-dates">Emisión: ' + formatDate(inv.date) +
+              (inv.due_date ? ' · Vencimiento: ' + formatDate(inv.due_date) : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="factura-importes">' +
+            '<div class="factura-total">Total: ' + fmt(inv.total) + ' €</div>' +
+            '<div class="factura-pendiente' + (inv.vencida ? ' vencida' : '') + '">' + fmt(inv.pendiente) + ' €</div>' +
+          '</div>';
+
+        card.addEventListener('click', function() { toggleInvoice(inv, card); });
+        list.appendChild(card);
+      });
+    })
+    .catch(function() {
+      list.innerHTML = '<div class="history-empty">Error cargando facturas.</div>';
+    });
+  }
+
+  function setupJournalButtons() {
+    // Buscar diario efectivo y pagaré
+    var efectivo = journals.find(function(j) { return j.type === 'cash'; });
+    var pagare   = journals.find(function(j) { return j.name.toLowerCase().indexOf('pagar') !== -1; });
+
+    var btnEfectivo = document.getElementById('metodo-efectivo');
+    var btnPagare   = document.getElementById('metodo-pagare');
+
+    if (efectivo) {
+      btnEfectivo.dataset.journal = efectivo.id;
+      selectedJournalId = efectivo.id;
+    } else {
+      btnEfectivo.disabled = true;
+      btnEfectivo.textContent = '💵 Efectivo (no configurado)';
+    }
+
+    if (pagare) {
+      btnPagare.dataset.journal = pagare.id;
+    } else {
+      btnPagare.disabled = true;
+      btnPagare.textContent = '📄 Pagaré (no configurado)';
+    }
+  }
+
+  function toggleInvoice(inv, card) {
+    if (selectedInvoices[inv.id]) {
+      delete selectedInvoices[inv.id];
+      card.classList.remove('selected');
+      document.getElementById('fcheck-' + inv.id).textContent = '';
+    } else {
+      selectedInvoices[inv.id] = inv;
+      card.classList.add('selected');
+      document.getElementById('fcheck-' + inv.id).textContent = '✓';
+    }
+    updateCobroPanel();
+  }
+
+  function updateCobroPanel() {
+    var keys = Object.keys(selectedInvoices);
+    var panel = document.getElementById('cobro-panel');
+    var btnCobrar = document.getElementById('btn-cobrar');
+    var seleccionEl = document.getElementById('cobro-seleccion');
+    var totalEl = document.getElementById('cobro-total-amount');
+
+    if (!keys.length) {
+      panel.style.display = 'none';
+      return;
+    }
+
+    panel.style.display = 'block';
+    var totalCobro = keys.reduce(function(sum, id) { return sum + selectedInvoices[id].pendiente; }, 0);
+    seleccionEl.innerHTML = '<strong>' + keys.length + ' factura' + (keys.length > 1 ? 's' : '') + ' seleccionada' + (keys.length > 1 ? 's' : '') + '</strong>';
+    totalEl.textContent = fmt(totalCobro) + ' €';
+    btnCobrar.disabled = !selectedJournalId;
+  }
+
+  // Métodos de pago
+  document.getElementById('metodo-efectivo').addEventListener('click', function() {
+    selectedMetodo = 'efectivo';
+    selectedJournalId = +this.dataset.journal || null;
+    document.getElementById('metodo-efectivo').classList.add('active');
+    document.getElementById('metodo-pagare').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display = 'none';
+    updateCobroPanel();
+  });
+
+  document.getElementById('metodo-pagare').addEventListener('click', function() {
+    selectedMetodo = 'pagare';
+    selectedJournalId = +this.dataset.journal || null;
+    document.getElementById('metodo-pagare').classList.add('active');
+    document.getElementById('metodo-efectivo').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display = 'block';
+    updateCobroPanel();
+  });
+
+  // Registrar cobro
+  document.getElementById('btn-cobrar').addEventListener('click', function() {
+    var keys = Object.keys(selectedInvoices).map(Number);
+    if (!keys.length || !selectedJournalId) return;
+
+    var btnCobrar = document.getElementById('btn-cobrar');
+    btnCobrar.disabled = true;
+    btnCobrar.innerHTML = '<span class="spinner"></span>Procesando...';
+
+    var memo = selectedMetodo === 'pagare'
+      ? (document.getElementById('cobro-ref').value.trim() || 'Pagaré')
+      : 'Cobro en efectivo — ' + vendorName;
+
+    fetch(API + '/invoices/pay?partner_id=' + selectedClient.id, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ invoice_ids: keys, journal_id: selectedJournalId, memo: memo })
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      btnCobrar.disabled = false;
+      btnCobrar.innerHTML = 'Registrar cobro';
+      if (!res.ok) {
+        modalErrMsg.textContent = res.data.detail || 'Error al registrar el cobro.';
+        modalErr.classList.add('open');
+        return;
+      }
+      var names = res.data.invoices_paid.join(', ');
+      document.getElementById('modal-cobro-msg').textContent =
+        fmt(res.data.amount) + ' € cobrados — ' + (selectedMetodo === 'efectivo' ? 'Efectivo' : 'Pagaré');
+      document.getElementById('modal-cobro-ref').textContent = names;
+      document.getElementById('modal-cobro-ok').classList.add('open');
+      // Recargar facturas
+      facturasLoaded = false;
+      selectedInvoices = {};
+    })
+    .catch(function() {
+      btnCobrar.disabled = false;
+      btnCobrar.innerHTML = 'Registrar cobro';
+      modalErrMsg.textContent = 'Error de conexión al registrar el cobro.';
+      modalErr.classList.add('open');
+    });
+  });
+
+  document.getElementById('btn-cobro-ok-close').addEventListener('click', function() {
+    document.getElementById('modal-cobro-ok').classList.remove('open');
+    loadFacturas();
+  });
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
