@@ -1160,7 +1160,15 @@
 
   document.getElementById('btn-cobro-ok-close').addEventListener('click', function() {
     document.getElementById('modal-cobro-ok').classList.remove('open');
-    loadFacturas();
+    // Pequeña espera para que Odoo actualice el estado de las facturas
+    var list = document.getElementById('facturas-list');
+    var totalEl = document.getElementById('facturas-total-pendiente');
+    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
+    totalEl.textContent = '—';
+    document.getElementById('cobro-panel').style.display = 'none';
+    selectedInvoices = {};
+    facturasLoaded = false;
+    setTimeout(function() { loadFacturas(); }, 1500);
   });
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
