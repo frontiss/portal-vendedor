@@ -213,6 +213,52 @@
   .btn-cobrar{background:var(--accent);color:white;border:none;padding:14px 32px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
   .btn-cobrar:hover{background:#C07828}
   .btn-cobrar:disabled{background:#CCC;cursor:not-allowed}
+
+  /* ── LIQUIDACIÓN ── */
+  @media print {
+    body > *:not(#print-area) { display: none !important; }
+    #print-area { display: block !important; }
+    .no-print { display: none !important; }
+  }
+  #print-area { display: none; }
+  .liq-screen { max-width: 900px; margin: 0 auto; padding: 40px 24px 60px; }
+  .liq-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+  .liq-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--primary); }
+  .liq-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .liq-date-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--primary); background: white; outline: none; transition: border-color .2s; }
+  .liq-date-input:focus { border-color: var(--accent); }
+  .btn-liq { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-liq:hover { background: #24503A; }
+  .btn-liq-print { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
+  .btn-liq-print:hover { background: #C07828; }
+  .liq-detail-tabs { display: flex; gap: 4px; background: white; padding: 5px; border-radius: 12px; border: 1.5px solid var(--border); width: fit-content; margin-bottom: 28px; }
+  .liq-detail-btn { padding: 8px 18px; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all .2s; }
+  .liq-detail-btn.active { background: var(--primary); color: white; }
+  .liq-resumen-card { background: white; border-radius: 16px; border: 1.5px solid var(--border); padding: 24px 28px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .liq-resumen-dato { text-align: center; }
+  .liq-resumen-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .liq-resumen-valor { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--primary); font-weight: 700; display: block; }
+  .liq-resumen-valor.grande { font-size: 36px; color: var(--accent); }
+  .liq-cliente-card { background: white; border-radius: 14px; border: 1.5px solid var(--border); margin-bottom: 12px; overflow: hidden; }
+  .liq-cliente-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; cursor: pointer; transition: background .15s; }
+  .liq-cliente-header:hover { background: var(--bg); }
+  .liq-cliente-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: var(--primary); }
+  .liq-cliente-subtotal { font-size: 18px; font-weight: 700; color: var(--primary); }
+  .liq-cliente-body { display: none; border-top: 1px solid var(--border); }
+  .liq-cliente-card.open .liq-cliente-body { display: block; }
+  .liq-cliente-card.open .liq-chevron { transform: rotate(180deg); }
+  .liq-chevron { color: var(--text-muted); transition: transform .2s; font-size: 16px; }
+  .liq-cobro-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; }
+  .liq-cobro-row:last-child { border-bottom: none; }
+  .liq-cobro-info { flex: 1; }
+  .liq-cobro-ref { font-size: 13px; font-weight: 600; color: var(--primary); }
+  .liq-cobro-memo { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .liq-cobro-facturas { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .liq-cobro-importe { font-size: 16px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+  .liq-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-style: italic; }
+  .liq-total-bar { background: var(--primary); color: white; border-radius: 14px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+  .liq-total-bar-label { font-size: 16px; font-weight: 600; opacity: .85; }
+  .liq-total-bar-amount { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700; }
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -268,7 +314,10 @@
       <span class="header-logo-text">Comercial A. Puchol</span>
       <span class="vendor-pill" id="vendor-pill"></span>
     </div>
-    <button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">📊 Liquidación</button>
+      <button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button>
+    </div>
   </div>
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
@@ -285,6 +334,46 @@
   </div>
 </div>
 
+
+<!-- ════════════════════════════════════════════════
+     PANTALLA: LIQUIDACIÓN
+════════════════════════════════════════════════ -->
+<div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
+  <div class="clients-header">
+    <div class="clients-header-left">
+      <span class="header-logo-text">Comercial A. Puchol</span>
+      <span class="vendor-pill" id="liq-vendor-pill"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-back" id="btn-liq-back">← Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-liq">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="liq-screen">
+    <div class="liq-header-row">
+      <div>
+        <h1 class="liq-title">Liquidación de cobros</h1>
+        <p style="color:var(--text-muted);font-size:14px;margin-top:4px" id="liq-vendedor-label"></p>
+      </div>
+      <div class="liq-controls no-print">
+        <input type="date" id="liq-fecha" class="liq-date-input">
+        <button class="btn-liq" id="btn-liq-buscar">Ver liquidación</button>
+        <button class="btn-liq-print" id="btn-liq-print" style="display:none">🖨️ Imprimir / PDF</button>
+      </div>
+    </div>
+    <div class="liq-detail-tabs no-print" id="liq-detail-tabs" style="display:none">
+      <button class="liq-detail-btn active" data-mode="clientes">Por cliente</button>
+      <button class="liq-detail-btn" data-mode="facturas">Por factura</button>
+      <button class="liq-detail-btn" data-mode="resumen">Solo resumen</button>
+    </div>
+    <div id="liq-content">
+      <div class="liq-empty">Selecciona una fecha y pulsa "Ver liquidación"</div>
+    </div>
+  </div>
+</div>
+
+<!-- Área de impresión -->
+<div id="print-area"></div>
 
 <!-- ════════════════════════════════════════════════
      PANTALLA 3: PORTAL DE PEDIDO (igual que el original)
@@ -1299,6 +1388,212 @@
     facturasLoaded = false;
     setTimeout(function() { loadFacturas(); }, 1500);
   });
+
+
+  // ═══════════════════════════════════════════════
+  // LIQUIDACIÓN
+  // ═══════════════════════════════════════════════
+
+  var liqData = null;
+  var liqMode = 'clientes';
+
+  // Navegar a liquidación
+  document.getElementById('btn-liquidacion-nav').addEventListener('click', function() {
+    clientsScreen.style.display = 'none';
+    document.getElementById('liq-screen').style.display = 'block';
+    document.getElementById('liq-vendor-pill').textContent = vendorName;
+    document.getElementById('liq-vendedor-pill') && (document.getElementById('liq-vendor-pill').textContent = vendorName);
+    document.getElementById('liq-vendedor-label').textContent = 'Vendedor: ' + vendorName;
+    // Poner fecha de hoy por defecto
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('liq-fecha').value = today;
+    liqData = null;
+    document.getElementById('liq-content').innerHTML = '<div class="liq-empty">Selecciona una fecha y pulsa \"Ver liquidación\"</div>';
+    document.getElementById('btn-liq-print').style.display = 'none';
+    document.getElementById('liq-detail-tabs').style.display = 'none';
+  });
+
+  // Volver a clientes desde liquidación
+  document.getElementById('btn-liq-back').addEventListener('click', function() {
+    document.getElementById('liq-screen').style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+
+  document.getElementById('btn-logout-liq').addEventListener('click', logout);
+
+  // Buscar liquidación
+  document.getElementById('btn-liq-buscar').addEventListener('click', function() {
+    var fecha = document.getElementById('liq-fecha').value;
+    if (!fecha) { alert('Selecciona una fecha'); return; }
+    loadLiquidacion(fecha);
+  });
+
+  // Imprimir
+  document.getElementById('btn-liq-print').addEventListener('click', function() {
+    if (!liqData) return;
+    var printArea = document.getElementById('print-area');
+    printArea.innerHTML = buildPrintHTML(liqData, liqMode);
+    window.print();
+  });
+
+  // Tabs de detalle
+  document.querySelectorAll('.liq-detail-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.liq-detail-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      liqMode = btn.dataset.mode;
+      if (liqData) renderLiquidacion(liqData, liqMode);
+    });
+  });
+
+  function loadLiquidacion(fecha) {
+    var content = document.getElementById('liq-content');
+    content.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando cobros...</div>';
+    document.getElementById('btn-liq-print').style.display = 'none';
+    document.getElementById('liq-detail-tabs').style.display = 'none';
+
+    fetch(API + '/liquidacion?fecha=' + fecha, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+    .then(function(res) {
+      if (!res.ok) {
+        content.innerHTML = '<div class="liq-empty">Error: ' + (res.data.detail || 'No se pudo cargar') + '</div>';
+        return;
+      }
+      liqData = res.data;
+      if (!liqData.clientes || !liqData.clientes.length) {
+        content.innerHTML = '<div class="liq-empty">No hay cobros registrados el ' + formatDateES(fecha) + '</div>';
+        return;
+      }
+      document.getElementById('liq-detail-tabs').style.display = 'flex';
+      document.getElementById('btn-liq-print').style.display = 'inline-block';
+      renderLiquidacion(liqData, liqMode);
+    })
+    .catch(function() {
+      content.innerHTML = '<div class="liq-empty">Error de conexión.</div>';
+    });
+  }
+
+  function renderLiquidacion(data, mode) {
+    var content = document.getElementById('liq-content');
+    var html = '';
+
+    // Resumen siempre visible
+    html += '<div class="liq-resumen-card">' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">' + formatDateES(data.fecha) + '</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes cobrados</span><span class="liq-resumen-valor">' + data.clientes.length + '</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Nº cobros</span><span class="liq-resumen-valor">' + data.num_cobros + '</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total cobrado</span><span class="liq-resumen-valor grande">' + fmt(data.total) + ' €</span></div>' +
+    '</div>';
+
+    if (mode === 'resumen') {
+      content.innerHTML = html;
+      return;
+    }
+
+    if (mode === 'clientes' || mode === 'facturas') {
+      data.clientes.forEach(function(cliente, idx) {
+        html += '<div class="liq-cliente-card" id="liq-card-' + idx + '">' +
+          '<div class="liq-cliente-header" onclick="toggleLiqCard(' + idx + ')">' +
+            '<div>' +
+              '<div class="liq-cliente-name">' + cliente.cliente + '</div>' +
+              '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">' + cliente.cobros.length + ' cobro' + (cliente.cobros.length > 1 ? 's' : '') + '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:12px">' +
+              '<span class="liq-cliente-subtotal">' + fmt(cliente.subtotal) + ' €</span>' +
+              '<span class="liq-chevron">▾</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="liq-cliente-body">';
+
+        cliente.cobros.forEach(function(cobro) {
+          var facturasStr = cobro.facturas.length
+            ? 'Facturas: ' + cobro.facturas.map(function(f) { return f.ref; }).join(', ')
+            : 'Sin facturas asociadas';
+          html += '<div class="liq-cobro-row">' +
+            '<div class="liq-cobro-info">' +
+              '<div class="liq-cobro-ref">' + cobro.ref + ' · ' + cobro.diario + '</div>' +
+              '<div class="liq-cobro-memo">' + (cobro.memo || '') + '</div>' +
+              (mode === 'facturas' ? '<div class="liq-cobro-facturas">' + facturasStr + '</div>' : '') +
+            '</div>' +
+            '<div class="liq-cobro-importe">' + fmt(cobro.importe) + ' €</div>' +
+          '</div>';
+        });
+
+        html += '</div></div>';
+      });
+    }
+
+    // Total
+    html += '<div class="liq-total-bar">' +
+      '<span class="liq-total-bar-label">TOTAL COBRADO ' + formatDateES(data.fecha).toUpperCase() + '</span>' +
+      '<span class="liq-total-bar-amount">' + fmt(data.total) + ' €</span>' +
+    '</div>';
+
+    content.innerHTML = html;
+  }
+
+  function toggleLiqCard(idx) {
+    var card = document.getElementById('liq-card-' + idx);
+    if (card) card.classList.toggle('open');
+  }
+
+  function formatDateES(fecha) {
+    if (!fecha) return '';
+    var parts = fecha.split('-');
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  function buildPrintHTML(data, mode) {
+    var rows = '';
+    data.clientes.forEach(function(cliente) {
+      cliente.cobros.forEach(function(cobro) {
+        var facturas = cobro.facturas.map(function(f) { return f.ref; }).join(', ') || '-';
+        rows += '<tr>' +
+          '<td>' + cliente.cliente + '</td>' +
+          '<td>' + cobro.ref + '</td>' +
+          '<td>' + cobro.diario + '</td>' +
+          (mode === 'facturas' ? '<td>' + facturas + '</td>' : '') +
+          '<td style="text-align:right;font-weight:700">' + fmt(cobro.importe) + ' €</td>' +
+        '</tr>';
+      });
+    });
+
+    return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">' +
+        '<div>' +
+          '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidación de cobros</h1>' +
+          '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: ' + data.vendedor + ' &nbsp;|&nbsp; Fecha: ' + formatDateES(data.fecha) + '</p>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div style="font-size:12px;color:#666">Comercial A. Puchol S.A.</div>' +
+          '<div style="font-size:11px;color:#999">Generado: ' + new Date().toLocaleDateString('es-ES') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Clientes cobrados</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">' + data.clientes.length + '</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Nº cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">' + data.num_cobros + '</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Total cobrado</div><div style="font-size:28px;font-weight:700;color:#D48B3A">' + fmt(data.total) + ' €</div></div>' +
+      '</div>' +
+      (mode !== 'resumen' ?
+        '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+          '<thead><tr style="background:#1A3A2A;color:white">' +
+            '<th style="padding:10px 12px;text-align:left">Cliente</th>' +
+            '<th style="padding:10px 12px;text-align:left">Referencia</th>' +
+            '<th style="padding:10px 12px;text-align:left">Diario</th>' +
+            (mode === 'facturas' ? '<th style="padding:10px 12px;text-align:left">Facturas</th>' : '') +
+            '<th style="padding:10px 12px;text-align:right">Importe</th>' +
+          '</tr></thead>' +
+          '<tbody>' + rows + '</tbody>' +
+          '<tfoot><tr style="background:#f5f2ec;font-weight:700">' +
+            '<td colspan="' + (mode === 'facturas' ? '4' : '3') + '" style="padding:12px;font-size:15px">TOTAL</td>' +
+            '<td style="padding:12px;text-align:right;font-size:18px;color:#1A3A2A">' + fmt(data.total) + ' €</td>' +
+          '</tr></tfoot>' +
+        '</table>'
+      : '') +
+    '</div>';
+  }
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
