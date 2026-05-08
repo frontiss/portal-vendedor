@@ -1004,9 +1004,13 @@
     modifyingOrderId = null;
     btnOrder.innerHTML = 'Confirmar pedido';
     modalOk.classList.remove('open');
-    render(allProducts);
-    updateSummary();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Volver a la pantalla de clientes
+    appScreen.style.display = 'none';
+    clientsScreen.style.display = 'block';
+    clientSearch.value = '';
+    activeDayFilter = 'todos';
+    buildDayFilters(allClients);
+    renderClients(allClients);
   });
 
   document.getElementById('btn-err-close').addEventListener('click', function () { modalErr.classList.remove('open'); });
