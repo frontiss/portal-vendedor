@@ -801,15 +801,19 @@
   document.getElementById('tab-pedido').addEventListener('click', function () {
     document.getElementById('tab-pedido').classList.add('active');
     document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('tab-facturas').classList.remove('active');
     document.getElementById('panel-pedido').style.display = 'block';
     document.getElementById('panel-historial').style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'none';
   });
 
   document.getElementById('tab-historial').addEventListener('click', function () {
     document.getElementById('tab-historial').classList.add('active');
     document.getElementById('tab-pedido').classList.remove('active');
+    document.getElementById('tab-facturas').classList.remove('active');
     document.getElementById('panel-pedido').style.display = 'none';
     document.getElementById('panel-historial').style.display = 'block';
+    document.getElementById('panel-facturas').style.display = 'none';
     if (!historyLoaded) loadHistory();
   });
 
