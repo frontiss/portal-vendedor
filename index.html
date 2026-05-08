@@ -63,6 +63,14 @@
   .loading-box{text-align:center;padding:60px 20px;color:var(--text-muted)}
   .big-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
 
+
+  /* ── FILTROS DÍA REPARTO ── */
+  .day-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .day-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:20px;background:white;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s}
+  .day-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .day-btn.active{background:var(--primary);border-color:var(--primary);color:white}
+  .day-btn.all{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+  .day-btn.all.active{background:var(--accent);border-color:var(--accent);color:white}
   /* ── APP SCREEN (PEDIDO) ── */
   #app-screen{display:none;min-height:100vh}
   header{background:var(--primary);padding:8px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -257,6 +265,8 @@
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
     <p class="clients-subtitle" id="clients-subtitle">Selecciona un cliente para hacer su pedido</p>
+
+    <div class="day-filters" id="day-filters" style="display:none"></div>
     <div class="clients-search-wrap">
       <svg class="clients-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="client-search" class="field-input" style="padding-left:42px;border-radius:10px;border:1.5px solid var(--border);background:white" placeholder="Buscar cliente...">
@@ -528,11 +538,91 @@
       allClients = res.data.clients || [];
       var subtitle = document.getElementById('clients-subtitle');
       subtitle.textContent = allClients.length + ' cliente' + (allClients.length !== 1 ? 's' : '') + ' asignado' + (allClients.length !== 1 ? 's' : '') + ' — selecciona uno para hacer su pedido';
+      buildDayFilters(allClients);
       renderClients(allClients);
     })
     .catch(function () {
       clientsGrid.innerHTML = '<div class="loading-box">Error de conexión.</div>';
     });
+  }
+
+
+  // ── FILTRO POR DÍA DE REPARTO ──────────────────────────
+  var activeDayFilter = 'todos';
+
+  function buildDayFilters(clients) {
+    var container = document.getElementById('day-filters');
+    // Recopilar días únicos
+    var days = {};
+    clients.forEach(function(c) {
+      if (c.ruta && c.ruta.trim()) {
+        var day = c.ruta.trim();
+        days[day] = (days[day] || 0) + 1;
+      }
+    });
+
+    var dayKeys = Object.keys(days).sort();
+    if (!dayKeys.length) { container.style.display = 'none'; return; }
+
+    container.innerHTML = '';
+    container.style.display = 'flex';
+
+    // Botón "Todos"
+    var btnTodos = document.createElement('button');
+    btnTodos.className = 'day-btn all active';
+    btnTodos.textContent = 'Todos (' + clients.length + ')';
+    btnTodos.dataset.day = 'todos';
+    btnTodos.addEventListener('click', function() { setDayFilter('todos', clients); });
+    container.appendChild(btnTodos);
+
+    // Botón por cada día
+    dayKeys.forEach(function(day) {
+      var btn = document.createElement('button');
+      btn.className = 'day-btn';
+      btn.textContent = day + ' (' + days[day] + ')';
+      btn.dataset.day = day;
+      btn.addEventListener('click', function() { setDayFilter(day, clients); });
+      container.appendChild(btn);
+    });
+
+    // Botón "Sin día asignado"
+    var sinDia = clients.filter(function(c) { return !c.ruta || !c.ruta.trim(); }).length;
+    if (sinDia > 0) {
+      var btnSin = document.createElement('button');
+      btnSin.className = 'day-btn';
+      btnSin.textContent = 'Sin día (' + sinDia + ')';
+      btnSin.dataset.day = 'sin-dia';
+      btnSin.addEventListener('click', function() { setDayFilter('sin-dia', clients); });
+      container.appendChild(btnSin);
+    }
+  }
+
+  function setDayFilter(day, clients) {
+    activeDayFilter = day;
+
+    // Actualizar botones activos
+    document.querySelectorAll('.day-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.day === day);
+    });
+
+    // Aplicar filtro combinado con búsqueda de texto
+    applyFilters(clients);
+  }
+
+  function applyFilters(clients) {
+    var q = clientSearch.value.toLowerCase();
+
+    var filtered = clients.filter(function(c) {
+      // Filtro por texto
+      var textOk = !q || (c.name + (c.ref || '') + (c.address || '')).toLowerCase().indexOf(q) !== -1;
+      // Filtro por día
+      var dayOk = activeDayFilter === 'todos' ||
+        (activeDayFilter === 'sin-dia' && (!c.ruta || !c.ruta.trim())) ||
+        (c.ruta && c.ruta.trim() === activeDayFilter);
+      return textOk && dayOk;
+    });
+
+    renderClients(filtered);
   }
 
   function renderClients(list) {
@@ -560,13 +650,7 @@
   }
 
   clientSearch.addEventListener('input', function () {
-    var q = clientSearch.value.toLowerCase();
-    var filtered = q
-      ? allClients.filter(function (c) {
-          return (c.name + (c.ref || '') + (c.address || '')).toLowerCase().indexOf(q) !== -1;
-        })
-      : allClients;
-    renderClients(filtered);
+    applyFilters(allClients);
   });
 
   function selectClient(client) {
@@ -621,6 +705,8 @@
     clientsScreen.style.display = 'block';
     // Limpiar búsqueda de cliente
     clientSearch.value = '';
+    activeDayFilter = 'todos';
+    buildDayFilters(allClients);
     renderClients(allClients);
   });
 
