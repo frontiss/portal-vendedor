@@ -167,6 +167,14 @@
   .confirm-item{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
   .confirm-item:last-child{border-bottom:none}
 
+
+  /* ── PRODUCTOS HABITUALES ── */
+  .product-habitual-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;color:#856404;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;width:fit-content}
+  .product-card.habitual{border-color:#D4A843;background:#FFFBF0}
+  .product-card.habitual:hover{border-color:var(--accent);background:#FFF8E8}
+  .habitual-divider{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:8px 0 4px}
+  .habitual-divider span{font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
+  .habitual-divider::before,.habitual-divider::after{content:'';flex:1;height:1px;background:var(--border)}
   /* ── FACTURAS ── */
   .facturas-resumen{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;margin-bottom:24px}
   .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -744,6 +752,9 @@
         return;
       }
       allProducts = res.data.products || [];
+      // Guardar IDs de productos habituales
+      topProductIds = {};
+      allProducts.forEach(function(p) { if (p.freq > 0) topProductIds[p.id] = p.freq; });
       searchBar.style.display = 'flex';
       summaryEl.style.display = 'block';
       document.getElementById('tabs').style.display = 'flex';
@@ -762,6 +773,8 @@
     }) : allProducts);
   });
 
+  var topProductIds = {};
+
   function render(products) {
     if (!products.length) {
       productsArea.innerHTML = '<div class="loading-box">No se encontraron productos.</div>';
@@ -769,12 +782,38 @@
     }
     var grid = document.createElement('div');
     grid.className = 'products-grid';
+
+    var habitualesShown = false;
+    var restoShown = false;
+
     products.forEach(function (p) {
       var qty = quantities[p.id] || 0;
+      var esHabitual = (topProductIds[p.id] || 0) > 0;
+
+      if (esHabitual && !habitualesShown) {
+        habitualesShown = true;
+        var div1 = document.createElement('div');
+        div1.className = 'habitual-divider';
+        div1.innerHTML = '<span>&#11088; Habituales de este cliente</span>';
+        grid.appendChild(div1);
+      }
+      if (!esHabitual && habitualesShown && !restoShown) {
+        restoShown = true;
+        var div2 = document.createElement('div');
+        div2.className = 'habitual-divider';
+        div2.innerHTML = '<span>Resto del cat\u00e1logo</span>';
+        grid.appendChild(div2);
+      }
+
       var card = document.createElement('div');
-      card.className = 'product-card' + (qty > 0 ? ' selected' : '');
+      card.className = 'product-card' + (esHabitual ? ' habitual' : '') + (qty > 0 ? ' selected' : '');
       card.id = 'card-' + p.id;
+      var freq = topProductIds[p.id] || 0;
+      var badgeHtml = esHabitual
+        ? '<div class="product-habitual-badge">&#11088; Habitual &middot; ' + freq + ' pedido' + (freq > 1 ? 's' : '') + '</div>'
+        : '';
       card.innerHTML =
+        badgeHtml +
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         '<div class="product-name">' + p.name + '</div>' +
         '<div class="product-format">' + (p.uom || '') + '</div>' +
