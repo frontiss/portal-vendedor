@@ -63,14 +63,6 @@
   .loading-box{text-align:center;padding:60px 20px;color:var(--text-muted)}
   .big-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
 
-
-  /* ── FILTROS DÍA REPARTO ── */
-  .day-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
-  .day-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:20px;background:white;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s}
-  .day-btn:hover{border-color:var(--primary);color:var(--primary)}
-  .day-btn.active{background:var(--primary);border-color:var(--primary);color:white}
-  .day-btn.all{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
-  .day-btn.all.active{background:var(--accent);border-color:var(--accent);color:white}
   /* ── APP SCREEN (PEDIDO) ── */
   #app-screen{display:none;min-height:100vh}
   header{background:var(--primary);padding:8px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
@@ -167,14 +159,6 @@
   .confirm-item{padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
   .confirm-item:last-child{border-bottom:none}
 
-
-  /* ── PRODUCTOS HABITUALES ── */
-  .product-habitual-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;color:#856404;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;width:fit-content}
-  .product-card.habitual{border-color:#D4A843;background:#FFFBF0}
-  .product-card.habitual:hover{border-color:var(--accent);background:#FFF8E8}
-  .habitual-divider{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:8px 0 4px}
-  .habitual-divider span{font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
-  .habitual-divider::before,.habitual-divider::after{content:'';flex:1;height:1px;background:var(--border)}
   /* ── FACTURAS ── */
   .facturas-resumen{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;margin-bottom:24px}
   .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -214,51 +198,100 @@
   .btn-cobrar:hover{background:#C07828}
   .btn-cobrar:disabled{background:#CCC;cursor:not-allowed}
 
-  /* ── LIQUIDACIÓN ── */
-  @media print {
-    body > *:not(#print-area) { display: none !important; }
-    #print-area { display: block !important; }
-    .no-print { display: none !important; }
-  }
-  #print-area { display: none; }
-  .liq-screen { max-width: 900px; margin: 0 auto; padding: 40px 24px 60px; }
-  .liq-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
-  .liq-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--primary); }
-  .liq-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .liq-date-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--primary); background: white; outline: none; transition: border-color .2s; }
-  .liq-date-input:focus { border-color: var(--accent); }
-  .btn-liq { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
-  .btn-liq:hover { background: #24503A; }
-  .btn-liq-print { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s; }
-  .btn-liq-print:hover { background: #C07828; }
-  .liq-detail-tabs { display: flex; gap: 4px; background: white; padding: 5px; border-radius: 12px; border: 1.5px solid var(--border); width: fit-content; margin-bottom: 28px; }
-  .liq-detail-btn { padding: 8px 18px; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all .2s; }
-  .liq-detail-btn.active { background: var(--primary); color: white; }
-  .liq-resumen-card { background: white; border-radius: 16px; border: 1.5px solid var(--border); padding: 24px 28px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-  .liq-resumen-dato { text-align: center; }
-  .liq-resumen-label { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-  .liq-resumen-valor { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--primary); font-weight: 700; display: block; }
-  .liq-resumen-valor.grande { font-size: 36px; color: var(--accent); }
-  .liq-cliente-card { background: white; border-radius: 14px; border: 1.5px solid var(--border); margin-bottom: 12px; overflow: hidden; }
-  .liq-cliente-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; cursor: pointer; transition: background .15s; }
-  .liq-cliente-header:hover { background: var(--bg); }
-  .liq-cliente-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 700; color: var(--primary); }
-  .liq-cliente-subtotal { font-size: 18px; font-weight: 700; color: var(--primary); }
-  .liq-cliente-body { display: none; border-top: 1px solid var(--border); }
-  .liq-cliente-card.open .liq-cliente-body { display: block; }
-  .liq-cliente-card.open .liq-chevron { transform: rotate(180deg); }
-  .liq-chevron { color: var(--text-muted); transition: transform .2s; font-size: 16px; }
-  .liq-cobro-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 20px; border-bottom: 1px solid var(--border); gap: 12px; }
-  .liq-cobro-row:last-child { border-bottom: none; }
-  .liq-cobro-info { flex: 1; }
-  .liq-cobro-ref { font-size: 13px; font-weight: 600; color: var(--primary); }
-  .liq-cobro-memo { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .liq-cobro-facturas { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-  .liq-cobro-importe { font-size: 16px; font-weight: 700; color: var(--primary); white-space: nowrap; }
-  .liq-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); font-style: italic; }
-  .liq-total-bar { background: var(--primary); color: white; border-radius: 14px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
-  .liq-total-bar-label { font-size: 16px; font-weight: 600; opacity: .85; }
-  .liq-total-bar-amount { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700; }
+  /* Filtros dia reparto */
+  .day-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .day-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:20px;background:white;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s}
+  .day-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .day-btn.active{background:var(--primary);border-color:var(--primary);color:white}
+  .day-btn.all{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+  .day-btn.all.active{background:var(--accent);border-color:var(--accent);color:white}
+  /* Tarjetas cliente */
+  .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .client-card.visited{border-color:#1A3A2A !important;background:#F0F6F3}
+  .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3A2A;margin-top:8px;background:#D1E7DD;padding:3px 10px;border-radius:20px;width:fit-content}
+  .client-card.visited .visited-badge{display:block}
+  /* Habituales */
+  .product-habitual-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;color:#856404;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;width:fit-content}
+  .product-card.habitual{border-color:#D4A843;background:#FFFBF0}
+  .product-card.habitual:hover{border-color:var(--accent);background:#FFF8E8}
+  .habitual-divider{grid-column:1/-1;display:flex;align-items:center;gap:12px;margin:8px 0 4px}
+  .habitual-divider span{font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap;letter-spacing:.06em;text-transform:uppercase}
+  .habitual-divider::before,.habitual-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+  /* Facturas */
+  .facturas-resumen{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;margin-bottom:24px}
+  .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .facturas-resumen-label{font-size:13px;color:var(--text-muted)}
+  .facturas-total-pendiente{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--danger);font-weight:700}
+  .facturas-total-pendiente.ok{color:#0A5C36}
+  .factura-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s,box-shadow .15s}
+  .factura-card:hover{box-shadow:var(--shadow)}
+  .factura-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .factura-card.vencida{border-color:#F5C6CB}
+  .factura-card.vencida.selected{border-color:var(--danger);background:#FFF5F5}
+  .factura-check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+  .factura-card.selected .factura-check{background:var(--primary);border-color:var(--primary);color:white}
+  .factura-card.vencida.selected .factura-check{background:var(--danger);border-color:var(--danger)}
+  .factura-info{flex:1}
+  .factura-ref{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;color:var(--primary)}
+  .factura-dates{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .factura-vencida-badge{display:inline-block;background:#F8D7DA;color:#842029;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .factura-importes{text-align:right}
+  .factura-total{font-size:13px;color:var(--text-muted)}
+  .factura-pendiente{font-size:18px;font-weight:700;color:var(--primary)}
+  .factura-pendiente.vencida{color:var(--danger)}
+  .facturas-list{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .cobro-panel{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;position:sticky;bottom:24px;box-shadow:var(--shadow-lg)}
+  .cobro-panel-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-bottom:16px}
+  .cobro-seleccion{font-size:13px;color:var(--text-muted);margin-bottom:16px}
+  .cobro-seleccion strong{color:var(--primary)}
+  .cobro-metodo{display:flex;gap:10px;margin-bottom:20px}
+  .metodo-btn{flex:1;padding:12px;border:2px solid var(--border);border-radius:12px;background:white;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text-muted)}
+  .metodo-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .metodo-btn.active{border-color:var(--primary);background:var(--primary);color:white}
+  .cobro-ref-wrap{margin-bottom:20px;display:none}
+  .cobro-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+  .cobro-total-label{font-size:13px;color:var(--text-muted)}
+  .cobro-total-amount{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--primary);display:block}
+  .btn-cobrar{background:var(--accent);color:white;border:none;padding:14px 32px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+  .btn-cobrar:hover{background:#C07828}
+  .btn-cobrar:disabled{background:#CCC;cursor:not-allowed}
+  /* Liquidacion */
+  @media print{body>*:not(#print-area){display:none!important}#print-area{display:block!important}.no-print{display:none!important}}
+  #print-area{display:none}
+  .liq-screen-content{max-width:900px;margin:0 auto;padding:40px 24px 60px}
+  .liq-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+  .liq-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--primary)}
+  .liq-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .liq-date-input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;color:var(--primary);background:white;outline:none}
+  .btn-liq{background:var(--primary);color:white;border:none;padding:10px 20px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+  .btn-liq-print{background:var(--accent);color:white;border:none;padding:10px 20px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+  .liq-detail-tabs{display:flex;gap:4px;background:white;padding:5px;border-radius:12px;border:1.5px solid var(--border);width:fit-content;margin-bottom:28px}
+  .liq-detail-btn{padding:8px 18px;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .2s}
+  .liq-detail-btn.active{background:var(--primary);color:white}
+  .liq-resumen-card{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px 28px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .liq-resumen-dato{text-align:center}
+  .liq-resumen-label{font-size:12px;color:var(--text-muted);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .liq-resumen-valor{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--primary);font-weight:700;display:block}
+  .liq-resumen-valor.grande{font-size:36px;color:var(--accent)}
+  .liq-cliente-card{background:white;border-radius:14px;border:1.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+  .liq-cliente-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer;transition:background .15s}
+  .liq-cliente-header:hover{background:var(--bg)}
+  .liq-cliente-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--primary)}
+  .liq-cliente-body{display:none;border-top:1px solid var(--border)}
+  .liq-cliente-card.open .liq-cliente-body{display:block}
+  .liq-cliente-card.open .liq-chevron{transform:rotate(180deg)}
+  .liq-chevron{color:var(--text-muted);transition:transform .2s;font-size:16px}
+  .liq-cobro-row{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 20px;border-bottom:1px solid var(--border);gap:12px}
+  .liq-cobro-row:last-child{border-bottom:none}
+  .liq-cobro-info{flex:1}
+  .liq-cobro-ref{font-size:13px;font-weight:600;color:var(--primary)}
+  .liq-cobro-memo{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .liq-cobro-facturas{font-size:11px;color:var(--text-muted);margin-top:4px}
+  .liq-cobro-importe{font-size:16px;font-weight:700;color:var(--primary);white-space:nowrap}
+  .liq-empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-style:italic}
+  .liq-total-bar{background:var(--primary);color:white;border-radius:14px;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+  .liq-total-bar-label{font-size:16px;font-weight:600;opacity:.85}
+  .liq-total-bar-amount{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -314,15 +347,11 @@
       <span class="header-logo-text">Comercial A. Puchol</span>
       <span class="vendor-pill" id="vendor-pill"></span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">📊 Liquidación</button>
-      <button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button>
-    </div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">Liquidación</button><button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button></div>
   </div>
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
     <p class="clients-subtitle" id="clients-subtitle">Selecciona un cliente para hacer su pedido</p>
-
     <div class="day-filters" id="day-filters" style="display:none"></div>
     <div class="clients-search-wrap">
       <svg class="clients-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -336,8 +365,9 @@
 
 
 <!-- ════════════════════════════════════════════════
-     PANTALLA: LIQUIDACIÓN
+     PANTALLA 3: PORTAL DE PEDIDO (igual que el original)
 ════════════════════════════════════════════════ -->
+
 <div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
   <div class="clients-header">
     <div class="clients-header-left">
@@ -345,20 +375,20 @@
       <span class="vendor-pill" id="liq-vendor-pill"></span>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn-back" id="btn-liq-back">← Mis clientes</button>
-      <button class="btn-logout" id="btn-logout-liq">Cerrar sesión</button>
+      <button class="btn-back" id="btn-liq-back">Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-liq">Cerrar sesion</button>
     </div>
   </div>
-  <div class="liq-screen">
+  <div class="liq-screen-content">
     <div class="liq-header-row">
       <div>
-        <h1 class="liq-title">Liquidación de cobros</h1>
+        <h1 class="liq-title">Liquidacion de cobros</h1>
         <p style="color:var(--text-muted);font-size:14px;margin-top:4px" id="liq-vendedor-label"></p>
       </div>
       <div class="liq-controls no-print">
         <input type="date" id="liq-fecha" class="liq-date-input">
-        <button class="btn-liq" id="btn-liq-buscar">Ver liquidación</button>
-        <button class="btn-liq-print" id="btn-liq-print" style="display:none">🖨️ Imprimir / PDF</button>
+        <button class="btn-liq" id="btn-liq-buscar">Ver liquidacion</button>
+        <button class="btn-liq-print" id="btn-liq-print" style="display:none">Imprimir / PDF</button>
       </div>
     </div>
     <div class="liq-detail-tabs no-print" id="liq-detail-tabs" style="display:none">
@@ -367,17 +397,12 @@
       <button class="liq-detail-btn" data-mode="resumen">Solo resumen</button>
     </div>
     <div id="liq-content">
-      <div class="liq-empty">Selecciona una fecha y pulsa "Ver liquidación"</div>
+      <div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div>
     </div>
   </div>
 </div>
-
-<!-- Área de impresión -->
 <div id="print-area"></div>
 
-<!-- ════════════════════════════════════════════════
-     PANTALLA 3: PORTAL DE PEDIDO (igual que el original)
-════════════════════════════════════════════════ -->
 <div id="app-screen">
   <header>
     <div class="header-left">
@@ -399,6 +424,7 @@
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" id="tab-pedido">🛒 Hacer pedido</button>
       <button class="tab-btn" id="tab-historial">📋 Pedidos del cliente</button>
+      <button class="tab-btn" id="tab-facturas">Facturas y cobros</button>
       <button class="tab-btn" id="tab-facturas">💶 Facturas y cobros</button>
     </div>
 
@@ -430,6 +456,39 @@
         <div class="cobro-ref-wrap" id="cobro-ref-wrap">
           <label class="field-label">Referencia del pagaré</label>
           <input class="field-input" id="cobro-ref" type="text" placeholder="Nº pagaré o referencia...">
+        </div>
+        <div class="cobro-footer">
+          <div>
+            <span class="cobro-total-label">Total a cobrar</span>
+            <span class="cobro-total-amount" id="cobro-total-amount">0,00 €</span>
+          </div>
+          <button class="btn-cobrar" id="btn-cobrar" disabled>Registrar cobro</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="panel-facturas" style="display:none">
+      <div class="facturas-resumen">
+        <div class="facturas-resumen-top">
+          <span class="facturas-resumen-label">Total pendiente de cobro</span>
+          <button class="btn-back" id="btn-reload-facturas" style="font-size:12px;padding:5px 10px">Actualizar</button>
+        </div>
+        <div class="facturas-total-pendiente" id="facturas-total-pendiente">-</div>
+      </div>
+      <div class="facturas-list" id="facturas-list">
+        <div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>
+      </div>
+      <div class="cobro-panel" id="cobro-panel" style="display:none">
+        <div class="cobro-panel-title">Registrar cobro</div>
+        <div class="cobro-seleccion" id="cobro-seleccion">Ninguna factura seleccionada</div>
+        <div class="cobro-metodo">
+          <button class="metodo-btn active" id="metodo-efectivo" data-journal="">Efectivo</button>
+          <button class="metodo-btn" id="metodo-pagare" data-journal="">Pagare</button>
+        </div>
+        <div class="cobro-ref-wrap" id="cobro-ref-wrap">
+          <label class="field-label">Referencia del pagare</label>
+          <input class="field-input" id="cobro-ref" type="text" placeholder="Num pagare o referencia...">
         </div>
         <div class="cobro-footer">
           <div>
@@ -495,6 +554,17 @@
   <div class="modal">
     <div class="modal-icon">💶</div>
     <h2>¡Cobro registrado!</h2>
+    <p id="modal-cobro-msg">El pago ha sido registrado en Odoo correctamente.</p>
+    <div class="modal-ref" id="modal-cobro-ref"></div>
+    <button class="btn-primary" id="btn-cobro-ok-close">Aceptar</button>
+  </div>
+</div>
+
+
+<div class="modal-overlay" id="modal-cobro-ok">
+  <div class="modal">
+    <div class="modal-icon">ok</div>
+    <h2>Cobro registrado!</h2>
     <p id="modal-cobro-msg">El pago ha sido registrado en Odoo correctamente.</p>
     <div class="modal-ref" id="modal-cobro-ref"></div>
     <button class="btn-primary" id="btn-cobro-ok-close">Aceptar</button>
@@ -643,85 +713,6 @@
     });
   }
 
-
-  // ── FILTRO POR DÍA DE REPARTO ──────────────────────────
-  var activeDayFilter = 'todos';
-
-  function buildDayFilters(clients) {
-    var container = document.getElementById('day-filters');
-    // Recopilar días únicos
-    var days = {};
-    clients.forEach(function(c) {
-      if (c.ruta && c.ruta.trim()) {
-        var day = c.ruta.trim();
-        days[day] = (days[day] || 0) + 1;
-      }
-    });
-
-    var dayKeys = Object.keys(days).sort();
-    if (!dayKeys.length) { container.style.display = 'none'; return; }
-
-    container.innerHTML = '';
-    container.style.display = 'flex';
-
-    // Botón "Todos"
-    var btnTodos = document.createElement('button');
-    btnTodos.className = 'day-btn all active';
-    btnTodos.textContent = 'Todos (' + clients.length + ')';
-    btnTodos.dataset.day = 'todos';
-    btnTodos.addEventListener('click', function() { setDayFilter('todos', clients); });
-    container.appendChild(btnTodos);
-
-    // Botón por cada día
-    dayKeys.forEach(function(day) {
-      var btn = document.createElement('button');
-      btn.className = 'day-btn';
-      btn.textContent = day + ' (' + days[day] + ')';
-      btn.dataset.day = day;
-      btn.addEventListener('click', function() { setDayFilter(day, clients); });
-      container.appendChild(btn);
-    });
-
-    // Botón "Sin día asignado"
-    var sinDia = clients.filter(function(c) { return !c.ruta || !c.ruta.trim(); }).length;
-    if (sinDia > 0) {
-      var btnSin = document.createElement('button');
-      btnSin.className = 'day-btn';
-      btnSin.textContent = 'Sin día (' + sinDia + ')';
-      btnSin.dataset.day = 'sin-dia';
-      btnSin.addEventListener('click', function() { setDayFilter('sin-dia', clients); });
-      container.appendChild(btnSin);
-    }
-  }
-
-  function setDayFilter(day, clients) {
-    activeDayFilter = day;
-
-    // Actualizar botones activos
-    document.querySelectorAll('.day-btn').forEach(function(btn) {
-      btn.classList.toggle('active', btn.dataset.day === day);
-    });
-
-    // Aplicar filtro combinado con búsqueda de texto
-    applyFilters(clients);
-  }
-
-  function applyFilters(clients) {
-    var q = clientSearch.value.toLowerCase();
-
-    var filtered = clients.filter(function(c) {
-      // Filtro por texto
-      var textOk = !q || (c.name + (c.ref || '') + (c.address || '')).toLowerCase().indexOf(q) !== -1;
-      // Filtro por día
-      var dayOk = activeDayFilter === 'todos' ||
-        (activeDayFilter === 'sin-dia' && (!c.ruta || !c.ruta.trim())) ||
-        (c.ruta && c.ruta.trim() === activeDayFilter);
-      return textOk && dayOk;
-    });
-
-    renderClients(filtered);
-  }
-
   function renderClients(list) {
     if (!list.length) {
       clientsGrid.innerHTML = '<div class="clients-empty">No se encontraron clientes.</div>';
@@ -734,24 +725,31 @@
       var rutaHtml = c.ruta
         ? '<span class="client-ruta">📅 ' + c.ruta + '</span>'
         : '';
+      var tarifaHtml = c.pricelist_name ? '<div class="client-tarifa">' + c.pricelist_name + '</div>' : '';
       card.innerHTML =
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
         '<div class="client-name">' + c.name + '</div>' +
         '<div class="client-address">' + (c.address || '') + '</div>' +
-        rutaHtml;
-      card.addEventListener('click', function () {
-        selectClient(c);
-      });
+        tarifaHtml +
+        rutaHtml +
+        '<div class="visited-badge">Pedido realizado hoy</div>';
+      card.dataset.clientId = c.id;
+      if (visitedClients[c.id]) card.classList.add('visited');
+      card.addEventListener('click', function () { selectClient(c); });
       clientsGrid.appendChild(card);
     });
   }
 
-  clientSearch.addEventListener('input', function () {
-    applyFilters(allClients);
-  });
+  // busqueda delegada a applyFilters
+
+  var visitedClients = {};
 
   function selectClient(client) {
     selectedClient = client;
+    visitedClients[client.id] = true;
+    document.querySelectorAll('.client-card').forEach(function(cd) {
+      if (+cd.dataset.clientId === client.id) cd.classList.add('visited');
+    });
     // Transición a pantalla de pedido
     clientsScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -763,6 +761,15 @@
     storeInfo.textContent = parts.join(' — ') + ' · Selecciona las cajas que necesitas';
 
     document.getElementById('page-title').textContent = 'Pedido para ' + client.name;
+    var oldBadge = document.getElementById('client-tarifa-badge');
+    if (oldBadge) oldBadge.remove();
+    if (client.pricelist_name) {
+      var tb = document.createElement('span');
+      tb.id = 'client-tarifa-badge';
+      tb.style.cssText = 'display:inline-flex;align-items:center;background:#EBF3EE;color:#1A3A2A;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
+      tb.textContent = client.pricelist_name;
+      document.getElementById('page-title').appendChild(tb);
+    }
     document.getElementById('modal-confirm-client').textContent = 'Para el cliente: ' + client.name;
 
     var deliveryEl = document.getElementById('delivery-day');
@@ -798,13 +805,8 @@
   // ── Botón "← Mis clientes" ──
   document.getElementById('btn-back-clients').addEventListener('click', function () {
     appScreen.style.display = 'none';
-    document.getElementById('panel-facturas').style.display = 'none';
     clientsScreen.style.display = 'block';
-    // Limpiar búsqueda de cliente
-    clientSearch.value = '';
-    activeDayFilter = 'todos';
-    buildDayFilters(allClients);
-    renderClients(allClients);
+    applyFilters(allClients);
   });
 
   // ── Logout desde clientes ──
@@ -841,9 +843,9 @@
         return;
       }
       allProducts = res.data.products || [];
-      // Guardar IDs de productos habituales
       topProductIds = {};
-      allProducts.forEach(function(p) { if (p.freq > 0) topProductIds[p.id] = p.freq; });
+      allProducts.forEach(function(p){ if(p.freq>0) topProductIds[p.id]=p.freq; });
+      buildDayFilters(allClients);
       searchBar.style.display = 'flex';
       summaryEl.style.display = 'block';
       document.getElementById('tabs').style.display = 'flex';
@@ -862,8 +864,6 @@
     }) : allProducts);
   });
 
-  var topProductIds = {};
-
   function render(products) {
     if (!products.length) {
       productsArea.innerHTML = '<div class="loading-box">No se encontraron productos.</div>';
@@ -871,48 +871,17 @@
     }
     var grid = document.createElement('div');
     grid.className = 'products-grid';
-
-    var habitualesShown = false;
-    var restoShown = false;
-
     products.forEach(function (p) {
       var qty = quantities[p.id] || 0;
-      var esHabitual = (topProductIds[p.id] || 0) > 0;
-
-      if (esHabitual && !habitualesShown) {
-        habitualesShown = true;
-        var div1 = document.createElement('div');
-        div1.className = 'habitual-divider';
-        div1.innerHTML = '<span>&#11088; Habituales de este cliente</span>';
-        grid.appendChild(div1);
-      }
-      if (!esHabitual && habitualesShown && !restoShown) {
-        restoShown = true;
-        var div2 = document.createElement('div');
-        div2.className = 'habitual-divider';
-        div2.innerHTML = '<span>Resto del cat\u00e1logo</span>';
-        grid.appendChild(div2);
-      }
-
       var card = document.createElement('div');
-      card.className = 'product-card' + (esHabitual ? ' habitual' : '') + (qty > 0 ? ' selected' : '');
+      card.className = 'product-card' + (qty > 0 ? ' selected' : '');
       card.id = 'card-' + p.id;
-      var freq = topProductIds[p.id] || 0;
-      var badgeHtml = esHabitual
-        ? '<div class="product-habitual-badge">&#11088; Habitual &middot; ' + freq + ' pedido' + (freq > 1 ? 's' : '') + '</div>'
-        : '';
-      var boxLabel = p.box_name || 'caja';
-      var boxQty   = p.box_qty || 1;
-      var unitInfo = boxQty > 1
-        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price) + '\u20ac/ud</small>'
-        : '';
       card.innerHTML =
-        badgeHtml +
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         '<div class="product-name">' + p.name + '</div>' +
-        '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
+        '<div class="product-format">' + (p.uom || '') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + '</small><br>' + unitInfo + '</div>' +
+          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/caja</small></div>' +
           '<div class="qty-control">' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
@@ -1009,13 +978,9 @@
     modifyingOrderId = null;
     btnOrder.innerHTML = 'Confirmar pedido';
     modalOk.classList.remove('open');
-    // Volver a la pantalla de clientes
     appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
-    clientSearch.value = '';
-    activeDayFilter = 'todos';
-    buildDayFilters(allClients);
-    renderClients(allClients);
+    applyFilters(allClients);
   });
 
   document.getElementById('btn-err-close').addEventListener('click', function () { modalErr.classList.remove('open'); });
@@ -1387,222 +1352,303 @@
 
   document.getElementById('btn-cobro-ok-close').addEventListener('click', function() {
     document.getElementById('modal-cobro-ok').classList.remove('open');
-    // Pequeña espera para que Odoo actualice el estado de las facturas
-    var list = document.getElementById('facturas-list');
-    var totalEl = document.getElementById('facturas-total-pendiente');
-    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
-    totalEl.textContent = '—';
-    document.getElementById('cobro-panel').style.display = 'none';
-    selectedInvoices = {};
-    facturasLoaded = false;
-    setTimeout(function() { loadFacturas(); }, 1500);
+    loadFacturas();
   });
 
 
-  // ═══════════════════════════════════════════════
-  // LIQUIDACIÓN
-  // ═══════════════════════════════════════════════
+  // ── FILTROS DIA DE REPARTO ──────────────────────────
+  var activeDayFilter = 'todos';
 
-  var liqData = null;
-  var liqMode = 'clientes';
-
-  // Navegar a liquidación
-  document.getElementById('btn-liquidacion-nav').addEventListener('click', function() {
-    clientsScreen.style.display = 'none';
-    document.getElementById('liq-screen').style.display = 'block';
-    document.getElementById('liq-vendor-pill').textContent = vendorName;
-    document.getElementById('liq-vendedor-pill') && (document.getElementById('liq-vendor-pill').textContent = vendorName);
-    document.getElementById('liq-vendedor-label').textContent = 'Vendedor: ' + vendorName;
-    // Poner fecha de hoy por defecto
-    var today = new Date().toISOString().split('T')[0];
-    document.getElementById('liq-fecha').value = today;
-    liqData = null;
-    document.getElementById('liq-content').innerHTML = '<div class="liq-empty">Selecciona una fecha y pulsa \"Ver liquidación\"</div>';
-    document.getElementById('btn-liq-print').style.display = 'none';
-    document.getElementById('liq-detail-tabs').style.display = 'none';
-  });
-
-  // Volver a clientes desde liquidación
-  document.getElementById('btn-liq-back').addEventListener('click', function() {
-    document.getElementById('liq-screen').style.display = 'none';
-    clientsScreen.style.display = 'block';
-  });
-
-  document.getElementById('btn-logout-liq').addEventListener('click', logout);
-
-  // Buscar liquidación
-  document.getElementById('btn-liq-buscar').addEventListener('click', function() {
-    var fecha = document.getElementById('liq-fecha').value;
-    if (!fecha) { alert('Selecciona una fecha'); return; }
-    loadLiquidacion(fecha);
-  });
-
-  // Imprimir
-  document.getElementById('btn-liq-print').addEventListener('click', function() {
-    if (!liqData) return;
-    var printArea = document.getElementById('print-area');
-    printArea.innerHTML = buildPrintHTML(liqData, liqMode);
-    window.print();
-  });
-
-  // Tabs de detalle
-  document.querySelectorAll('.liq-detail-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.liq-detail-btn').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      liqMode = btn.dataset.mode;
-      if (liqData) renderLiquidacion(liqData, liqMode);
+  function buildDayFilters(clients) {
+    var container = document.getElementById('day-filters');
+    var days = {};
+    clients.forEach(function(c) {
+      if (c.ruta && c.ruta.trim()) { var d = c.ruta.trim(); days[d] = (days[d]||0)+1; }
     });
-  });
-
-  function loadLiquidacion(fecha) {
-    var content = document.getElementById('liq-content');
-    content.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando cobros...</div>';
-    document.getElementById('btn-liq-print').style.display = 'none';
-    document.getElementById('liq-detail-tabs').style.display = 'none';
-
-    fetch(API + '/liquidacion?fecha=' + fecha, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
-    .then(function(res) {
-      if (!res.ok) {
-        content.innerHTML = '<div class="liq-empty">Error: ' + (res.data.detail || 'No se pudo cargar') + '</div>';
-        return;
-      }
-      liqData = res.data;
-      if (!liqData.clientes || !liqData.clientes.length) {
-        content.innerHTML = '<div class="liq-empty">No hay cobros registrados el ' + formatDateES(fecha) + '</div>';
-        return;
-      }
-      document.getElementById('liq-detail-tabs').style.display = 'flex';
-      document.getElementById('btn-liq-print').style.display = 'inline-block';
-      renderLiquidacion(liqData, liqMode);
-    })
-    .catch(function() {
-      content.innerHTML = '<div class="liq-empty">Error de conexión.</div>';
+    var dayKeys = Object.keys(days).sort();
+    if (!dayKeys.length) { container.style.display='none'; return; }
+    container.innerHTML=''; container.style.display='flex';
+    var btnTodos = document.createElement('button');
+    btnTodos.className='day-btn all active'; btnTodos.textContent='Todos ('+clients.length+')';
+    btnTodos.dataset.day='todos';
+    btnTodos.addEventListener('click', function(){ setDayFilter('todos',clients); });
+    container.appendChild(btnTodos);
+    dayKeys.forEach(function(day) {
+      var btn=document.createElement('button'); btn.className='day-btn';
+      btn.textContent=day+' ('+days[day]+')'; btn.dataset.day=day;
+      btn.addEventListener('click', function(){ setDayFilter(day,clients); });
+      container.appendChild(btn);
     });
+    var sinDia=clients.filter(function(c){return !c.ruta||!c.ruta.trim();}).length;
+    if (sinDia>0) {
+      var btnSin=document.createElement('button'); btnSin.className='day-btn';
+      btnSin.textContent='Sin dia ('+sinDia+')'; btnSin.dataset.day='sin-dia';
+      btnSin.addEventListener('click',function(){setDayFilter('sin-dia',clients);});
+      container.appendChild(btnSin);
+    }
   }
 
-  function renderLiquidacion(data, mode) {
-    var content = document.getElementById('liq-content');
-    var html = '';
+  function setDayFilter(day, clients) {
+    activeDayFilter=day;
+    document.querySelectorAll('.day-btn').forEach(function(btn){ btn.classList.toggle('active', btn.dataset.day===day); });
+    applyFilters(clients);
+  }
 
-    // Resumen siempre visible
-    html += '<div class="liq-resumen-card">' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">' + formatDateES(data.fecha) + '</span></div>' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes cobrados</span><span class="liq-resumen-valor">' + data.clientes.length + '</span></div>' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Nº cobros</span><span class="liq-resumen-valor">' + data.num_cobros + '</span></div>' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total cobrado</span><span class="liq-resumen-valor grande">' + fmt(data.total) + ' €</span></div>' +
+  function applyFilters(clients) {
+    var q=clientSearch.value.toLowerCase();
+    var filtered=clients.filter(function(c){
+      var textOk=!q||(c.name+(c.ref||'')+(c.address||'')).toLowerCase().indexOf(q)!==-1;
+      var dayOk=activeDayFilter==='todos'||(activeDayFilter==='sin-dia'&&(!c.ruta||!c.ruta.trim()))||(c.ruta&&c.ruta.trim()===activeDayFilter);
+      return textOk&&dayOk;
+    });
+    renderClients(filtered);
+  }
+
+  // Actualizar buscador para usar applyFilters
+  clientSearch.addEventListener('input', function(){ applyFilters(allClients); });
+
+  // ── HABITUALES ──────────────────────────────────────
+  var topProductIds = {};
+
+  // ── FACTURAS Y COBROS ────────────────────────────────
+  var facturasLoaded=false; var selectedInvoices={}; var journals=[];
+  var selectedJournalId=null; var selectedMetodo='efectivo';
+
+  document.getElementById('tab-facturas').addEventListener('click', function(){
+    document.getElementById('tab-facturas').classList.add('active');
+    document.getElementById('tab-pedido').classList.remove('active');
+    document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('panel-pedido').style.display='none';
+    document.getElementById('panel-historial').style.display='none';
+    document.getElementById('panel-facturas').style.display='block';
+    if (!facturasLoaded) loadFacturas();
+  });
+
+  document.getElementById('btn-reload-facturas').addEventListener('click',function(){
+    facturasLoaded=false; selectedInvoices={}; loadFacturas();
+  });
+
+  function loadFacturas(){
+    var list=document.getElementById('facturas-list');
+    var totalEl=document.getElementById('facturas-total-pendiente');
+    list.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>';
+    totalEl.textContent='-'; document.getElementById('cobro-panel').style.display='none';
+    selectedInvoices={};
+    Promise.all([
+      fetch(API+'/payment-journals',{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();}),
+      fetch(API+'/invoices?partner_id='+selectedClient.id,{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();})
+    ]).then(function(results){
+      journals=results[0].journals||[]; setupJournalButtons();
+      facturasLoaded=true;
+      var invoices=results[1].invoices||[]; var totalPendiente=results[1].total_pendiente||0;
+      totalEl.textContent=fmt(totalPendiente)+' \u20ac';
+      totalEl.className='facturas-total-pendiente'+(totalPendiente>0?'':' ok');
+      if (!invoices.length){list.innerHTML='<div class="history-empty">Este cliente no tiene facturas pendientes.</div>';return;}
+      list.innerHTML='';
+      invoices.forEach(function(inv){
+        var card=document.createElement('div');
+        card.className='factura-card'+(inv.vencida?' vencida':''); card.dataset.id=inv.id;
+        card.innerHTML='<div class="factura-check" id="fcheck-'+inv.id+'"></div>'+
+          '<div class="factura-info"><div class="factura-ref">'+inv.name+(inv.vencida?'<span class="factura-vencida-badge">VENCIDA</span>':'')+'</div>'+
+          '<div class="factura-dates">Emision: '+formatDate(inv.date)+(inv.due_date?' - Vence: '+formatDate(inv.due_date):'')+'</div></div>'+
+          '<div class="factura-importes"><div class="factura-total">Total: '+fmt(inv.total)+' \u20ac</div>'+
+          '<div class="factura-pendiente'+(inv.vencida?' vencida':'')+'">'+fmt(inv.pendiente)+' \u20ac</div></div>';
+        card.addEventListener('click',function(){toggleInvoice(inv,card);});
+        list.appendChild(card);
+      });
+    }).catch(function(){list.innerHTML='<div class="history-empty">Error cargando facturas.</div>';});
+  }
+
+  function setupJournalButtons(){
+    var efectivo=journals.find(function(j){return j.type==='cash';});
+    var pagare=journals.find(function(j){return j.name.toLowerCase().indexOf('pagar')!==-1;});
+    var btnE=document.getElementById('metodo-efectivo'); var btnP=document.getElementById('metodo-pagare');
+    if(efectivo){btnE.dataset.journal=efectivo.id;selectedJournalId=efectivo.id;}
+    else{btnE.disabled=true;}
+    if(pagare){btnP.dataset.journal=pagare.id;}
+    else{btnP.disabled=true;}
+  }
+
+  function toggleInvoice(inv,card){
+    if(selectedInvoices[inv.id]){delete selectedInvoices[inv.id];card.classList.remove('selected');document.getElementById('fcheck-'+inv.id).textContent='';}
+    else{selectedInvoices[inv.id]=inv;card.classList.add('selected');document.getElementById('fcheck-'+inv.id).textContent='checkmark';}
+    updateCobroPanel();
+  }
+
+  function updateCobroPanel(){
+    var keys=Object.keys(selectedInvoices); var panel=document.getElementById('cobro-panel');
+    var btnCobrar=document.getElementById('btn-cobrar'); var totalEl=document.getElementById('cobro-total-amount');
+    if(!keys.length){panel.style.display='none';return;}
+    panel.style.display='block';
+    var totalCobro=keys.reduce(function(s,id){return s+selectedInvoices[id].pendiente;},0);
+    document.getElementById('cobro-seleccion').innerHTML='<strong>'+keys.length+' factura'+(keys.length>1?'s':'')+' seleccionada'+(keys.length>1?'s':'')+'</strong>';
+    totalEl.textContent=fmt(totalCobro)+' \u20ac'; btnCobrar.disabled=!selectedJournalId;
+  }
+
+  document.getElementById('metodo-efectivo').addEventListener('click',function(){
+    selectedMetodo='efectivo'; selectedJournalId=+this.dataset.journal||null;
+    document.getElementById('metodo-efectivo').classList.add('active');
+    document.getElementById('metodo-pagare').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display='none'; updateCobroPanel();
+  });
+  document.getElementById('metodo-pagare').addEventListener('click',function(){
+    selectedMetodo='pagare'; selectedJournalId=+this.dataset.journal||null;
+    document.getElementById('metodo-pagare').classList.add('active');
+    document.getElementById('metodo-efectivo').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display='block'; updateCobroPanel();
+  });
+
+  document.getElementById('btn-cobrar').addEventListener('click',function(){
+    var keys=Object.keys(selectedInvoices).map(Number);
+    if(!keys.length||!selectedJournalId) return;
+    var btnCobrar=document.getElementById('btn-cobrar');
+    btnCobrar.disabled=true; btnCobrar.innerHTML='<span class="spinner"></span>Procesando...';
+    var memo=selectedMetodo==='pagare'?(document.getElementById('cobro-ref').value.trim()||'Pagare'):'Cobro en efectivo - '+vendorName;
+    fetch(API+'/invoices/pay?partner_id='+selectedClient.id,{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({invoice_ids:keys,journal_id:selectedJournalId,memo:memo})
+    }).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+    .then(function(res){
+      btnCobrar.disabled=false; btnCobrar.innerHTML='Registrar cobro';
+      if(!res.ok){modalErrMsg.textContent=res.data.detail||'Error al registrar el cobro.';modalErr.classList.add('open');return;}
+      document.getElementById('modal-cobro-msg').textContent=fmt(res.data.amount)+' cobrados - '+(selectedMetodo==='efectivo'?'Efectivo':'Pagare');
+      document.getElementById('modal-cobro-ref').textContent=res.data.invoices_paid.join(', ');
+      document.getElementById('modal-cobro-ok').classList.add('open');
+      facturasLoaded=false; selectedInvoices={};
+    }).catch(function(){btnCobrar.disabled=false;btnCobrar.innerHTML='Registrar cobro';modalErrMsg.textContent='Error de conexion.';modalErr.classList.add('open');});
+  });
+
+  document.getElementById('btn-cobro-ok-close').addEventListener('click',function(){
+    document.getElementById('modal-cobro-ok').classList.remove('open');
+    var list=document.getElementById('facturas-list');
+    var totalEl=document.getElementById('facturas-total-pendiente');
+    list.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
+    totalEl.textContent='-'; document.getElementById('cobro-panel').style.display='none';
+    selectedInvoices={}; facturasLoaded=false;
+    setTimeout(function(){loadFacturas();},1500);
+  });
+
+  // ── LIQUIDACION ─────────────────────────────────────
+  var liqData=null; var liqMode='clientes';
+
+  document.getElementById('btn-liquidacion-nav').addEventListener('click',function(){
+    clientsScreen.style.display='none';
+    document.getElementById('liq-screen').style.display='block';
+    document.getElementById('liq-vendor-pill').textContent=vendorName;
+    document.getElementById('liq-vendedor-label').textContent='Vendedor: '+vendorName;
+    var today=new Date().toISOString().split('T')[0];
+    document.getElementById('liq-fecha').value=today;
+    liqData=null;
+    document.getElementById('liq-content').innerHTML='<div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div>';
+    document.getElementById('btn-liq-print').style.display='none';
+    document.getElementById('liq-detail-tabs').style.display='none';
+  });
+
+  document.getElementById('btn-liq-back').addEventListener('click',function(){
+    document.getElementById('liq-screen').style.display='none'; clientsScreen.style.display='block';
+  });
+  document.getElementById('btn-logout-liq').addEventListener('click',logout);
+
+  document.getElementById('btn-liq-buscar').addEventListener('click',function(){
+    var fecha=document.getElementById('liq-fecha').value;
+    if(!fecha){alert('Selecciona una fecha');return;} loadLiquidacion(fecha);
+  });
+
+  document.getElementById('btn-liq-print').addEventListener('click',function(){
+    if(!liqData) return;
+    document.getElementById('print-area').innerHTML=buildPrintHTML(liqData,liqMode); window.print();
+  });
+
+  document.querySelectorAll('.liq-detail-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.liq-detail-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active'); liqMode=btn.dataset.mode;
+      if(liqData) renderLiquidacion(liqData,liqMode);
+    });
+  });
+
+  function loadLiquidacion(fecha){
+    var content=document.getElementById('liq-content');
+    content.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Cargando cobros...</div>';
+    document.getElementById('btn-liq-print').style.display='none';
+    document.getElementById('liq-detail-tabs').style.display='none';
+    fetch(API+'/liquidacion?fecha='+fecha,{headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+    .then(function(res){
+      if(!res.ok){content.innerHTML='<div class="liq-empty">Error: '+(res.data.detail||'No se pudo cargar')+'</div>';return;}
+      liqData=res.data;
+      if(!liqData.clientes||!liqData.clientes.length){
+        content.innerHTML='<div class="liq-empty">No hay cobros registrados el '+formatDateES(fecha)+'</div>';return;
+      }
+      document.getElementById('liq-detail-tabs').style.display='flex';
+      document.getElementById('btn-liq-print').style.display='inline-block';
+      renderLiquidacion(liqData,liqMode);
+    }).catch(function(){content.innerHTML='<div class="liq-empty">Error de conexion.</div>';});
+  }
+
+  function renderLiquidacion(data,mode){
+    var content=document.getElementById('liq-content'); var h='';
+    h+='<div class="liq-resumen-card">'+
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">'+formatDateES(data.fecha)+'</span></div>'+
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes cobrados</span><span class="liq-resumen-valor">'+data.clientes.length+'</span></div>'+
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Num cobros</span><span class="liq-resumen-valor">'+data.num_cobros+'</span></div>'+
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total cobrado</span><span class="liq-resumen-valor grande">'+fmt(data.total)+' \u20ac</span></div>'+
     '</div>';
-
-    if (mode === 'resumen') {
-      content.innerHTML = html;
-      return;
-    }
-
-    if (mode === 'clientes' || mode === 'facturas') {
-      data.clientes.forEach(function(cliente, idx) {
-        html += '<div class="liq-cliente-card" id="liq-card-' + idx + '">' +
-          '<div class="liq-cliente-header" onclick="toggleLiqCard(' + idx + ')">' +
-            '<div>' +
-              '<div class="liq-cliente-name">' + cliente.cliente + '</div>' +
-              '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">' + cliente.cobros.length + ' cobro' + (cliente.cobros.length > 1 ? 's' : '') + '</div>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:12px">' +
-              '<span class="liq-cliente-subtotal">' + fmt(cliente.subtotal) + ' €</span>' +
-              '<span class="liq-chevron">▾</span>' +
-            '</div>' +
-          '</div>' +
+    if(mode!=='resumen'){
+      data.clientes.forEach(function(cliente,idx){
+        h+='<div class="liq-cliente-card" id="liq-card-'+idx+'">'+
+          '<div class="liq-cliente-header" onclick="toggleLiqCard('+idx+')">'+
+            '<div><div class="liq-cliente-name">'+cliente.cliente+'</div>'+
+            '<div style="font-size:12px;color:var(--text-muted)">'+cliente.cobros.length+' cobro'+(cliente.cobros.length>1?'s':'')+'</div></div>'+
+            '<div style="display:flex;align-items:center;gap:12px">'+
+              '<span style="font-size:18px;font-weight:700;color:var(--primary)">'+fmt(cliente.subtotal)+' \u20ac</span>'+
+              '<span class="liq-chevron">\u25be</span></div></div>'+
           '<div class="liq-cliente-body">';
-
-        cliente.cobros.forEach(function(cobro) {
-          var facturasStr = cobro.facturas.length
-            ? 'Facturas: ' + cobro.facturas.map(function(f) { return f.ref; }).join(', ')
-            : 'Sin facturas asociadas';
-          html += '<div class="liq-cobro-row">' +
-            '<div class="liq-cobro-info">' +
-              '<div class="liq-cobro-ref">' + cobro.ref + ' · ' + cobro.diario + '</div>' +
-              '<div class="liq-cobro-memo">' + (cobro.memo || '') + '</div>' +
-              (mode === 'facturas' ? '<div class="liq-cobro-facturas">' + facturasStr + '</div>' : '') +
-            '</div>' +
-            '<div class="liq-cobro-importe">' + fmt(cobro.importe) + ' €</div>' +
-          '</div>';
+        cliente.cobros.forEach(function(cobro){
+          var factStr=cobro.facturas.length?'Facturas: '+cobro.facturas.map(function(f){return f.ref;}).join(', '):'Sin facturas';
+          h+='<div class="liq-cobro-row"><div class="liq-cobro-info">'+
+            '<div class="liq-cobro-ref">'+cobro.ref+' - '+cobro.diario+'</div>'+
+            '<div class="liq-cobro-memo">'+(cobro.memo||'')+'</div>'+
+            (mode==='facturas'?'<div class="liq-cobro-facturas">'+factStr+'</div>':'')+
+          '</div><div class="liq-cobro-importe">'+fmt(cobro.importe)+' \u20ac</div></div>';
         });
-
-        html += '</div></div>';
+        h+='</div></div>';
       });
     }
-
-    // Total
-    html += '<div class="liq-total-bar">' +
-      '<span class="liq-total-bar-label">TOTAL COBRADO ' + formatDateES(data.fecha).toUpperCase() + '</span>' +
-      '<span class="liq-total-bar-amount">' + fmt(data.total) + ' €</span>' +
-    '</div>';
-
-    content.innerHTML = html;
+    h+='<div class="liq-total-bar"><span class="liq-total-bar-label">TOTAL COBRADO '+formatDateES(data.fecha).toUpperCase()+'</span><span class="liq-total-bar-amount">'+fmt(data.total)+' \u20ac</span></div>';
+    content.innerHTML=h;
   }
 
-  function toggleLiqCard(idx) {
-    var card = document.getElementById('liq-card-' + idx);
-    if (card) card.classList.toggle('open');
-  }
+  function toggleLiqCard(idx){var c=document.getElementById('liq-card-'+idx);if(c)c.classList.toggle('open');}
 
-  function formatDateES(fecha) {
-    if (!fecha) return '';
-    var parts = fecha.split('-');
-    return parts[2] + '/' + parts[1] + '/' + parts[0];
-  }
+  function formatDateES(f){if(!f)return'';var p=f.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
 
-  function buildPrintHTML(data, mode) {
-    var rows = '';
-    data.clientes.forEach(function(cliente) {
-      cliente.cobros.forEach(function(cobro) {
-        var facturas = cobro.facturas.map(function(f) { return f.ref; }).join(', ') || '-';
-        rows += '<tr>' +
-          '<td>' + cliente.cliente + '</td>' +
-          '<td>' + cobro.ref + '</td>' +
-          '<td>' + cobro.diario + '</td>' +
-          (mode === 'facturas' ? '<td>' + facturas + '</td>' : '') +
-          '<td style="text-align:right;font-weight:700">' + fmt(cobro.importe) + ' €</td>' +
-        '</tr>';
-      });
-    });
-
-    return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">' +
-        '<div>' +
-          '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidación de cobros</h1>' +
-          '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: ' + data.vendedor + ' &nbsp;|&nbsp; Fecha: ' + formatDateES(data.fecha) + '</p>' +
-        '</div>' +
-        '<div style="text-align:right">' +
-          '<div style="font-size:12px;color:#666">Comercial A. Puchol S.A.</div>' +
-          '<div style="font-size:11px;color:#999">Generado: ' + new Date().toLocaleDateString('es-ES') + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Clientes cobrados</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">' + data.clientes.length + '</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Nº cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">' + data.num_cobros + '</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.05em">Total cobrado</div><div style="font-size:28px;font-weight:700;color:#D48B3A">' + fmt(data.total) + ' €</div></div>' +
-      '</div>' +
-      (mode !== 'resumen' ?
-        '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
-          '<thead><tr style="background:#1A3A2A;color:white">' +
-            '<th style="padding:10px 12px;text-align:left">Cliente</th>' +
-            '<th style="padding:10px 12px;text-align:left">Referencia</th>' +
-            '<th style="padding:10px 12px;text-align:left">Diario</th>' +
-            (mode === 'facturas' ? '<th style="padding:10px 12px;text-align:left">Facturas</th>' : '') +
-            '<th style="padding:10px 12px;text-align:right">Importe</th>' +
-          '</tr></thead>' +
-          '<tbody>' + rows + '</tbody>' +
-          '<tfoot><tr style="background:#f5f2ec;font-weight:700">' +
-            '<td colspan="' + (mode === 'facturas' ? '4' : '3') + '" style="padding:12px;font-size:15px">TOTAL</td>' +
-            '<td style="padding:12px;text-align:right;font-size:18px;color:#1A3A2A">' + fmt(data.total) + ' €</td>' +
-          '</tr></tfoot>' +
-        '</table>'
-      : '') +
+  function buildPrintHTML(data,mode){
+    var rows='';
+    data.clientes.forEach(function(c){c.cobros.forEach(function(co){
+      var f=co.facturas.map(function(x){return x.ref;}).join(', ')||'-';
+      rows+='<tr><td>'+c.cliente+'</td><td>'+co.ref+'</td><td>'+co.diario+'</td>'+(mode==='facturas'?'<td>'+f+'</td>':'')+'<td style="text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
+    });});
+    return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">'+
+      '<div style="border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">'+
+        '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidacion de cobros</h1>'+
+        '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: '+data.vendedor+' | Fecha: '+formatDateES(data.fecha)+'</p></div>'+
+      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">'+
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.clientes.length+'</div></div>'+
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.num_cobros+'</div></div>'+
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#D48B3A">'+fmt(data.total)+' \u20ac</div></div></div>'+
+      (mode!=='resumen'?
+        '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+          '<thead><tr style="background:#1A3A2A;color:white">'+
+            '<th style="padding:10px 12px;text-align:left">Cliente</th><th style="padding:10px 12px;text-align:left">Referencia</th><th style="padding:10px 12px;text-align:left">Diario</th>'+
+            (mode==='facturas'?'<th style="padding:10px 12px;text-align:left">Facturas</th>':'')+
+            '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>'+
+          '<tbody>'+rows+'</tbody>'+
+          '<tfoot><tr style="background:#f5f2ec;font-weight:700"><td colspan="'+(mode==='facturas'?'4':'3')+'" style="padding:12px;font-size:15px">TOTAL</td>'+
+            '<td style="padding:12px;text-align:right;font-size:18px">'+fmt(data.total)+' \u20ac</td></tr></tfoot></table>':'')+
     '</div>';
   }
+
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
