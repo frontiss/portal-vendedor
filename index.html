@@ -420,7 +420,6 @@
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" id="tab-pedido">🛒 Hacer pedido</button>
       <button class="tab-btn" id="tab-historial">📋 Pedidos del cliente</button>
-      <button class="tab-btn" id="tab-facturas">Facturas y cobros</button>
       <button class="tab-btn" id="tab-facturas">💶 Facturas y cobros</button>
     </div>
 
@@ -739,8 +738,6 @@
 
   function selectClient(client) {
     selectedClient = client;
-    visitedClients[client.id] = true;
-    document.querySelectorAll('.client-card').forEach(function(cd){if(+cd.dataset.clientId===client.id)cd.classList.add('visited');});
     // Transición a pantalla de pedido
     clientsScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -958,6 +955,10 @@
       historyLoaded = false;
       if (!res.ok) { modalErrMsg.textContent = res.data.detail || 'Error al enviar.'; modalErr.classList.add('open'); return; }
       modalRef.textContent = res.data.order_ref;
+      visitedClients[selectedClient.id] = true;
+      document.querySelectorAll('.client-card').forEach(function(cd){
+        if(+cd.dataset.clientId===selectedClient.id) cd.classList.add('visited');
+      });
       modalOk.classList.add('open');
     })
     .catch(function () {
@@ -1233,15 +1234,7 @@
   var selectedJournalId = null;
   var selectedMetodo = 'efectivo';
 
-  document.getElementById('tab-facturas').addEventListener('click', function(){
-    document.getElementById('tab-facturas').classList.add('active');
-    document.getElementById('tab-pedido').classList.remove('active');
-    document.getElementById('tab-historial').classList.remove('active');
-    document.getElementById('panel-pedido').style.display = 'none';
-    document.getElementById('panel-historial').style.display = 'none';
-    document.getElementById('panel-facturas').style.display = 'block';
-    if (!facturasLoaded) loadFacturas();
-  });
+  documen
 
   document.getElementById('btn-reload-facturas').addEventListener('click', function(){
     facturasLoaded = false; selectedInvoices = {}; loadFacturas();
