@@ -290,6 +290,22 @@
   .liq-total-bar{background:var(--primary);color:white;border-radius:14px;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;margin-top:24px}
   .liq-total-bar-label{font-size:16px;font-weight:600;opacity:.85}
   .liq-total-bar-amount{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700}
+
+  /* Modal edicion cliente */
+  .modal-edit{background:white;border-radius:20px;padding:36px 32px;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;animation:fadeUp .3s ease}
+  .modal-edit h2{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--primary);margin-bottom:6px}
+  .modal-edit .modal-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:24px}
+  .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .edit-field{display:flex;flex-direction:column;gap:6px}
+  .edit-field.full{grid-column:1/-1}
+  .edit-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+  .edit-input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;color:var(--primary);background:white;outline:none;transition:border-color .2s}
+  .edit-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,139,58,.12)}
+  .edit-textarea{resize:vertical;min-height:70px;font-family:'Poppins',sans-serif}
+  .edit-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+  .btn-save{background:var(--primary);color:white;border:none;padding:12px 28px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+  .btn-save:hover{background:#24503A}
+  .btn-save:disabled{background:#888;cursor:not-allowed}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -564,6 +580,56 @@
   </div>
 </div>
 
+
+<div class="modal-overlay" id="modal-edit-client">
+  <div class="modal-edit">
+    <h2>Editar cliente</h2>
+    <p class="modal-subtitle" id="edit-client-subtitle"></p>
+    <div class="edit-grid">
+      <div class="edit-field full">
+        <label class="edit-label">Nombre</label>
+        <input class="edit-input" id="edit-name" type="text">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Telefono</label>
+        <input class="edit-input" id="edit-phone" type="tel">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Movil</label>
+        <input class="edit-input" id="edit-mobile" type="tel">
+      </div>
+      <div class="edit-field full">
+        <label class="edit-label">Email</label>
+        <input class="edit-input" id="edit-email" type="email">
+      </div>
+      <div class="edit-field full">
+        <label class="edit-label">Direccion</label>
+        <input class="edit-input" id="edit-street" type="text">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Codigo postal</label>
+        <input class="edit-input" id="edit-zip" type="text">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Ciudad</label>
+        <input class="edit-input" id="edit-city" type="text">
+      </div>
+      <div class="edit-field full">
+        <label class="edit-label">Dia de reparto</label>
+        <input class="edit-input" id="edit-ruta" type="text" placeholder="Ej: Lunes">
+      </div>
+      <div class="edit-field full">
+        <label class="edit-label">Notas internas</label>
+        <textarea class="edit-input edit-textarea" id="edit-notes"></textarea>
+      </div>
+    </div>
+    <div class="edit-footer">
+      <button class="btn-secondary" id="btn-edit-cancel">Cancelar</button>
+      <button class="btn-save" id="btn-edit-save">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-err">
   <div class="modal">
     <div class="modal-icon err">❌</div>
@@ -743,6 +809,9 @@
     appScreen.style.display = 'block';
 
     storeBadge.textContent = client.name;
+    storeBadge.style.cursor = 'pointer';
+    storeBadge.title = 'Pulsa para editar los datos del cliente';
+    storeBadge.onclick = function(){ openEditClient(); };
     vendorBadgeApp.textContent = '👤 ' + vendorName;
 
     var parts = [client.name, client.address].filter(function (x) { return x && x.trim() !== '' && x !== 'False'; });
@@ -1234,8 +1303,6 @@
   var selectedJournalId = null;
   var selectedMetodo = 'efectivo';
 
-  documen
-
   document.getElementById('btn-reload-facturas').addEventListener('click', function(){
     facturasLoaded = false; selectedInvoices = {}; loadFacturas();
   });
@@ -1721,6 +1788,116 @@
     document.getElementById('modal-cobro-ok').classList.remove('open');
     loadFacturas();
   });
+
+
+  // ── EDICION DE CLIENTE ──────────────────────────────
+  function openEditClient() {
+    var subtitle = document.getElementById('edit-client-subtitle');
+    subtitle.textContent = 'Cargando datos de ' + selectedClient.name + '...';
+    document.getElementById('modal-edit-client').classList.add('open');
+
+    // Limpiar campos
+    ['name','phone','mobile','email','street','zip','city','ruta','notes'].forEach(function(f){
+      var el = document.getElementById('edit-'+f);
+      if (el) el.value = '';
+    });
+
+    fetch(API + '/clients/' + selectedClient.id, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      subtitle.textContent = 'Editando: ' + data.name;
+      document.getElementById('edit-name').value   = data.name   || '';
+      document.getElementById('edit-phone').value  = data.phone  || '';
+      document.getElementById('edit-mobile').value = data.mobile || '';
+      document.getElementById('edit-email').value  = data.email  || '';
+      document.getElementById('edit-street').value = data.street || '';
+      document.getElementById('edit-zip').value    = data.zip    || '';
+      document.getElementById('edit-city').value   = data.city   || '';
+      document.getElementById('edit-ruta').value   = data.ruta   || '';
+      document.getElementById('edit-notes').value  = data.notes  || '';
+    })
+    .catch(function(){
+      subtitle.textContent = 'Error cargando datos del cliente';
+    });
+  }
+
+  document.getElementById('btn-edit-cancel').addEventListener('click', function(){
+    document.getElementById('modal-edit-client').classList.remove('open');
+  });
+
+  document.getElementById('btn-edit-save').addEventListener('click', function(){
+    var btn = document.getElementById('btn-edit-save');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Guardando...';
+
+    var payload = {
+      name:    document.getElementById('edit-name').value.trim(),
+      phone:   document.getElementById('edit-phone').value.trim(),
+      mobile:  document.getElementById('edit-mobile').value.trim(),
+      email:   document.getElementById('edit-email').value.trim(),
+      street:  document.getElementById('edit-street').value.trim(),
+      zip:     document.getElementById('edit-zip').value.trim(),
+      city:    document.getElementById('edit-city').value.trim(),
+      ruta:    document.getElementById('edit-ruta').value.trim(),
+      notes:   document.getElementById('edit-notes').value.trim(),
+    };
+
+    fetch(API + '/clients/' + selectedClient.id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok, data:d}; }); })
+    .then(function(res){
+      btn.disabled = false;
+      btn.innerHTML = 'Guardar cambios';
+      if (!res.ok) {
+        alert('Error al guardar: ' + (res.data.detail || 'Error desconocido'));
+        return;
+      }
+      // Actualizar datos locales del cliente seleccionado
+      selectedClient.name    = payload.name || selectedClient.name;
+      selectedClient.address = [payload.street, payload.city].filter(Boolean).join(', ');
+      selectedClient.ruta    = payload.ruta;
+
+      // Actualizar header
+      storeBadge.textContent = selectedClient.name;
+      document.getElementById('page-title').textContent = 'Pedido para ' + selectedClient.name;
+      document.getElementById('modal-confirm-client').textContent = 'Para el cliente: ' + selectedClient.name;
+
+      // Actualizar badge de dia de reparto
+      var deliveryEl = document.getElementById('delivery-day');
+      if (payload.ruta) {
+        deliveryEl.innerHTML = '<span class="delivery-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Dia de reparto: <strong>' + payload.ruta + '</strong></span>';
+        deliveryEl.style.display = 'block';
+      } else {
+        deliveryEl.style.display = 'none';
+      }
+
+      // Actualizar la lista de clientes en memoria
+      allClients = allClients.map(function(c){
+        if (c.id === selectedClient.id) {
+          return Object.assign({}, c, {
+            name: payload.name || c.name,
+            address: selectedClient.address,
+            ruta: payload.ruta,
+          });
+        }
+        return c;
+      });
+
+      document.getElementById('modal-edit-client').classList.remove('open');
+      showToast('Datos del cliente actualizados correctamente');
+    })
+    .catch(function(){
+      btn.disabled = false;
+      btn.innerHTML = 'Guardar cambios';
+      alert('Error de conexion al guardar');
+    });
+  });
+
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
