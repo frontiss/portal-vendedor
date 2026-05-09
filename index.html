@@ -872,15 +872,20 @@
     grid.className = 'products-grid';
     products.forEach(function (p) {
       var qty = quantities[p.id] || 0;
+      var boxLabel = p.box_name || 'caja';
+      var boxQty   = p.box_qty || 1;
+      var unitInfo = boxQty > 1
+        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        : '';
       var card = document.createElement('div');
       card.className = 'product-card' + (qty > 0 ? ' selected' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         '<div class="product-name">' + p.name + '</div>' +
-        '<div class="product-format">' + (p.uom || '') + '</div>' +
+        '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/caja</small></div>' +
+          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + '</small><br>' + unitInfo + '</div>' +
           '<div class="qty-control">' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
