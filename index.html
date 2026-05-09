@@ -140,8 +140,6 @@
   .history-empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-style:italic}
   .btn-repeat{background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
   .btn-repeat:hover{background:#24503A}
-  .btn-modify{background:var(--accent);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
-  .btn-modify:hover{background:#C07828}
   .repeat-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;animation:fadeUp .3s ease;box-shadow:var(--shadow-lg)}
   /* modales */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
@@ -205,12 +203,12 @@
   .day-btn.active{background:var(--primary);border-color:var(--primary);color:white}
   .day-btn.all{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
   .day-btn.all.active{background:var(--accent);border-color:var(--accent);color:white}
-  /* Tarjetas cliente */
+  /* Cliente tarjeta */
   .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:2px}
   .client-card.visited{border-color:#1A3A2A !important;background:#F0F6F3}
   .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3A2A;margin-top:8px;background:#D1E7DD;padding:3px 10px;border-radius:20px;width:fit-content}
   .client-card.visited .visited-badge{display:block}
-  /* Habituales */
+  /* Habituales y pedido anterior */
   .product-habitual-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;color:#856404;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;width:fit-content}
   .product-card.habitual{border-color:#D4A843;background:#FFFBF0}
   .product-card.habitual:hover{border-color:var(--accent);background:#FFF8E8}
@@ -396,9 +394,7 @@
       <button class="liq-detail-btn" data-mode="facturas">Por factura</button>
       <button class="liq-detail-btn" data-mode="resumen">Solo resumen</button>
     </div>
-    <div id="liq-content">
-      <div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div>
-    </div>
+    <div id="liq-content"><div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div></div>
   </div>
 </div>
 <div id="print-area"></div>
@@ -424,6 +420,7 @@
     <div class="tabs" id="tabs" style="display:none">
       <button class="tab-btn active" id="tab-pedido">🛒 Hacer pedido</button>
       <button class="tab-btn" id="tab-historial">📋 Pedidos del cliente</button>
+      <button class="tab-btn" id="tab-facturas">Facturas y cobros</button>
       <button class="tab-btn" id="tab-facturas">💶 Facturas y cobros</button>
     </div>
 
@@ -475,9 +472,7 @@
         </div>
         <div class="facturas-total-pendiente" id="facturas-total-pendiente">-</div>
       </div>
-      <div class="facturas-list" id="facturas-list">
-        <div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>
-      </div>
+      <div class="facturas-list" id="facturas-list"></div>
       <div class="cobro-panel" id="cobro-panel" style="display:none">
         <div class="cobro-panel-title">Registrar cobro</div>
         <div class="cobro-seleccion" id="cobro-seleccion">Ninguna factura seleccionada</div>
@@ -487,7 +482,7 @@
         </div>
         <div class="cobro-ref-wrap" id="cobro-ref-wrap">
           <label class="field-label">Referencia del pagare</label>
-          <input class="field-input" id="cobro-ref" type="text" placeholder="Num pagare o referencia...">
+          <input class="field-input" id="cobro-ref" type="text" placeholder="Num pagare...">
         </div>
         <div class="cobro-footer">
           <div>
@@ -564,7 +559,7 @@
   <div class="modal">
     <div class="modal-icon">ok</div>
     <h2>Cobro registrado!</h2>
-    <p id="modal-cobro-msg">El pago ha sido registrado en Odoo correctamente.</p>
+    <p id="modal-cobro-msg">El pago ha sido registrado correctamente.</p>
     <div class="modal-ref" id="modal-cobro-ref"></div>
     <button class="btn-primary" id="btn-cobro-ok-close">Aceptar</button>
   </div>
@@ -724,13 +719,12 @@
       var rutaHtml = c.ruta
         ? '<span class="client-ruta">📅 ' + c.ruta + '</span>'
         : '';
-      var tarifaHtml = c.pricelist_name ? '<div class="client-tarifa">' + c.pricelist_name + '</div>' : '';
+      var tarifaHtml2 = c.pricelist_name ? '<div class="client-tarifa">' + c.pricelist_name + '</div>' : '';
       card.innerHTML =
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
         '<div class="client-name">' + c.name + '</div>' +
         '<div class="client-address">' + (c.address || '') + '</div>' +
-        tarifaHtml +
-        rutaHtml +
+        tarifaHtml2 + rutaHtml +
         '<div class="visited-badge">Pedido realizado hoy</div>';
       card.dataset.clientId = c.id;
       if (visitedClients[c.id]) card.classList.add('visited');
@@ -739,16 +733,14 @@
     });
   }
 
-  // busqueda delegada a applyFilters
+  clientSearch.addEventListener('input', function () { applyFilters(allClients); });
 
   var visitedClients = {};
 
   function selectClient(client) {
     selectedClient = client;
     visitedClients[client.id] = true;
-    document.querySelectorAll('.client-card').forEach(function(cd) {
-      if (+cd.dataset.clientId === client.id) cd.classList.add('visited');
-    });
+    document.querySelectorAll('.client-card').forEach(function(cd){if(+cd.dataset.clientId===client.id)cd.classList.add('visited');});
     // Transición a pantalla de pedido
     clientsScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -760,8 +752,8 @@
     storeInfo.textContent = parts.join(' — ') + ' · Selecciona las cajas que necesitas';
 
     document.getElementById('page-title').textContent = 'Pedido para ' + client.name;
-    var oldBadge = document.getElementById('client-tarifa-badge');
-    if (oldBadge) oldBadge.remove();
+    var oldTB = document.getElementById('client-tarifa-badge');
+    if (oldTB) oldTB.remove();
     if (client.pricelist_name) {
       var tb = document.createElement('span');
       tb.id = 'client-tarifa-badge';
@@ -844,7 +836,6 @@
       allProducts = res.data.products || [];
       topProductIds = {};
       allProducts.forEach(function(p){ if(p.freq>0) topProductIds[p.id]=p.freq; });
-      buildDayFilters(allClients);
       searchBar.style.display = 'flex';
       summaryEl.style.display = 'block';
       document.getElementById('tabs').style.display = 'flex';
@@ -872,12 +863,10 @@
     grid.className = 'products-grid';
     products.forEach(function (p) {
       var qty = quantities[p.id] || 0;
-      var boxLabel = p.box_name || 'caja';
-      var boxQty   = p.box_qty || 1;
-      var unitInfo = boxQty > 1
-        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
-        : '';
       var card = document.createElement('div');
+      var boxLabel = p.box_name || 'caja';
+      var boxQty = p.box_qty || 1;
+      var unitInfo = boxQty > 1 ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>' : '';
       card.className = 'product-card' + (qty > 0 ? ' selected' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
@@ -1045,8 +1034,7 @@
             '<div class="history-right">' +
               '<span class="state-badge ' + stateClass + '">' + order.state + '</span>' +
               '<span class="history-total">' + fmt(order.total) + ' \u20ac</span>' +
-              '<button class="btn-repeat">\u21a9 Repetir</button>' +
-              (['Borrador', 'draft'].indexOf(order.state) !== -1 ? '<button class="btn-modify">\u270f Modificar</button>' : '') +
+              '<button class="btn-repeat">Repetir</button>' +
               '<span class="history-chevron">\u25be</span>' +
             '</div>' +
           '</div>' +
@@ -1056,14 +1044,9 @@
         card.querySelector('.btn-repeat').addEventListener('click', function (e) {
           e.stopPropagation(); repeatOrder(orderLines);
         });
-        var modifyBtn = card.querySelector('.btn-modify');
-        if (modifyBtn) {
-          modifyBtn.addEventListener('click', function (e) {
-            e.stopPropagation(); modifyOrder(order.id, order.ref, orderLines);
-          });
-        }
+
         card.querySelector('.history-header').addEventListener('click', function (e) {
-          if (e.target.classList.contains('btn-repeat') || e.target.classList.contains('btn-modify')) return;
+          if (e.target.classList.contains('btn-repeat')) return;
           card.classList.toggle('open');
         });
         list.appendChild(card);
@@ -1085,55 +1068,442 @@
     return d;
   }
 
-  function modifyOrder(orderId, orderRef, lines) {
-    modifyingOrderId = orderId;
-    quantities = {};
-    lines.forEach(function (line) {
-      if (!line.qty || line.qty <= 0) return;
-      var product = allProducts.filter(function (p) { return p.id === line.product_id; })[0];
-      if (!product) product = allProducts.filter(function (p) { return p.name === line.product; })[0];
-      if (product) quantities[product.id] = line.qty;
+
+
+
+
+
+  // ── FILTROS DIA REPARTO ──────────────────────────────
+  var activeDayFilter = 'todos';
+
+  function buildDayFilters(clients) {
+    var container = document.getElementById('day-filters');
+    var days = {};
+    clients.forEach(function(c) {
+      if (c.ruta && c.ruta.trim()) { var d = c.ruta.trim(); days[d] = (days[d]||0)+1; }
     });
-    document.getElementById('tab-pedido').classList.add('active');
-    document.getElementById('tab-historial').classList.remove('active');
-    document.getElementById('panel-pedido').style.display = 'block';
-    document.getElementById('panel-historial').style.display = 'none';
-    render(allProducts);
-    updateSummary();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    btnOrder.textContent = 'Guardar cambios (' + orderRef + ')';
-    showToast('Modifica las cantidades y pulsa "Guardar cambios"');
+    var dayKeys = Object.keys(days).sort();
+    if (!dayKeys.length) { container.style.display='none'; return; }
+    container.innerHTML=''; container.style.display='flex';
+    var btnTodos = document.createElement('button');
+    btnTodos.className='day-btn all active';
+    btnTodos.textContent='Todos (' + clients.length + ')';
+    btnTodos.dataset.day='todos';
+    btnTodos.addEventListener('click', function(){ setDayFilter('todos', clients); });
+    container.appendChild(btnTodos);
+    dayKeys.forEach(function(day) {
+      var btn = document.createElement('button');
+      btn.className='day-btn'; btn.textContent=day+' ('+days[day]+')'; btn.dataset.day=day;
+      btn.addEventListener('click', function(){ setDayFilter(day, clients); });
+      container.appendChild(btn);
+    });
+    var sinDia = clients.filter(function(c){ return !c.ruta||!c.ruta.trim(); }).length;
+    if (sinDia > 0) {
+      var btnSin = document.createElement('button');
+      btnSin.className='day-btn'; btnSin.textContent='Sin dia ('+sinDia+')'; btnSin.dataset.day='sin-dia';
+      btnSin.addEventListener('click', function(){ setDayFilter('sin-dia', clients); });
+      container.appendChild(btnSin);
+    }
   }
 
+  function setDayFilter(day, clients) {
+    activeDayFilter = day;
+    document.querySelectorAll('.day-btn').forEach(function(btn){
+      btn.classList.toggle('active', btn.dataset.day === day);
+    });
+    applyFilters(clients);
+  }
+
+  function applyFilters(clients) {
+    var q = clientSearch.value.toLowerCase();
+    var filtered = clients.filter(function(c) {
+      var textOk = !q || (c.name+(c.ref||'')+(c.address||'')).toLowerCase().indexOf(q) !== -1;
+      var dayOk = activeDayFilter==='todos' ||
+        (activeDayFilter==='sin-dia' && (!c.ruta||!c.ruta.trim())) ||
+        (c.ruta && c.ruta.trim()===activeDayFilter);
+      return textOk && dayOk;
+    });
+    renderClients(filtered);
+  }
+
+  clientSearch.addEventListener('input', function(){ applyFilters(allClients); });
+
+  // ── HABITUALES ──────────────────────────────────────
+  var topProductIds = {};
+
+  // ── REPETIR PEDIDO CON PRODUCTOS PRIMERO ─────────────
   function repeatOrder(lines) {
     modifyingOrderId = null;
     btnOrder.innerHTML = 'Confirmar pedido';
     quantities = {};
+    var repeatIds = {};
     var notFound = 0;
-    lines.forEach(function (line) {
+    lines.forEach(function(line) {
       if (!line.qty || line.qty <= 0) return;
       var product = null;
-      if (line.product_id) product = allProducts.filter(function (p) { return p.id === line.product_id; })[0];
-      if (!product) product = allProducts.filter(function (p) { return p.name === line.product; })[0];
-      if (product) quantities[product.id] = line.qty;
+      if (line.product_id) product = allProducts.filter(function(p){ return p.id===line.product_id; })[0];
+      if (!product) product = allProducts.filter(function(p){ return p.name===line.product; })[0];
+      if (product) { quantities[product.id]=line.qty; repeatIds[product.id]=true; }
       else notFound++;
     });
+
+    // Ordenar: productos del pedido anterior primero, luego el resto
+    var delPedido = allProducts.filter(function(p){ return repeatIds[p.id]; });
+    var resto = allProducts.filter(function(p){ return !repeatIds[p.id]; });
+    var ordenados = delPedido.concat(resto);
+
     document.getElementById('tab-pedido').classList.add('active');
     document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('tab-facturas').classList.remove('active');
     document.getElementById('panel-pedido').style.display = 'block';
     document.getElementById('panel-historial').style.display = 'none';
-    var q = searchField.value.toLowerCase();
-    var filtered = q ? allProducts.filter(function (p) {
-      return (p.name + p.ref + p.category).toLowerCase().indexOf(q) !== -1;
-    }) : allProducts;
-    render(filtered);
+    document.getElementById('panel-facturas').style.display = 'none';
+    searchField.value = '';
+
+    renderRepeat(ordenados, repeatIds);
     updateSummary();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     var msg = notFound > 0
       ? 'Pedido cargado (' + notFound + ' producto(s) ya no disponibles)'
-      : 'Pedido cargado. Revisa y confirma cuando quieras.';
+      : 'Pedido anterior cargado. Modifica lo que necesites y confirma.';
     showToast(msg);
   }
+
+  function renderRepeat(products, repeatIds) {
+    if (!products.length) {
+      productsArea.innerHTML = '<div class="loading-box">No se encontraron productos.</div>';
+      return;
+    }
+    var grid = document.createElement('div');
+    grid.className = 'products-grid';
+    var pedidoShown = false; var restoShown = false;
+
+    products.forEach(function(p) {
+      var qty = quantities[p.id] || 0;
+      var esDePedido = !!repeatIds[p.id];
+
+      if (esDePedido && !pedidoShown) {
+        pedidoShown = true;
+        var d1 = document.createElement('div');
+        d1.className = 'habitual-divider';
+        d1.innerHTML = '<span>Del pedido anterior</span>';
+        grid.appendChild(d1);
+      }
+      if (!esDePedido && pedidoShown && !restoShown) {
+        restoShown = true;
+        var d2 = document.createElement('div');
+        d2.className = 'habitual-divider';
+        d2.innerHTML = '<span>Resto del catalogo</span>';
+        grid.appendChild(d2);
+      }
+
+      var boxLabel = p.box_name || 'caja';
+      var boxQty = p.box_qty || 1;
+      var unitInfo = boxQty > 1
+        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        : '';
+      var card = document.createElement('div');
+      card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '');
+      card.id = 'card-' + p.id;
+      card.innerHTML =
+        '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
+        '<div class="product-name">' + p.name + '</div>' +
+        '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + '</div>' +
+        '<div class="product-footer">' +
+          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + '</small><br>' + unitInfo + '</div>' +
+          '<div class="qty-control">' +
+            '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
+            '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
+            '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
+          '</div>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+    productsArea.innerHTML = '';
+    productsArea.appendChild(grid);
+    productsArea.querySelectorAll('.qty-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ changeQty(+btn.dataset.id, +btn.dataset.d); });
+    });
+  }
+
+  // ── FACTURAS Y COBROS ──────────────────────────────
+  var facturasLoaded = false;
+  var selectedInvoices = {};
+  var journals = [];
+  var selectedJournalId = null;
+  var selectedMetodo = 'efectivo';
+
+  document.getElementById('tab-facturas').addEventListener('click', function(){
+    document.getElementById('tab-facturas').classList.add('active');
+    document.getElementById('tab-pedido').classList.remove('active');
+    document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('panel-pedido').style.display = 'none';
+    document.getElementById('panel-historial').style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'block';
+    if (!facturasLoaded) loadFacturas();
+  });
+
+  document.getElementById('btn-reload-facturas').addEventListener('click', function(){
+    facturasLoaded = false; selectedInvoices = {}; loadFacturas();
+  });
+
+  function loadFacturas() {
+    var list = document.getElementById('facturas-list');
+    var totalEl = document.getElementById('facturas-total-pendiente');
+    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>';
+    totalEl.textContent = '-';
+    document.getElementById('cobro-panel').style.display = 'none';
+    selectedInvoices = {};
+    Promise.all([
+      fetch(API+'/payment-journals', {headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();}),
+      fetch(API+'/invoices?partner_id='+selectedClient.id, {headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();})
+    ]).then(function(results) {
+      journals = results[0].journals || [];
+      setupJournalButtons();
+      facturasLoaded = true;
+      var invoices = results[1].invoices || [];
+      var totalPendiente = results[1].total_pendiente || 0;
+      totalEl.textContent = fmt(totalPendiente) + ' \u20ac';
+      totalEl.className = 'facturas-total-pendiente' + (totalPendiente > 0 ? '' : ' ok');
+      if (!invoices.length) {
+        list.innerHTML = '<div class="history-empty">Este cliente no tiene facturas pendientes.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      invoices.forEach(function(inv) {
+        var card = document.createElement('div');
+        card.className = 'factura-card' + (inv.vencida ? ' vencida' : '');
+        card.dataset.id = inv.id;
+        card.innerHTML =
+          '<div class="factura-check" id="fcheck-'+inv.id+'"></div>' +
+          '<div class="factura-info">' +
+            '<div class="factura-ref">'+inv.name+(inv.vencida?'<span class="factura-vencida-badge">VENCIDA</span>':'')+'</div>' +
+            '<div class="factura-dates">Emision: '+formatDate(inv.date)+(inv.due_date?' - Vence: '+formatDate(inv.due_date):'')+'</div>' +
+          '</div>' +
+          '<div class="factura-importes">' +
+            '<div class="factura-total">Total: '+fmt(inv.total)+' \u20ac</div>' +
+            '<div class="factura-pendiente'+(inv.vencida?' vencida':'')+'">'+fmt(inv.pendiente)+' \u20ac</div>' +
+          '</div>';
+        card.addEventListener('click', function(){ toggleInvoice(inv, card); });
+        list.appendChild(card);
+      });
+    }).catch(function(){ list.innerHTML = '<div class="history-empty">Error cargando facturas.</div>'; });
+  }
+
+  function setupJournalButtons() {
+    var efectivo = journals.find(function(j){ return j.type==='cash'; });
+    var pagare = journals.find(function(j){ return j.name.toLowerCase().indexOf('pagar')!==-1; });
+    var btnE = document.getElementById('metodo-efectivo');
+    var btnP = document.getElementById('metodo-pagare');
+    if (efectivo) { btnE.dataset.journal = efectivo.id; selectedJournalId = efectivo.id; }
+    else { btnE.disabled = true; }
+    if (pagare) { btnP.dataset.journal = pagare.id; }
+    else { btnP.disabled = true; }
+  }
+
+  function toggleInvoice(inv, card) {
+    if (selectedInvoices[inv.id]) {
+      delete selectedInvoices[inv.id];
+      card.classList.remove('selected');
+      document.getElementById('fcheck-'+inv.id).textContent = '';
+    } else {
+      selectedInvoices[inv.id] = inv;
+      card.classList.add('selected');
+      document.getElementById('fcheck-'+inv.id).textContent = '\u2713';
+    }
+    updateCobroPanel();
+  }
+
+  function updateCobroPanel() {
+    var keys = Object.keys(selectedInvoices);
+    var panel = document.getElementById('cobro-panel');
+    var btnCobrar = document.getElementById('btn-cobrar');
+    var totalEl = document.getElementById('cobro-total-amount');
+    if (!keys.length) { panel.style.display='none'; return; }
+    panel.style.display = 'block';
+    var totalCobro = keys.reduce(function(s,id){ return s+selectedInvoices[id].pendiente; }, 0);
+    document.getElementById('cobro-seleccion').innerHTML = '<strong>' + keys.length + ' factura' + (keys.length>1?'s':'') + ' seleccionada' + (keys.length>1?'s':'') + '</strong>';
+    totalEl.textContent = fmt(totalCobro) + ' \u20ac';
+    btnCobrar.disabled = !selectedJournalId;
+  }
+
+  document.getElementById('metodo-efectivo').addEventListener('click', function(){
+    selectedMetodo = 'efectivo'; selectedJournalId = +this.dataset.journal || null;
+    document.getElementById('metodo-efectivo').classList.add('active');
+    document.getElementById('metodo-pagare').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display = 'none';
+    updateCobroPanel();
+  });
+  document.getElementById('metodo-pagare').addEventListener('click', function(){
+    selectedMetodo = 'pagare'; selectedJournalId = +this.dataset.journal || null;
+    document.getElementById('metodo-pagare').classList.add('active');
+    document.getElementById('metodo-efectivo').classList.remove('active');
+    document.getElementById('cobro-ref-wrap').style.display = 'block';
+    updateCobroPanel();
+  });
+
+  document.getElementById('btn-cobrar').addEventListener('click', function(){
+    var keys = Object.keys(selectedInvoices).map(Number);
+    if (!keys.length || !selectedJournalId) return;
+    var btnCobrar = document.getElementById('btn-cobrar');
+    btnCobrar.disabled = true;
+    btnCobrar.innerHTML = '<span class="spinner"></span>Procesando...';
+    var memo = selectedMetodo==='pagare'
+      ? (document.getElementById('cobro-ref').value.trim() || 'Pagare')
+      : 'Cobro en efectivo - ' + vendorName;
+    fetch(API+'/invoices/pay?partner_id='+selectedClient.id, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({invoice_ids:keys, journal_id:selectedJournalId, memo:memo})
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+    .then(function(res){
+      btnCobrar.disabled = false; btnCobrar.innerHTML = 'Registrar cobro';
+      if (!res.ok) { modalErrMsg.textContent = res.data.detail||'Error al registrar el cobro.'; modalErr.classList.add('open'); return; }
+      document.getElementById('modal-cobro-msg').textContent = fmt(res.data.amount) + '\u20ac cobrados - ' + (selectedMetodo==='efectivo'?'Efectivo':'Pagare');
+      document.getElementById('modal-cobro-ref').textContent = res.data.invoices_paid.join(', ');
+      document.getElementById('modal-cobro-ok').classList.add('open');
+      facturasLoaded = false; selectedInvoices = {};
+    }).catch(function(){
+      btnCobrar.disabled = false; btnCobrar.innerHTML = 'Registrar cobro';
+      modalErrMsg.textContent = 'Error de conexion.'; modalErr.classList.add('open');
+    });
+  });
+
+  document.getElementById('btn-cobro-ok-close').addEventListener('click', function(){
+    document.getElementById('modal-cobro-ok').classList.remove('open');
+    var list = document.getElementById('facturas-list');
+    var totalEl = document.getElementById('facturas-total-pendiente');
+    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
+    totalEl.textContent = '-';
+    document.getElementById('cobro-panel').style.display = 'none';
+    selectedInvoices = {}; facturasLoaded = false;
+    setTimeout(function(){ loadFacturas(); }, 1500);
+  });
+
+  // ── LIQUIDACION ─────────────────────────────────────
+  var liqData = null; var liqMode = 'clientes';
+
+  document.getElementById('btn-liquidacion-nav').addEventListener('click', function(){
+    clientsScreen.style.display = 'none';
+    document.getElementById('liq-screen').style.display = 'block';
+    document.getElementById('liq-vendor-pill').textContent = vendorName;
+    document.getElementById('liq-vendedor-label').textContent = 'Vendedor: ' + vendorName;
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById('liq-fecha').value = today;
+    liqData = null;
+    document.getElementById('liq-content').innerHTML = '<div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div>';
+    document.getElementById('btn-liq-print').style.display = 'none';
+    document.getElementById('liq-detail-tabs').style.display = 'none';
+  });
+
+  document.getElementById('btn-liq-back').addEventListener('click', function(){
+    document.getElementById('liq-screen').style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+  document.getElementById('btn-logout-liq').addEventListener('click', logout);
+
+  document.getElementById('btn-liq-buscar').addEventListener('click', function(){
+    var fecha = document.getElementById('liq-fecha').value;
+    if (!fecha) { alert('Selecciona una fecha'); return; }
+    loadLiquidacion(fecha);
+  });
+
+  document.getElementById('btn-liq-print').addEventListener('click', function(){
+    if (!liqData) return;
+    document.getElementById('print-area').innerHTML = buildPrintHTML(liqData, liqMode);
+    window.print();
+  });
+
+  document.querySelectorAll('.liq-detail-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.liq-detail-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active'); liqMode = btn.dataset.mode;
+      if (liqData) renderLiquidacion(liqData, liqMode);
+    });
+  });
+
+  function loadLiquidacion(fecha) {
+    var content = document.getElementById('liq-content');
+    content.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando cobros...</div>';
+    document.getElementById('btn-liq-print').style.display = 'none';
+    document.getElementById('liq-detail-tabs').style.display = 'none';
+    fetch(API+'/liquidacion?fecha='+fecha, {headers:{'Authorization':'Bearer '+token}})
+    .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+    .then(function(res){
+      if (!res.ok) { content.innerHTML='<div class="liq-empty">Error: '+(res.data.detail||'No se pudo cargar')+'</div>'; return; }
+      liqData = res.data;
+      if (!liqData.clientes || !liqData.clientes.length) {
+        content.innerHTML = '<div class="liq-empty">No hay cobros el ' + formatDateES(fecha) + '</div>'; return;
+      }
+      document.getElementById('liq-detail-tabs').style.display = 'flex';
+      document.getElementById('btn-liq-print').style.display = 'inline-block';
+      renderLiquidacion(liqData, liqMode);
+    }).catch(function(){ content.innerHTML='<div class="liq-empty">Error de conexion.</div>'; });
+  }
+
+  function renderLiquidacion(data, mode) {
+    var content = document.getElementById('liq-content'); var h = '';
+    h += '<div class="liq-resumen-card">' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">'+formatDateES(data.fecha)+'</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes</span><span class="liq-resumen-valor">'+data.clientes.length+'</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Cobros</span><span class="liq-resumen-valor">'+data.num_cobros+'</span></div>' +
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total</span><span class="liq-resumen-valor grande">'+fmt(data.total)+' \u20ac</span></div>' +
+    '</div>';
+    if (mode !== 'resumen') {
+      data.clientes.forEach(function(cliente, idx) {
+        h += '<div class="liq-cliente-card" id="liq-card-'+idx+'">' +
+          '<div class="liq-cliente-header" onclick="toggleLiqCard('+idx+')">' +
+            '<div><div class="liq-cliente-name">'+cliente.cliente+'</div>' +
+            '<div style="font-size:12px;color:var(--text-muted)">'+cliente.cobros.length+' cobro'+(cliente.cobros.length>1?'s':'')+'</div></div>' +
+            '<div style="display:flex;align-items:center;gap:12px">' +
+              '<span style="font-size:18px;font-weight:700;color:var(--primary)">'+fmt(cliente.subtotal)+' \u20ac</span>' +
+              '<span class="liq-chevron">\u25be</span></div></div>' +
+          '<div class="liq-cliente-body">';
+        cliente.cobros.forEach(function(cobro) {
+          var factStr = cobro.facturas.length ? 'Facturas: '+cobro.facturas.map(function(f){return f.ref;}).join(', ') : 'Sin facturas';
+          h += '<div class="liq-cobro-row"><div class="liq-cobro-info">' +
+            '<div class="liq-cobro-ref">'+cobro.ref+' - '+cobro.diario+'</div>' +
+            '<div class="liq-cobro-memo">'+(cobro.memo||'')+'</div>' +
+            (mode==='facturas'?'<div class="liq-cobro-facturas">'+factStr+'</div>':'') +
+          '</div><div class="liq-cobro-importe">'+fmt(cobro.importe)+' \u20ac</div></div>';
+        });
+        h += '</div></div>';
+      });
+    }
+    h += '<div class="liq-total-bar"><span class="liq-total-bar-label">TOTAL COBRADO '+formatDateES(data.fecha).toUpperCase()+'</span><span class="liq-total-bar-amount">'+fmt(data.total)+' \u20ac</span></div>';
+    content.innerHTML = h;
+  }
+
+  function toggleLiqCard(idx) { var c=document.getElementById('liq-card-'+idx); if(c) c.classList.toggle('open'); }
+  function formatDateES(f) { if(!f) return ''; var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+
+  function buildPrintHTML(data, mode) {
+    var rows='';
+    data.clientes.forEach(function(c){ c.cobros.forEach(function(co){
+      var f=co.facturas.map(function(x){return x.ref;}).join(', ')||'-';
+      rows+='<tr><td>'+c.cliente+'</td><td>'+co.ref+'</td><td>'+co.diario+'</td>'+(mode==='facturas'?'<td>'+f+'</td>':'')+'<td style="text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
+    });});
+    return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">' +
+      '<div style="border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">' +
+        '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidacion de cobros</h1>' +
+        '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: '+data.vendedor+' | Fecha: '+formatDateES(data.fecha)+'</p></div>' +
+      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.clientes.length+'</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.num_cobros+'</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#D48B3A">'+fmt(data.total)+' \u20ac</div></div></div>' +
+      (mode!=='resumen'?
+        '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+          '<thead><tr style="background:#1A3A2A;color:white">' +
+            '<th style="padding:10px 12px;text-align:left">Cliente</th><th style="padding:10px 12px;text-align:left">Referencia</th><th style="padding:10px 12px;text-align:left">Diario</th>' +
+            (mode==='facturas'?'<th style="padding:10px 12px;text-align:left">Facturas</th>':'') +
+            '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>' +
+          '<tbody>'+rows+'</tbody>' +
+          '<tfoot><tr style="background:#f5f2ec;font-weight:700">' +
+            '<td colspan="'+(mode==='facturas'?'4':'3')+'" style="padding:12px;font-size:15px">TOTAL</td>' +
+            '<td style="padding:12px;text-align:right;font-size:18px">'+fmt(data.total)+' \u20ac</td></tr></tfoot></table>':'') +
+    '</div>';
+  }
+
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
@@ -1157,7 +1527,22 @@
   var selectedMetodo = 'efectivo';
 
   // Tab facturas
+  document.getElementById('tab-facturas').addEventListener('click', function () {
+    document.getElementById('tab-facturas').classList.add('active');
+    document.getElementById('tab-pedido').classList.remove('active');
+    document.getElementById('tab-historial').classList.remove('active');
+    document.getElementById('panel-pedido').style.display = 'none';
+    document.getElementById('panel-historial').style.display = 'none';
+    document.getElementById('panel-facturas').style.display = 'block';
+    if (!facturasLoaded) loadFacturas();
+  });
 
+  // Reload facturas
+  document.getElementById('btn-reload-facturas').addEventListener('click', function () {
+    facturasLoaded = false;
+    selectedInvoices = {};
+    loadFacturas();
+  });
 
   function loadFacturas() {
     var list = document.getElementById('facturas-list');
@@ -1343,301 +1728,6 @@
     document.getElementById('modal-cobro-ok').classList.remove('open');
     loadFacturas();
   });
-
-
-  // ── FILTROS DIA DE REPARTO ──────────────────────────
-  var activeDayFilter = 'todos';
-
-  function buildDayFilters(clients) {
-    var container = document.getElementById('day-filters');
-    var days = {};
-    clients.forEach(function(c) {
-      if (c.ruta && c.ruta.trim()) { var d = c.ruta.trim(); days[d] = (days[d]||0)+1; }
-    });
-    var dayKeys = Object.keys(days).sort();
-    if (!dayKeys.length) { container.style.display='none'; return; }
-    container.innerHTML=''; container.style.display='flex';
-    var btnTodos = document.createElement('button');
-    btnTodos.className='day-btn all active'; btnTodos.textContent='Todos ('+clients.length+')';
-    btnTodos.dataset.day='todos';
-    btnTodos.addEventListener('click', function(){ setDayFilter('todos',clients); });
-    container.appendChild(btnTodos);
-    dayKeys.forEach(function(day) {
-      var btn=document.createElement('button'); btn.className='day-btn';
-      btn.textContent=day+' ('+days[day]+')'; btn.dataset.day=day;
-      btn.addEventListener('click', function(){ setDayFilter(day,clients); });
-      container.appendChild(btn);
-    });
-    var sinDia=clients.filter(function(c){return !c.ruta||!c.ruta.trim();}).length;
-    if (sinDia>0) {
-      var btnSin=document.createElement('button'); btnSin.className='day-btn';
-      btnSin.textContent='Sin dia ('+sinDia+')'; btnSin.dataset.day='sin-dia';
-      btnSin.addEventListener('click',function(){setDayFilter('sin-dia',clients);});
-      container.appendChild(btnSin);
-    }
-  }
-
-  function setDayFilter(day, clients) {
-    activeDayFilter=day;
-    document.querySelectorAll('.day-btn').forEach(function(btn){ btn.classList.toggle('active', btn.dataset.day===day); });
-    applyFilters(clients);
-  }
-
-  function applyFilters(clients) {
-    var q=clientSearch.value.toLowerCase();
-    var filtered=clients.filter(function(c){
-      var textOk=!q||(c.name+(c.ref||'')+(c.address||'')).toLowerCase().indexOf(q)!==-1;
-      var dayOk=activeDayFilter==='todos'||(activeDayFilter==='sin-dia'&&(!c.ruta||!c.ruta.trim()))||(c.ruta&&c.ruta.trim()===activeDayFilter);
-      return textOk&&dayOk;
-    });
-    renderClients(filtered);
-  }
-
-  // Actualizar buscador para usar applyFilters
-  clientSearch.addEventListener('input', function(){ applyFilters(allClients); });
-
-  // ── HABITUALES ──────────────────────────────────────
-  var topProductIds = {};
-
-  // ── FACTURAS Y COBROS ────────────────────────────────
-  var facturasLoaded=false; var selectedInvoices={}; var journals=[];
-  var selectedJournalId=null; var selectedMetodo='efectivo';
-
-  document.getElementById('tab-facturas').addEventListener('click', function(){
-    document.getElementById('tab-facturas').classList.add('active');
-    document.getElementById('tab-pedido').classList.remove('active');
-    document.getElementById('tab-historial').classList.remove('active');
-    document.getElementById('panel-pedido').style.display='none';
-    document.getElementById('panel-historial').style.display='none';
-    document.getElementById('panel-facturas').style.display='block';
-    if (!facturasLoaded) loadFacturas();
-  });
-
-  document.getElementById('btn-reload-facturas').addEventListener('click',function(){
-    facturasLoaded=false; selectedInvoices={}; loadFacturas();
-  });
-
-  function loadFacturas(){
-    var list=document.getElementById('facturas-list');
-    var totalEl=document.getElementById('facturas-total-pendiente');
-    list.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>';
-    totalEl.textContent='-'; document.getElementById('cobro-panel').style.display='none';
-    selectedInvoices={};
-    Promise.all([
-      fetch(API+'/payment-journals',{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();}),
-      fetch(API+'/invoices?partner_id='+selectedClient.id,{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.json();})
-    ]).then(function(results){
-      journals=results[0].journals||[]; setupJournalButtons();
-      facturasLoaded=true;
-      var invoices=results[1].invoices||[]; var totalPendiente=results[1].total_pendiente||0;
-      totalEl.textContent=fmt(totalPendiente)+' \u20ac';
-      totalEl.className='facturas-total-pendiente'+(totalPendiente>0?'':' ok');
-      if (!invoices.length){list.innerHTML='<div class="history-empty">Este cliente no tiene facturas pendientes.</div>';return;}
-      list.innerHTML='';
-      invoices.forEach(function(inv){
-        var card=document.createElement('div');
-        card.className='factura-card'+(inv.vencida?' vencida':''); card.dataset.id=inv.id;
-        card.innerHTML='<div class="factura-check" id="fcheck-'+inv.id+'"></div>'+
-          '<div class="factura-info"><div class="factura-ref">'+inv.name+(inv.vencida?'<span class="factura-vencida-badge">VENCIDA</span>':'')+'</div>'+
-          '<div class="factura-dates">Emision: '+formatDate(inv.date)+(inv.due_date?' - Vence: '+formatDate(inv.due_date):'')+'</div></div>'+
-          '<div class="factura-importes"><div class="factura-total">Total: '+fmt(inv.total)+' \u20ac</div>'+
-          '<div class="factura-pendiente'+(inv.vencida?' vencida':'')+'">'+fmt(inv.pendiente)+' \u20ac</div></div>';
-        card.addEventListener('click',function(){toggleInvoice(inv,card);});
-        list.appendChild(card);
-      });
-    }).catch(function(){list.innerHTML='<div class="history-empty">Error cargando facturas.</div>';});
-  }
-
-  function setupJournalButtons(){
-    var efectivo=journals.find(function(j){return j.type==='cash';});
-    var pagare=journals.find(function(j){return j.name.toLowerCase().indexOf('pagar')!==-1;});
-    var btnE=document.getElementById('metodo-efectivo'); var btnP=document.getElementById('metodo-pagare');
-    if(efectivo){btnE.dataset.journal=efectivo.id;selectedJournalId=efectivo.id;}
-    else{btnE.disabled=true;}
-    if(pagare){btnP.dataset.journal=pagare.id;}
-    else{btnP.disabled=true;}
-  }
-
-  function toggleInvoice(inv,card){
-    if(selectedInvoices[inv.id]){delete selectedInvoices[inv.id];card.classList.remove('selected');document.getElementById('fcheck-'+inv.id).textContent='';}
-    else{selectedInvoices[inv.id]=inv;card.classList.add('selected');document.getElementById('fcheck-'+inv.id).textContent='checkmark';}
-    updateCobroPanel();
-  }
-
-  function updateCobroPanel(){
-    var keys=Object.keys(selectedInvoices); var panel=document.getElementById('cobro-panel');
-    var btnCobrar=document.getElementById('btn-cobrar'); var totalEl=document.getElementById('cobro-total-amount');
-    if(!keys.length){panel.style.display='none';return;}
-    panel.style.display='block';
-    var totalCobro=keys.reduce(function(s,id){return s+selectedInvoices[id].pendiente;},0);
-    document.getElementById('cobro-seleccion').innerHTML='<strong>'+keys.length+' factura'+(keys.length>1?'s':'')+' seleccionada'+(keys.length>1?'s':'')+'</strong>';
-    totalEl.textContent=fmt(totalCobro)+' \u20ac'; btnCobrar.disabled=!selectedJournalId;
-  }
-
-  document.getElementById('metodo-efectivo').addEventListener('click',function(){
-    selectedMetodo='efectivo'; selectedJournalId=+this.dataset.journal||null;
-    document.getElementById('metodo-efectivo').classList.add('active');
-    document.getElementById('metodo-pagare').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display='none'; updateCobroPanel();
-  });
-  document.getElementById('metodo-pagare').addEventListener('click',function(){
-    selectedMetodo='pagare'; selectedJournalId=+this.dataset.journal||null;
-    document.getElementById('metodo-pagare').classList.add('active');
-    document.getElementById('metodo-efectivo').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display='block'; updateCobroPanel();
-  });
-
-  document.getElementById('btn-cobrar').addEventListener('click',function(){
-    var keys=Object.keys(selectedInvoices).map(Number);
-    if(!keys.length||!selectedJournalId) return;
-    var btnCobrar=document.getElementById('btn-cobrar');
-    btnCobrar.disabled=true; btnCobrar.innerHTML='<span class="spinner"></span>Procesando...';
-    var memo=selectedMetodo==='pagare'?(document.getElementById('cobro-ref').value.trim()||'Pagare'):'Cobro en efectivo - '+vendorName;
-    fetch(API+'/invoices/pay?partner_id='+selectedClient.id,{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body:JSON.stringify({invoice_ids:keys,journal_id:selectedJournalId,memo:memo})
-    }).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
-    .then(function(res){
-      btnCobrar.disabled=false; btnCobrar.innerHTML='Registrar cobro';
-      if(!res.ok){modalErrMsg.textContent=res.data.detail||'Error al registrar el cobro.';modalErr.classList.add('open');return;}
-      document.getElementById('modal-cobro-msg').textContent=fmt(res.data.amount)+' cobrados - '+(selectedMetodo==='efectivo'?'Efectivo':'Pagare');
-      document.getElementById('modal-cobro-ref').textContent=res.data.invoices_paid.join(', ');
-      document.getElementById('modal-cobro-ok').classList.add('open');
-      facturasLoaded=false; selectedInvoices={};
-    }).catch(function(){btnCobrar.disabled=false;btnCobrar.innerHTML='Registrar cobro';modalErrMsg.textContent='Error de conexion.';modalErr.classList.add('open');});
-  });
-
-  document.getElementById('btn-cobro-ok-close').addEventListener('click',function(){
-    document.getElementById('modal-cobro-ok').classList.remove('open');
-    var list=document.getElementById('facturas-list');
-    var totalEl=document.getElementById('facturas-total-pendiente');
-    list.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
-    totalEl.textContent='-'; document.getElementById('cobro-panel').style.display='none';
-    selectedInvoices={}; facturasLoaded=false;
-    setTimeout(function(){loadFacturas();},1500);
-  });
-
-  // ── LIQUIDACION ─────────────────────────────────────
-  var liqData=null; var liqMode='clientes';
-
-  document.getElementById('btn-liquidacion-nav').addEventListener('click',function(){
-    clientsScreen.style.display='none';
-    document.getElementById('liq-screen').style.display='block';
-    document.getElementById('liq-vendor-pill').textContent=vendorName;
-    document.getElementById('liq-vendedor-label').textContent='Vendedor: '+vendorName;
-    var today=new Date().toISOString().split('T')[0];
-    document.getElementById('liq-fecha').value=today;
-    liqData=null;
-    document.getElementById('liq-content').innerHTML='<div class="liq-empty">Selecciona una fecha y pulsa Ver liquidacion</div>';
-    document.getElementById('btn-liq-print').style.display='none';
-    document.getElementById('liq-detail-tabs').style.display='none';
-  });
-
-  document.getElementById('btn-liq-back').addEventListener('click',function(){
-    document.getElementById('liq-screen').style.display='none'; clientsScreen.style.display='block';
-  });
-  document.getElementById('btn-logout-liq').addEventListener('click',logout);
-
-  document.getElementById('btn-liq-buscar').addEventListener('click',function(){
-    var fecha=document.getElementById('liq-fecha').value;
-    if(!fecha){alert('Selecciona una fecha');return;} loadLiquidacion(fecha);
-  });
-
-  document.getElementById('btn-liq-print').addEventListener('click',function(){
-    if(!liqData) return;
-    document.getElementById('print-area').innerHTML=buildPrintHTML(liqData,liqMode); window.print();
-  });
-
-  document.querySelectorAll('.liq-detail-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      document.querySelectorAll('.liq-detail-btn').forEach(function(b){b.classList.remove('active');});
-      btn.classList.add('active'); liqMode=btn.dataset.mode;
-      if(liqData) renderLiquidacion(liqData,liqMode);
-    });
-  });
-
-  function loadLiquidacion(fecha){
-    var content=document.getElementById('liq-content');
-    content.innerHTML='<div class="loading-box"><div class="big-spinner"></div>Cargando cobros...</div>';
-    document.getElementById('btn-liq-print').style.display='none';
-    document.getElementById('liq-detail-tabs').style.display='none';
-    fetch(API+'/liquidacion?fecha='+fecha,{headers:{'Authorization':'Bearer '+token}})
-    .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
-    .then(function(res){
-      if(!res.ok){content.innerHTML='<div class="liq-empty">Error: '+(res.data.detail||'No se pudo cargar')+'</div>';return;}
-      liqData=res.data;
-      if(!liqData.clientes||!liqData.clientes.length){
-        content.innerHTML='<div class="liq-empty">No hay cobros registrados el '+formatDateES(fecha)+'</div>';return;
-      }
-      document.getElementById('liq-detail-tabs').style.display='flex';
-      document.getElementById('btn-liq-print').style.display='inline-block';
-      renderLiquidacion(liqData,liqMode);
-    }).catch(function(){content.innerHTML='<div class="liq-empty">Error de conexion.</div>';});
-  }
-
-  function renderLiquidacion(data,mode){
-    var content=document.getElementById('liq-content'); var h='';
-    h+='<div class="liq-resumen-card">'+
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">'+formatDateES(data.fecha)+'</span></div>'+
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes cobrados</span><span class="liq-resumen-valor">'+data.clientes.length+'</span></div>'+
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Num cobros</span><span class="liq-resumen-valor">'+data.num_cobros+'</span></div>'+
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total cobrado</span><span class="liq-resumen-valor grande">'+fmt(data.total)+' \u20ac</span></div>'+
-    '</div>';
-    if(mode!=='resumen'){
-      data.clientes.forEach(function(cliente,idx){
-        h+='<div class="liq-cliente-card" id="liq-card-'+idx+'">'+
-          '<div class="liq-cliente-header" onclick="toggleLiqCard('+idx+')">'+
-            '<div><div class="liq-cliente-name">'+cliente.cliente+'</div>'+
-            '<div style="font-size:12px;color:var(--text-muted)">'+cliente.cobros.length+' cobro'+(cliente.cobros.length>1?'s':'')+'</div></div>'+
-            '<div style="display:flex;align-items:center;gap:12px">'+
-              '<span style="font-size:18px;font-weight:700;color:var(--primary)">'+fmt(cliente.subtotal)+' \u20ac</span>'+
-              '<span class="liq-chevron">\u25be</span></div></div>'+
-          '<div class="liq-cliente-body">';
-        cliente.cobros.forEach(function(cobro){
-          var factStr=cobro.facturas.length?'Facturas: '+cobro.facturas.map(function(f){return f.ref;}).join(', '):'Sin facturas';
-          h+='<div class="liq-cobro-row"><div class="liq-cobro-info">'+
-            '<div class="liq-cobro-ref">'+cobro.ref+' - '+cobro.diario+'</div>'+
-            '<div class="liq-cobro-memo">'+(cobro.memo||'')+'</div>'+
-            (mode==='facturas'?'<div class="liq-cobro-facturas">'+factStr+'</div>':'')+
-          '</div><div class="liq-cobro-importe">'+fmt(cobro.importe)+' \u20ac</div></div>';
-        });
-        h+='</div></div>';
-      });
-    }
-    h+='<div class="liq-total-bar"><span class="liq-total-bar-label">TOTAL COBRADO '+formatDateES(data.fecha).toUpperCase()+'</span><span class="liq-total-bar-amount">'+fmt(data.total)+' \u20ac</span></div>';
-    content.innerHTML=h;
-  }
-
-  function toggleLiqCard(idx){var c=document.getElementById('liq-card-'+idx);if(c)c.classList.toggle('open');}
-
-  function formatDateES(f){if(!f)return'';var p=f.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
-
-  function buildPrintHTML(data,mode){
-    var rows='';
-    data.clientes.forEach(function(c){c.cobros.forEach(function(co){
-      var f=co.facturas.map(function(x){return x.ref;}).join(', ')||'-';
-      rows+='<tr><td>'+c.cliente+'</td><td>'+co.ref+'</td><td>'+co.diario+'</td>'+(mode==='facturas'?'<td>'+f+'</td>':'')+'<td style="text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
-    });});
-    return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">'+
-      '<div style="border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">'+
-        '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidacion de cobros</h1>'+
-        '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: '+data.vendedor+' | Fecha: '+formatDateES(data.fecha)+'</p></div>'+
-      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">'+
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.clientes.length+'</div></div>'+
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.num_cobros+'</div></div>'+
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#D48B3A">'+fmt(data.total)+' \u20ac</div></div></div>'+
-      (mode!=='resumen'?
-        '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
-          '<thead><tr style="background:#1A3A2A;color:white">'+
-            '<th style="padding:10px 12px;text-align:left">Cliente</th><th style="padding:10px 12px;text-align:left">Referencia</th><th style="padding:10px 12px;text-align:left">Diario</th>'+
-            (mode==='facturas'?'<th style="padding:10px 12px;text-align:left">Facturas</th>':'')+
-            '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>'+
-          '<tbody>'+rows+'</tbody>'+
-          '<tfoot><tr style="background:#f5f2ec;font-weight:700"><td colspan="'+(mode==='facturas'?'4':'3')+'" style="padding:12px;font-size:15px">TOTAL</td>'+
-            '<td style="padding:12px;text-align:right;font-size:18px">'+fmt(data.total)+' \u20ac</td></tr></tfoot></table>':'')+
-    '</div>';
-  }
-
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
