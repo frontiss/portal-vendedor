@@ -629,6 +629,12 @@
         </select>
       </div>
       <div class="edit-field full">
+        <label class="edit-label">Metodo de envio</label>
+        <select class="edit-input" id="edit-carrier">
+          <option value="">Cargando...</option>
+        </select>
+      </div>
+      <div class="edit-field full">
         <label class="edit-label">Notas internas</label>
         <textarea class="edit-input edit-textarea" id="edit-notes"></textarea>
       </div>
@@ -1809,10 +1815,12 @@
     // Cargar tarifas y datos del cliente en paralelo
     Promise.all([
       fetch(API + '/pricelists', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
-      fetch(API + '/clients/' + selectedClient.id, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
+      fetch(API + '/clients/' + selectedClient.id, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
+      fetch(API + '/delivery-methods', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
     ]).then(function(results) {
       var plData  = results[0];
       var data    = results[1];
+      var carrData = results[2];
 
       // Rellenar selector de tarifas
       var sel = document.getElementById('edit-pricelist');
@@ -1823,6 +1831,17 @@
         opt.textContent = pl.name;
         if (pl.id === data.pricelist_id) opt.selected = true;
         sel.appendChild(opt);
+      });
+
+      // Rellenar selector de metodos de envio
+      var selCarr = document.getElementById('edit-carrier');
+      selCarr.innerHTML = '<option value="">-- Sin cambios --</option>';
+      (carrData.carriers || []).forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        if (c.id === data.carrier_id) opt.selected = true;
+        selCarr.appendChild(opt);
       });
 
       subtitle.textContent = 'Editando: ' + data.name;
@@ -1865,6 +1884,7 @@
       notes:        document.getElementById('edit-notes').value.trim(),
       vat:          document.getElementById('edit-vat').value.trim(),
       pricelist_id: plId,
+      carrier_id:   document.getElementById('edit-carrier').value ? parseInt(document.getElementById('edit-carrier').value) : null,
     };
 
     fetch(API + '/clients/' + selectedClient.id, {
