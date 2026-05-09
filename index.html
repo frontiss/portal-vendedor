@@ -618,6 +618,16 @@
         <label class="edit-label">Dia de reparto</label>
         <input class="edit-input" id="edit-ruta" type="text" placeholder="Ej: Lunes">
       </div>
+      <div class="edit-field">
+        <label class="edit-label">NIF / CIF</label>
+        <input class="edit-input" id="edit-vat" type="text" placeholder="B12345678">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Lista de precios</label>
+        <select class="edit-input" id="edit-pricelist">
+          <option value="">Cargando tarifas...</option>
+        </select>
+      </div>
       <div class="edit-field full">
         <label class="edit-label">Notas internas</label>
         <textarea class="edit-input edit-textarea" id="edit-notes"></textarea>
@@ -1796,17 +1806,25 @@
     subtitle.textContent = 'Cargando datos de ' + selectedClient.name + '...';
     document.getElementById('modal-edit-client').classList.add('open');
 
-    // Limpiar campos
-    ['name','phone','mobile','email','street','zip','city','ruta','notes'].forEach(function(f){
-      var el = document.getElementById('edit-'+f);
-      if (el) el.value = '';
-    });
+    // Cargar tarifas y datos del cliente en paralelo
+    Promise.all([
+      fetch(API + '/pricelists', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
+      fetch(API + '/clients/' + selectedClient.id, { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
+    ]).then(function(results) {
+      var plData  = results[0];
+      var data    = results[1];
 
-    fetch(API + '/clients/' + selectedClient.id, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
+      // Rellenar selector de tarifas
+      var sel = document.getElementById('edit-pricelist');
+      sel.innerHTML = '<option value="">-- Sin cambios --</option>';
+      (plData.pricelists || []).forEach(function(pl) {
+        var opt = document.createElement('option');
+        opt.value = pl.id;
+        opt.textContent = pl.name;
+        if (pl.id === data.pricelist_id) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
       subtitle.textContent = 'Editando: ' + data.name;
       document.getElementById('edit-name').value   = data.name   || '';
       document.getElementById('edit-phone').value  = data.phone  || '';
@@ -1817,8 +1835,8 @@
       document.getElementById('edit-city').value   = data.city   || '';
       document.getElementById('edit-ruta').value   = data.ruta   || '';
       document.getElementById('edit-notes').value  = data.notes  || '';
-    })
-    .catch(function(){
+      document.getElementById('edit-vat').value    = data.vat    || '';
+    }).catch(function(){
       subtitle.textContent = 'Error cargando datos del cliente';
     });
   }
@@ -1832,16 +1850,21 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Guardando...';
 
+    var plSel = document.getElementById('edit-pricelist');
+    var plId  = plSel.value ? parseInt(plSel.value) : null;
+    var plName = plSel.value ? plSel.options[plSel.selectedIndex].text : selectedClient.pricelist_name;
     var payload = {
-      name:    document.getElementById('edit-name').value.trim(),
-      phone:   document.getElementById('edit-phone').value.trim(),
-      mobile:  document.getElementById('edit-mobile').value.trim(),
-      email:   document.getElementById('edit-email').value.trim(),
-      street:  document.getElementById('edit-street').value.trim(),
-      zip:     document.getElementById('edit-zip').value.trim(),
-      city:    document.getElementById('edit-city').value.trim(),
-      ruta:    document.getElementById('edit-ruta').value.trim(),
-      notes:   document.getElementById('edit-notes').value.trim(),
+      name:         document.getElementById('edit-name').value.trim(),
+      phone:        document.getElementById('edit-phone').value.trim(),
+      mobile:       document.getElementById('edit-mobile').value.trim(),
+      email:        document.getElementById('edit-email').value.trim(),
+      street:       document.getElementById('edit-street').value.trim(),
+      zip:          document.getElementById('edit-zip').value.trim(),
+      city:         document.getElementById('edit-city').value.trim(),
+      ruta:         document.getElementById('edit-ruta').value.trim(),
+      notes:        document.getElementById('edit-notes').value.trim(),
+      vat:          document.getElementById('edit-vat').value.trim(),
+      pricelist_id: plId,
     };
 
     fetch(API + '/clients/' + selectedClient.id, {
@@ -1858,14 +1881,25 @@
         return;
       }
       // Actualizar datos locales del cliente seleccionado
-      selectedClient.name    = payload.name || selectedClient.name;
-      selectedClient.address = [payload.street, payload.city].filter(Boolean).join(', ');
-      selectedClient.ruta    = payload.ruta;
+      selectedClient.name           = payload.name || selectedClient.name;
+      selectedClient.address        = [payload.street, payload.city].filter(Boolean).join(', ');
+      selectedClient.ruta           = payload.ruta;
+      selectedClient.pricelist_name = plName || selectedClient.pricelist_name;
+      if (plId) selectedClient.pricelist_id = plId;
 
       // Actualizar header
       storeBadge.textContent = selectedClient.name;
       document.getElementById('page-title').textContent = 'Pedido para ' + selectedClient.name;
       document.getElementById('modal-confirm-client').textContent = 'Para el cliente: ' + selectedClient.name;
+      var oldTB2 = document.getElementById('client-tarifa-badge');
+      if (oldTB2) oldTB2.remove();
+      if (selectedClient.pricelist_name) {
+        var tb2 = document.createElement('span');
+        tb2.id = 'client-tarifa-badge';
+        tb2.style.cssText = 'display:inline-flex;align-items:center;background:#EBF3EE;color:#1A3A2A;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
+        tb2.textContent = selectedClient.pricelist_name;
+        document.getElementById('page-title').appendChild(tb2);
+      }
 
       // Actualizar badge de dia de reparto
       var deliveryEl = document.getElementById('delivery-day');
