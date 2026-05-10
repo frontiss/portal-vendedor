@@ -1042,7 +1042,10 @@
     btnOrder.innerHTML = '<span class="spinner"></span>Enviando...';
 
     var lines = Object.keys(quantities).filter(function (k) { return quantities[k] > 0; })
-      .map(function (k) { return { product_id: +k, quantity: quantities[k] }; });
+      .map(function (k) {
+        var prod = allProducts.filter(function(p){ return p.id === +k; })[0];
+        return { product_id: +k, quantity: quantities[k], box_qty: (prod && prod.box_qty) ? prod.box_qty : 1 };
+      });
 
     var url = modifyingOrderId
       ? API + '/orders/' + modifyingOrderId + '?partner_id=' + selectedClient.id
