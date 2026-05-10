@@ -523,6 +523,10 @@
       <div class="order-summary" id="order-summary" style="display:none">
         <div class="summary-title">Resumen del pedido</div>
         <ul class="summary-list" id="summary-list"></ul>
+        <div class="order-notes-wrap">
+          <label class="order-notes-label">Notas para el almacen</label>
+          <textarea class="order-notes-input" id="order-notes" placeholder="Instrucciones especiales, observaciones..."></textarea>
+        </div>
         <div class="summary-footer">
           <div>
             <span class="total-label">Total estimado</span>
@@ -1010,6 +1014,21 @@
       if (!p) return '';
       return '<div class="confirm-item"><span>' + p.name + '</span><strong>' + q + ' caja' + (q > 1 ? 's' : '') + '</strong></div>';
     }).join('');
+    var notesVal = document.getElementById('order-notes').value.trim();
+    if (notesVal) {
+      var notesPreview = document.getElementById('confirm-notes-preview');
+      if (!notesPreview) {
+        notesPreview = document.createElement('div');
+        notesPreview.id = 'confirm-notes-preview';
+        notesPreview.style.cssText = 'background:var(--accent-light);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--accent);margin-bottom:16px;font-style:italic';
+        document.getElementById('confirm-items').after(notesPreview);
+      }
+      notesPreview.textContent = 'Nota: ' + notesVal;
+      notesPreview.style.display = 'block';
+    } else {
+      var np = document.getElementById('confirm-notes-preview');
+      if (np) np.style.display = 'none';
+    }
     document.getElementById('modal-confirm').classList.add('open');
   });
 
@@ -1033,7 +1052,7 @@
     fetch(url, {
       method: method,
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ lines: lines })
+      body: JSON.stringify({ lines: lines, notes: document.getElementById('order-notes').value.trim() || null })
     })
     .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
     .then(function (res) {
@@ -1059,6 +1078,7 @@
     quantities = {};
     modifyingOrderId = null;
     btnOrder.innerHTML = 'Confirmar pedido';
+    document.getElementById('order-notes').value = '';
     modalOk.classList.remove('open');
     appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
