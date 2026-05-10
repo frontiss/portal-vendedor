@@ -955,7 +955,13 @@
       var card = document.createElement('div');
       var boxLabel = p.box_name || 'caja';
       var boxQty = p.box_qty || 1;
-      var unitInfo = boxQty > 1 ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>' : '';
+      var taxRate = p.tax_rate || 0;
+      var unitInfo = boxQty > 1
+        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        : '';
+      var vatInfo = taxRate > 0
+        ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(p.price_with_vat || p.price) + '\u20ac c/IVA</small>'
+        : '<small style="color:var(--text-muted);font-size:11px">sin IVA</small>';
       card.className = 'product-card' + (qty > 0 ? ' selected' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
@@ -963,7 +969,11 @@
         '<div class="product-name">' + p.name + '</div>' +
         '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + '</small><br>' + unitInfo + '</div>' +
+          '<div class="product-price">' +
+            fmt(p.price) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small><br>' +
+            vatInfo + '<br>' +
+            unitInfo +
+          '</div>' +
           '<div class="qty-control">' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
@@ -1311,8 +1321,12 @@
 
       var boxLabel = p.box_name || 'caja';
       var boxQty = p.box_qty || 1;
+      var taxRate = p.tax_rate || 0;
       var unitInfo = boxQty > 1
         ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        : '';
+      var vatInfo = taxRate > 0
+        ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(p.price_with_vat || p.price) + '\u20ac c/IVA</small>'
         : '';
       var card = document.createElement('div');
       card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '');
@@ -1322,7 +1336,7 @@
         '<div class="product-name">' + p.name + '</div>' +
         '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + '</small><br>' + unitInfo + '</div>' +
+          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small><br>' + vatInfo + '<br>' + unitInfo + '</div>' +
           '<div class="qty-control">' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
