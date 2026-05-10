@@ -1054,7 +1054,12 @@
     var lines = Object.keys(quantities).filter(function (k) { return quantities[k] > 0; })
       .map(function (k) {
         var prod = allProducts.filter(function(p){ return p.id === +k; })[0];
-        return { product_id: +k, quantity: quantities[k], box_qty: (prod && prod.box_qty) ? prod.box_qty : 1 };
+        return {
+          product_id:   +k,
+          quantity:     quantities[k],
+          box_qty:      (prod && prod.box_qty)      ? prod.box_qty      : 1,
+          packaging_id: (prod && prod.packaging_id) ? prod.packaging_id : 0,
+        };
       });
 
     var url = modifyingOrderId
