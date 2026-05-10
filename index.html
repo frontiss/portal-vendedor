@@ -367,9 +367,13 @@
     <h1 class="clients-title">Tus clientes</h1>
     <p class="clients-subtitle" id="clients-subtitle">Selecciona un cliente para hacer su pedido</p>
     <div class="day-filters" id="day-filters" style="display:none"></div>
-    <div class="clients-search-wrap">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:28px;flex-wrap:wrap">
+      <div class="clients-search-wrap" style="flex:1;margin-bottom:0">
       <svg class="clients-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="client-search" class="field-input" style="padding-left:42px;border-radius:10px;border:1.5px solid var(--border);background:white" placeholder="Buscar cliente...">
+      </div>
+      <button class="btn-new-client" id="btn-new-client">+ Nuevo cliente</button>
+    </div>
     </div>
     <div class="clients-grid" id="clients-grid">
       <div class="loading-box"><div class="big-spinner"></div>Cargando clientes...</div>
@@ -587,7 +591,7 @@
     <p class="modal-subtitle" id="edit-client-subtitle"></p>
     <div class="edit-grid">
       <div class="edit-field full">
-        <label class="edit-label">Nombre</label>
+        <label class="edit-label">Nombre *</label>
         <input class="edit-input" id="edit-name" type="text">
       </div>
       <div class="edit-field">
@@ -1807,7 +1811,53 @@
 
 
   // ── EDICION DE CLIENTE ──────────────────────────────
+
+  // ── NUEVO CLIENTE ────────────────────────────────────
+  var editMode = 'edit'; // 'edit' o 'new'
+
+  document.getElementById('btn-new-client').addEventListener('click', function(){
+    editMode = 'new';
+    var subtitle = document.getElementById('edit-client-subtitle');
+    subtitle.textContent = 'Rellena los datos del nuevo cliente';
+    document.getElementById('modal-edit-client').classList.add('open');
+
+    // Limpiar todos los campos
+    ['name','phone','mobile','email','street','zip','city','ruta','notes','vat'].forEach(function(f){
+      var el = document.getElementById('edit-'+f);
+      if (el) el.value = '';
+    });
+
+    // Cargar tarifas y métodos de envío
+    Promise.all([
+      fetch(API + '/pricelists', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
+      fetch(API + '/delivery-methods', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
+    ]).then(function(results) {
+      var plData   = results[0];
+      var carrData = results[1];
+
+      var sel = document.getElementById('edit-pricelist');
+      sel.innerHTML = '<option value="">-- Sin tarifa --</option>';
+      (plData.pricelists || []).forEach(function(pl) {
+        var opt = document.createElement('option');
+        opt.value = pl.id; opt.textContent = pl.name;
+        sel.appendChild(opt);
+      });
+
+      var selCarr = document.getElementById('edit-carrier');
+      selCarr.innerHTML = '<option value="">-- Sin metodo --</option>';
+      (carrData.carriers || []).forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = c.name;
+        selCarr.appendChild(opt);
+      });
+    });
+
+    document.getElementById('btn-edit-save').textContent = 'Crear cliente';
+  });
+
   function openEditClient() {
+    editMode = 'edit';
+    document.getElementById('btn-edit-save').textContent = 'Guardar cambios';
     var subtitle = document.getElementById('edit-client-subtitle');
     subtitle.textContent = 'Cargando datos de ' + selectedClient.name + '...';
     document.getElementById('modal-edit-client').classList.add('open');
@@ -1887,8 +1937,10 @@
       carrier_id:   document.getElementById('edit-carrier').value ? parseInt(document.getElementById('edit-carrier').value) : null,
     };
 
-    fetch(API + '/clients/' + selectedClient.id, {
-      method: 'PUT',
+    var saveUrl    = editMode === 'new' ? API + '/clients' : API + '/clients/' + selectedClient.id;
+    var saveMethod = editMode === 'new' ? 'POST' : 'PUT';
+    fetch(saveUrl, {
+      method: saveMethod,
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify(payload)
     })
@@ -1943,7 +1995,20 @@
       });
 
       document.getElementById('modal-edit-client').classList.remove('open');
-      showToast('Datos del cliente actualizados correctamente');
+      if (editMode === 'new') {
+        showToast('Cliente creado correctamente con etiqueta "Por revisar"');
+        // Recargar lista de clientes
+        clientsGrid.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando clientes...</div>';
+        fetch(API + '/vendor/clients', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+          allClients = res.clients || [];
+          buildDayFilters(allClients);
+          applyFilters(allClients);
+        });
+      } else {
+        showToast('Datos del cliente actualizados correctamente');
+      }
     })
     .catch(function(){
       btn.disabled = false;
