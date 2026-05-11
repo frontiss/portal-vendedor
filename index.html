@@ -1013,8 +1013,8 @@
       var p = allProducts.filter(function (x) { return x.id == id; })[0];
       var q = quantities[id];
       if (!p) return '';
-      // Usar unit_price sin redondear * box_qty * cajas para máxima precisión
-      var unitRaw = p.unit_price || (p.price / (p.box_qty || 1));
+      // Usar unit_price_raw (sin redondear) para máxima precisión igual que Odoo
+      var unitRaw = p.unit_price_raw || p.unit_price || (p.price / (p.box_qty || 1));
       var boxQty = p.box_qty || 1;
       total += unitRaw * boxQty * q;
       var unitRawVat = unitRaw * (1 + (p.tax_rate || 0) / 100);
