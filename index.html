@@ -1048,12 +1048,18 @@
       var p = allProducts.filter(function (x) { return x.id == id; })[0];
       var q = quantities[id];
       if (!p) return '';
-      // Usar unit_price_raw (sin redondear) para máxima precisión igual que Odoo
-      var unitRaw = p.unit_price_raw || p.unit_price || (p.price / (p.box_qty || 1));
+      // Usar precio personalizado si existe, si no usar unit_price_raw
+      var custom = customPrices[+id];
       var boxQty = p.box_qty || 1;
-      total += unitRaw * boxQty * q;
-      var unitRawVat = unitRaw * (1 + (p.tax_rate || 0) / 100);
-      totalWithVat += unitRawVat * boxQty * q;
+      if (custom) {
+        total += custom.price * q;
+        totalWithVat += custom.price * (1 + (p.tax_rate || 0) / 100) * q;
+      } else {
+        var unitRaw = p.unit_price_raw || p.unit_price || (p.price / boxQty);
+        total += unitRaw * boxQty * q;
+        var unitRawVat = unitRaw * (1 + (p.tax_rate || 0) / 100);
+        totalWithVat += unitRawVat * boxQty * q;
+      }
       return '<li class="summary-item"><span class="si-name">' + p.name + '</span><span class="si-qty">' + q + ' caja' + (q > 1 ? 's' : '') + '</span></li>';
     }).join('');
     totalAmount.textContent = fmt(total) + ' \u20ac';
