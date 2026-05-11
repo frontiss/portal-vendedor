@@ -1013,8 +1013,12 @@
       var p = allProducts.filter(function (x) { return x.id == id; })[0];
       var q = quantities[id];
       if (!p) return '';
-      total += (p.price || 0) * q;
-      totalWithVat += (p.price_with_vat || p.price || 0) * q;
+      // Usar unit_price sin redondear * box_qty * cajas para máxima precisión
+      var unitRaw = p.unit_price || (p.price / (p.box_qty || 1));
+      var boxQty = p.box_qty || 1;
+      total += unitRaw * boxQty * q;
+      var unitRawVat = unitRaw * (1 + (p.tax_rate || 0) / 100);
+      totalWithVat += unitRawVat * boxQty * q;
       return '<li class="summary-item"><span class="si-name">' + p.name + '</span><span class="si-qty">' + q + ' caja' + (q > 1 ? 's' : '') + '</span></li>';
     }).join('');
     totalAmount.textContent = fmt(total) + ' \u20ac';
