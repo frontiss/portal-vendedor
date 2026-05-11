@@ -1270,8 +1270,14 @@
       var product = null;
       if (line.product_id) product = allProducts.filter(function(p){ return p.id===line.product_id; })[0];
       if (!product) product = allProducts.filter(function(p){ return p.name===line.product; })[0];
-      if (product) { quantities[product.id]=line.qty; repeatIds[product.id]=true; }
-      else notFound++;
+      if (product) {
+        // Convertir unidades de Odoo a cajas
+        var boxQty = product.box_qty || 1;
+        var cajas = boxQty > 1 ? Math.round(line.qty / boxQty) : line.qty;
+        if (cajas < 1) cajas = 1;
+        quantities[product.id] = cajas;
+        repeatIds[product.id] = true;
+      } else notFound++;
     });
 
     // Ordenar: productos del pedido anterior primero, luego el resto
