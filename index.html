@@ -2184,6 +2184,13 @@
     updateSummary();
   }
 
+  // Exponer funciones de precio al scope global (necesario para onclick en HTML dinámico)
+  window.togglePriceEditor  = togglePriceEditor;
+  window.setPriceEditorMode = setPriceEditorMode;
+  window.applyCustomPrice   = applyCustomPrice;
+  window.resetCustomPrice   = resetCustomPrice;
+  window.toggleLiqCard      = toggleLiqCard;
+
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
 }());
