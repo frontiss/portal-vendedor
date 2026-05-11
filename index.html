@@ -864,6 +864,7 @@
     // Reset estado del pedido
     facturasLoaded = false;
     selectedInvoices = {};
+    customPrices = {};
     document.getElementById('panel-facturas').style.display = 'none';
     document.getElementById('tab-facturas').classList.remove('active');
     quantities = {};
@@ -957,21 +958,25 @@
       var boxLabel = p.box_name || 'caja';
       var boxQty = p.box_qty || 1;
       var taxRate = p.tax_rate || 0;
+      var custom = customPrices[p.id];
+      var displayPrice = custom ? custom.price : p.price;
+      var displayVatPrice = custom ? round2(custom.price * (1 + taxRate/100)) : (p.price_with_vat || p.price);
+      var customBadge = custom ? '<span class="price-custom-badge">-' + custom.discount + '%</span>' : '';
       var unitInfo = boxQty > 1
-        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt((custom ? custom.price/boxQty : p.unit_price) || p.price) + '\u20ac/ud</small>'
         : '';
       var vatInfo = taxRate > 0
-        ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(p.price_with_vat || p.price) + '\u20ac c/IVA</small>'
+        ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice) + '\u20ac c/IVA</small>'
         : '<small style="color:var(--text-muted);font-size:11px">sin IVA</small>';
-      card.className = 'product-card' + (qty > 0 ? ' selected' : '');
+      card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         '<div class="product-name">' + p.name + '</div>' +
         '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' +
-            fmt(p.price) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small><br>' +
+          '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
+            fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
             vatInfo + '<br>' +
             unitInfo +
           '</div>' +
@@ -979,6 +984,17 @@
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="price-editor" id="pe-' + p.id + '">' +
+          '<div class="price-editor-tabs">' +
+            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
+            '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
+          '</div>' +
+          '<div class="price-editor-row">' +
+            '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
+            '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
+            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
           '</div>' +
         '</div>';
       grid.appendChild(card);
@@ -1066,11 +1082,14 @@
     var lines = Object.keys(quantities).filter(function (k) { return quantities[k] > 0; })
       .map(function (k) {
         var prod = allProducts.filter(function(p){ return p.id === +k; })[0];
+        var custom = customPrices[+k];
         return {
           product_id:   +k,
           quantity:     quantities[k],
           box_qty:      (prod && prod.box_qty)      ? prod.box_qty      : 1,
           packaging_id: (prod && prod.packaging_id) ? prod.packaging_id : 0,
+          discount:     custom ? custom.discount : 0,
+          custom_price: custom ? custom.price    : null,
         };
       });
 
@@ -1269,6 +1288,7 @@
 
   // ── HABITUALES ──────────────────────────────────────
   var topProductIds = {};
+  var customPrices = {};  // product_id -> {price, discount, mode}
 
   // ── REPETIR PEDIDO CON PRODUCTOS PRIMERO ─────────────
   function repeatOrder(lines) {
@@ -2076,6 +2096,74 @@
     });
   });
 
+
+
+  // ── EDITOR DE PRECIO ─────────────────────────────────
+  var priceEditorMode = {};  // product_id -> 'pct' | 'fix'
+
+  function round2(n) { return Math.round(n * 100) / 100; }
+
+  function togglePriceEditor(pid) {
+    var el = document.getElementById('pe-' + pid);
+    if (!el) return;
+    el.classList.toggle('open');
+    if (el.classList.contains('open')) {
+      var inp = document.getElementById('pei-' + pid);
+      var custom = customPrices[pid];
+      if (custom) inp.value = custom.discount;
+      else inp.value = '';
+      inp.focus();
+    }
+  }
+
+  function setPriceEditorMode(pid, mode) {
+    priceEditorMode[pid] = mode;
+    document.getElementById('pet-pct-' + pid).classList.toggle('active', mode === 'pct');
+    document.getElementById('pet-fix-' + pid).classList.toggle('active', mode === 'fix');
+    var inp = document.getElementById('pei-' + pid);
+    var p = allProducts.filter(function(x){ return x.id === pid; })[0];
+    if (!p) return;
+    if (mode === 'pct') {
+      inp.placeholder = '% descuento (0-100)';
+      inp.step = '0.1';
+    } else {
+      inp.placeholder = 'Precio caja s/IVA (max ' + fmt(p.price) + ')';
+      inp.step = '0.01';
+    }
+    inp.value = '';
+  }
+
+  function applyCustomPrice(pid) {
+    var p = allProducts.filter(function(x){ return x.id === pid; })[0];
+    if (!p) return;
+    var inp = document.getElementById('pei-' + pid);
+    var val = parseFloat(inp.value);
+    if (isNaN(val) || val < 0) { inp.focus(); return; }
+    var mode = priceEditorMode[pid] || 'pct';
+    var newPrice, discount;
+
+    if (mode === 'pct') {
+      if (val > 100) { alert('El descuento no puede ser mayor al 100%'); return; }
+      discount = val;
+      newPrice = round2(p.price * (1 - val / 100));
+    } else {
+      if (val > p.price) { alert('El precio no puede ser mayor al precio de tarifa (' + fmt(p.price) + '€)'); return; }
+      newPrice = round2(val);
+      discount = round2((1 - val / p.price) * 100);
+    }
+
+    customPrices[pid] = { price: newPrice, discount: round2(discount), mode: mode };
+    document.getElementById('pe-' + pid).classList.remove('open');
+    render(allProducts.filter(function(p2){ return quantities[p2.id] > 0 || true; }));
+    updateSummary();
+  }
+
+  function resetCustomPrice(pid) {
+    delete customPrices[pid];
+    document.getElementById('pe-' + pid).classList.remove('open');
+    render(allProducts);
+    updateSummary();
+  }
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
