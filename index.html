@@ -325,6 +325,33 @@
   .product-price-clickable:hover .price-edit-hint{opacity:1}
   .price-edit-hint{font-size:10px;color:var(--accent);opacity:0;transition:opacity .2s;display:block;margin-top:2px}
 
+
+  /* ── OFERTA LIBRE ── */
+  .oferta-libre-screen{min-height:100vh;background:var(--bg)}
+  .oferta-libre-content{max-width:900px;margin:0 auto;padding:40px 24px 60px}
+  .oferta-libre-header{margin-bottom:28px}
+  .oferta-libre-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--primary);margin-bottom:6px}
+  .oferta-libre-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
+  .oferta-search-wrap{position:relative;margin-bottom:8px}
+  .oferta-search-results{position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;z-index:100;max-height:280px;overflow-y:auto;box-shadow:var(--shadow-lg);display:none}
+  .oferta-search-results.open{display:block}
+  .oferta-result-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+  .oferta-result-item:hover{background:var(--bg)}
+  .oferta-result-item:last-child{border-bottom:none}
+  .oferta-result-name{font-size:13px;font-weight:600;color:var(--primary)}
+  .oferta-result-ref{font-size:11px;color:var(--text-muted)}
+  .oferta-result-price{font-size:13px;font-weight:700;color:var(--primary);white-space:nowrap;margin-left:12px}
+  .oferta-added-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+  .oferta-added-item{background:white;border-radius:12px;border:1.5px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:12px}
+  .oferta-added-info{flex:1}
+  .oferta-added-name{font-size:14px;font-weight:600;color:var(--primary)}
+  .oferta-added-detail{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .oferta-added-price{font-size:16px;font-weight:700;color:var(--primary);white-space:nowrap}
+  .oferta-added-vat{font-size:11px;color:var(--text-muted);white-space:nowrap}
+  .oferta-added-remove{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px;line-height:1;flex-shrink:0}
+  .oferta-added-remove:hover{color:var(--danger)}
+  .oferta-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .oferta-empty-added{text-align:center;padding:40px;color:var(--text-muted);font-style:italic;background:white;border-radius:12px;border:1.5px dashed var(--border)}
   /* ── OFERTA ── */
   .oferta-toolbar{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
   .btn-oferta-pdf{display:inline-flex;align-items:center;gap:8px;background:var(--danger);color:white;border:none;padding:11px 20px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
@@ -414,7 +441,7 @@
       <span class="header-logo-text">Comercial A. Puchol</span>
       <span class="vendor-pill" id="vendor-pill"></span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center"><button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">Liquidación</button><button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn-back" id="btn-oferta-libre-nav" style="font-size:13px">Crear oferta</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">Liquidación</button><button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button></div>
   </div>
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
@@ -437,6 +464,50 @@
 <!-- ════════════════════════════════════════════════
      PANTALLA 3: PORTAL DE PEDIDO (igual que el original)
 ════════════════════════════════════════════════ -->
+
+
+<div id="oferta-libre-screen" style="display:none" class="oferta-libre-screen">
+  <div class="clients-header">
+    <div class="clients-header-left">
+      <span class="header-logo-text">Comercial A. Puchol</span>
+      <span class="vendor-pill" id="oferta-libre-vendor-pill"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-back" id="btn-oferta-libre-back">Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-oferta-libre">Cerrar sesion</button>
+    </div>
+  </div>
+  <div class="oferta-libre-content">
+    <div class="oferta-libre-header">
+      <h1 class="oferta-libre-title">Crear oferta de precios</h1>
+      <p style="color:var(--text-muted);font-size:14px">Busca y añade los productos que quieres incluir en la oferta</p>
+    </div>
+    <div class="oferta-libre-fields">
+      <div class="edit-field">
+        <label class="edit-label">Nombre del cliente / empresa</label>
+        <input class="edit-input" id="oferta-libre-cliente" type="text" placeholder="Nombre del posible cliente...">
+      </div>
+      <div class="edit-field">
+        <label class="edit-label">Tarifa a aplicar</label>
+        <select class="edit-input" id="oferta-libre-tarifa">
+          <option value="">Cargando tarifas...</option>
+        </select>
+      </div>
+    </div>
+    <div class="oferta-search-wrap">
+      <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="field-input" id="oferta-libre-search" type="text" placeholder="Buscar producto por nombre o referencia..." style="padding-left:42px">
+      <div class="oferta-search-results" id="oferta-libre-results"></div>
+    </div>
+    <div id="oferta-libre-added" class="oferta-added-list">
+      <div class="oferta-empty-added">Busca y añade productos para la oferta</div>
+    </div>
+    <div class="oferta-actions">
+      <button class="btn-oferta-pdf" id="btn-oferta-libre-pdf" disabled>PDF / Imprimir</button>
+      <button class="btn-oferta-email" id="btn-oferta-libre-email" disabled>Enviar por email</button>
+    </div>
+  </div>
+</div>
 
 <div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
   <div class="clients-header">
@@ -638,6 +709,29 @@
 <!-- Modal: error -->
 
 
+
+<div class="modal-overlay" id="modal-oferta-libre-email">
+  <div class="modal-email">
+    <h2>Enviar oferta por email</h2>
+    <div class="field-wrap" style="margin-bottom:16px">
+      <label class="field-label">Email destinatario</label>
+      <input class="field-input" id="oferta-libre-email-input" type="email" placeholder="cliente@email.com">
+    </div>
+    <div class="field-wrap" style="margin-bottom:16px">
+      <label class="field-label">Asunto</label>
+      <input class="field-input" id="oferta-libre-email-subject" type="text" placeholder="Lista de precios...">
+    </div>
+    <div class="field-wrap" style="margin-bottom:24px">
+      <label class="field-label">Mensaje (opcional)</label>
+      <textarea class="field-input" id="oferta-libre-email-msg" style="min-height:80px;resize:vertical" placeholder="Adjunto nuestra lista de precios..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-secondary" id="btn-oferta-libre-email-cancel">Cancelar</button>
+      <button class="btn-order" id="btn-oferta-libre-email-send">Enviar email</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-oferta-email">
   <div class="modal-email">
     <h2>Enviar oferta por email</h2>
@@ -672,6 +766,29 @@
 </div>
 
 
+
+
+<div class="modal-overlay" id="modal-oferta-libre-email">
+  <div class="modal-email">
+    <h2>Enviar oferta por email</h2>
+    <div class="field-wrap" style="margin-bottom:16px">
+      <label class="field-label">Email destinatario</label>
+      <input class="field-input" id="oferta-libre-email-input" type="email" placeholder="cliente@email.com">
+    </div>
+    <div class="field-wrap" style="margin-bottom:16px">
+      <label class="field-label">Asunto</label>
+      <input class="field-input" id="oferta-libre-email-subject" type="text" placeholder="Lista de precios...">
+    </div>
+    <div class="field-wrap" style="margin-bottom:24px">
+      <label class="field-label">Mensaje (opcional)</label>
+      <textarea class="field-input" id="oferta-libre-email-msg" style="min-height:80px;resize:vertical" placeholder="Adjunto nuestra lista de precios..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-secondary" id="btn-oferta-libre-email-cancel">Cancelar</button>
+      <button class="btn-order" id="btn-oferta-libre-email-send">Enviar email</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-oferta-email">
   <div class="modal-email">
@@ -2507,8 +2624,228 @@
 
 
   // Exponer funciones de precio al scope global (necesario para onclick en HTML dinámico)
+
+  // ── OFERTA LIBRE ─────────────────────────────────────
+  var ofertaLibreItems = [];   // productos añadidos
+  var ofertaLibrePricelistId = null;
+  var ofertaLibreSearchTimer = null;
+
+  document.getElementById('btn-oferta-libre-nav').addEventListener('click', function(){
+    clientsScreen.style.display = 'none';
+    document.getElementById('oferta-libre-screen').style.display = 'block';
+    document.getElementById('oferta-libre-vendor-pill').textContent = vendorName;
+    ofertaLibreItems = [];
+    document.getElementById('oferta-libre-cliente').value = '';
+    document.getElementById('oferta-libre-search').value = '';
+    document.getElementById('oferta-libre-results').classList.remove('open');
+    renderOfertaLibreAdded();
+    // Cargar tarifas
+    fetch(API + '/pricelists', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var sel = document.getElementById('oferta-libre-tarifa');
+      sel.innerHTML = '<option value="">-- Elige una tarifa --</option>';
+      (res.pricelists || []).forEach(function(pl){
+        var opt = document.createElement('option');
+        opt.value = pl.id; opt.textContent = pl.name;
+        sel.appendChild(opt);
+      });
+    });
+  });
+
+  document.getElementById('btn-oferta-libre-back').addEventListener('click', function(){
+    document.getElementById('oferta-libre-screen').style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+  document.getElementById('btn-logout-oferta-libre').addEventListener('click', logout);
+
+  // Buscador de productos con debounce
+  document.getElementById('oferta-libre-search').addEventListener('input', function(){
+    clearTimeout(ofertaLibreSearchTimer);
+    var q = this.value.trim();
+    var plId = document.getElementById('oferta-libre-tarifa').value;
+    var results = document.getElementById('oferta-libre-results');
+    if (!plId) { alert('Primero elige una tarifa'); this.value = ''; return; }
+    if (q.length < 2) { results.classList.remove('open'); return; }
+    ofertaLibreSearchTimer = setTimeout(function(){
+      results.innerHTML = '<div class="oferta-result-item"><span class="oferta-result-name" style="color:var(--text-muted)">Buscando...</span></div>';
+      results.classList.add('open');
+      fetch(API + '/oferta/productos?q=' + encodeURIComponent(q) + '&pricelist_id=' + plId, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(function(r){ return r.json(); })
+      .then(function(res){
+        var prods = res.products || [];
+        if (!prods.length) {
+          results.innerHTML = '<div class="oferta-result-item"><span class="oferta-result-name" style="color:var(--text-muted)">Sin resultados</span></div>';
+          return;
+        }
+        results.innerHTML = '';
+        prods.forEach(function(p){
+          // No mostrar si ya está añadido
+          if (ofertaLibreItems.find(function(i){ return i.id === p.id; })) return;
+          var item = document.createElement('div');
+          item.className = 'oferta-result-item';
+          item.innerHTML =
+            '<div><div class="oferta-result-name">' + p.name + '</div>' +
+            '<div class="oferta-result-ref">' + (p.ref||'') + ' &middot; ' + (p.box_qty>1?p.box_qty+' uds/'+(p.box_name||'caja'):'Unidad') + '</div></div>' +
+            '<div class="oferta-result-price">' + fmt(p.price) + ' €</div>';
+          item.addEventListener('click', function(){
+            addOfertaLibreItem(p);
+            document.getElementById('oferta-libre-search').value = '';
+            results.classList.remove('open');
+          });
+          results.appendChild(item);
+        });
+      }).catch(function(){
+        results.innerHTML = '<div class="oferta-result-item"><span style="color:var(--danger)">Error buscando</span></div>';
+      });
+    }, 350);
+  });
+
+  // Cerrar resultados al hacer click fuera
+  document.addEventListener('click', function(e){
+    if (!e.target.closest('#oferta-libre-search') && !e.target.closest('#oferta-libre-results')) {
+      document.getElementById('oferta-libre-results').classList.remove('open');
+    }
+  });
+
+  function addOfertaLibreItem(p) {
+    if (ofertaLibreItems.find(function(i){ return i.id === p.id; })) return;
+    ofertaLibreItems.push(p);
+    renderOfertaLibreAdded();
+  }
+
+  function removeOfertaLibreItem(pid) {
+    ofertaLibreItems = ofertaLibreItems.filter(function(i){ return i.id !== pid; });
+    renderOfertaLibreAdded();
+  }
+
+  function renderOfertaLibreAdded() {
+    var container = document.getElementById('oferta-libre-added');
+    var btnPdf    = document.getElementById('btn-oferta-libre-pdf');
+    var btnEmail  = document.getElementById('btn-oferta-libre-email');
+    if (!ofertaLibreItems.length) {
+      container.innerHTML = '<div class="oferta-empty-added">Busca y añade productos para la oferta</div>';
+      btnPdf.disabled = true; btnEmail.disabled = true;
+      return;
+    }
+    btnPdf.disabled = false; btnEmail.disabled = false;
+    container.innerHTML = '';
+    ofertaLibreItems.forEach(function(p){
+      var div = document.createElement('div');
+      div.className = 'oferta-added-item';
+      div.innerHTML =
+        '<div class="oferta-added-info">' +
+          '<div class="oferta-added-name">' + p.name + '</div>' +
+          '<div class="oferta-added-detail">' + (p.ref||'') + (p.box_qty>1?' &middot; '+p.box_qty+' uds/'+(p.box_name||'caja'):'') + '</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="oferta-added-price">' + fmt(p.price) + ' €<small style="font-size:10px;font-weight:400">/' + (p.box_name||'ud') + ' s/IVA</small></div>' +
+          '<div class="oferta-added-vat">' + fmt(p.price_with_vat||p.price) + ' € c/IVA</div>' +
+        '</div>' +
+        '<button class="oferta-added-remove" onclick="removeOfertaLibreItem(' + p.id + ')" title="Eliminar">&times;</button>';
+      container.appendChild(div);
+    });
+  }
+
+  // PDF oferta libre
+  document.getElementById('btn-oferta-libre-pdf').addEventListener('click', function(){
+    if (!ofertaLibreItems.length) return;
+    var clienteNombre = document.getElementById('oferta-libre-cliente').value.trim() || 'Cliente';
+    var fecha = new Date().toLocaleDateString('es-ES');
+    var rows = ofertaLibreItems.map(function(p){
+      return '<tr>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + (p.ref||'') + '</td>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + p.name + '</td>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:center">' + (p.box_qty>1?p.box_qty+' uds/'+(p.box_name||'caja'):'Unidad') + '</td>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;font-weight:700">' + fmt(p.price) + ' €</td>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;color:#666">' + fmt(p.price_with_vat||p.price) + ' €</td>' +
+      '</tr>';
+    }).join('');
+
+    document.getElementById('oferta-print-area').innerHTML =
+      '<div style="font-family:Arial,sans-serif;padding:32px;max-width:800px;margin:0 auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3A2A;padding-bottom:16px;margin-bottom:20px">' +
+        '<div><h1 style="margin:0;font-size:22px;color:#1A3A2A">Comercial A. Puchol S.A.</h1>' +
+        '<p style="margin:4px 0 0;color:#666;font-size:13px">Oferta de precios</p></div>' +
+        '<div style="text-align:right"><p style="margin:0;font-size:13px;color:#333"><strong>' + clienteNombre + '</strong></p>' +
+        '<p style="margin:2px 0 0;font-size:12px;color:#666">Fecha: ' + fecha + '</p>' +
+        '<p style="margin:2px 0 0;font-size:12px;color:#666">Comercial: ' + vendorName + '</p></div>' +
+      '</div>' +
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr style="background:#1A3A2A">' +
+          '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">REF</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">PRODUCTO</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:center;font-size:11px">FORMATO</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO S/IVA</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO C/IVA</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+      '<div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#999">' +
+        'Precios sin IVA salvo indicación. Válidos salvo error tipográfico o agotado de existencias. ' +
+        'Generado el ' + fecha + ' por ' + vendorName + '.' +
+      '</div></div>';
+    window.print();
+  });
+
+  // Email oferta libre
+  document.getElementById('btn-oferta-libre-email').addEventListener('click', function(){
+    if (!ofertaLibreItems.length) return;
+    var clienteNombre = document.getElementById('oferta-libre-cliente').value.trim() || 'Cliente';
+    document.getElementById('oferta-libre-email-input').value = '';
+    document.getElementById('oferta-libre-email-subject').value = 'Oferta de precios - ' + clienteNombre;
+    document.getElementById('oferta-libre-email-msg').value = '';
+    document.getElementById('modal-oferta-libre-email').classList.add('open');
+  });
+
+  document.getElementById('btn-oferta-libre-email-cancel').addEventListener('click', function(){
+    document.getElementById('modal-oferta-libre-email').classList.remove('open');
+  });
+
+  document.getElementById('btn-oferta-libre-email-send').addEventListener('click', function(){
+    var email = document.getElementById('oferta-libre-email-input').value.trim();
+    if (!email || !email.includes('@')) { alert('Introduce un email válido'); return; }
+    var btn = document.getElementById('btn-oferta-libre-email-send');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Enviando...';
+
+    // Usar partner_id=0 para oferta sin cliente en Odoo
+    // Enviamos directamente con mail.mail via endpoint generico
+    var lines = ofertaLibreItems.map(function(p){
+      return {
+        product_id: p.id, name: p.name, ref: p.ref||'',
+        price: p.price, unit_price: p.unit_price||p.price,
+        box_qty: p.box_qty||1, box_name: p.box_name||'caja',
+        tax_rate: p.tax_rate||0, price_with_vat: p.price_with_vat||p.price,
+      };
+    });
+    var clienteNombre = document.getElementById('oferta-libre-cliente').value.trim() || 'Cliente';
+
+    fetch(API + '/oferta/libre/email', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body: JSON.stringify({
+        cliente_nombre: clienteNombre,
+        lines:   lines,
+        email:   email,
+        subject: document.getElementById('oferta-libre-email-subject').value.trim(),
+        message: document.getElementById('oferta-libre-email-msg').value.trim(),
+      })
+    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
+    .then(function(res){
+      btn.disabled = false; btn.innerHTML = 'Enviar email';
+      document.getElementById('modal-oferta-libre-email').classList.remove('open');
+      if (!res.ok) { alert('Error: ' + (res.data.detail||'No se pudo enviar')); return; }
+      showToast('Oferta enviada a ' + email);
+    }).catch(function(){
+      btn.disabled = false; btn.innerHTML = 'Enviar email';
+      alert('Error de conexión');
+    });
+  });
+
   window.togglePriceEditor  = togglePriceEditor;
   window.toggleOfertaProduct = toggleOfertaProduct;
+  window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
   window.applyCustomPrice   = applyCustomPrice;
   window.resetCustomPrice   = resetCustomPrice;
