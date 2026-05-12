@@ -2550,8 +2550,9 @@
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">REF</th>' +
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">PRODUCTO</th>' +
           '<th style="padding:10px 12px;color:white;text-align:center;font-size:11px">FORMATO</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO S/IVA</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO C/IVA</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/UD</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA S/IVA</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA C/IVA</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>' +
@@ -2763,7 +2764,7 @@
       '</tr>';
     }).join('');
 
-    document.getElementById('oferta-print-area').innerHTML =
+    document.getElementById('print-area').innerHTML =
       '<div style="font-family:Arial,sans-serif;padding:32px;max-width:800px;margin:0 auto">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3A2A;padding-bottom:16px;margin-bottom:20px">' +
         '<div><h1 style="margin:0;font-size:22px;color:#1A3A2A">Comercial A. Puchol S.A.</h1>' +
@@ -2777,8 +2778,9 @@
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">REF</th>' +
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">PRODUCTO</th>' +
           '<th style="padding:10px 12px;color:white;text-align:center;font-size:11px">FORMATO</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO S/IVA</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO C/IVA</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/UD</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA S/IVA</th>' +
+          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA C/IVA</th>' +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
       '</table>' +
