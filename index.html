@@ -2741,8 +2741,9 @@
           '<div class="oferta-added-detail">' + (p.ref||'') + (p.box_qty>1?' &middot; '+p.box_qty+' uds/'+(p.box_name||'caja'):'') + '</div>' +
         '</div>' +
         '<div style="text-align:right">' +
-          '<div class="oferta-added-price">' + fmt(p.price) + ' €<small style="font-size:10px;font-weight:400">/' + (p.box_name||'ud') + ' s/IVA</small></div>' +
-          '<div class="oferta-added-vat">' + fmt(p.price_with_vat||p.price) + ' € c/IVA</div>' +
+          '<div class="oferta-added-price">' + fmt(p.price) + ' \u20ac<small style="font-size:10px;font-weight:400">/' + (p.box_name||'caja') + ' s/IVA</small></div>' +
+          (p.box_qty>1?'<div class="oferta-added-vat">' + fmt(Math.round(p.price/p.box_qty*100)/100) + ' \u20ac/ud s/IVA</div>':'') +
+          '<div class="oferta-added-vat">' + fmt(p.price_with_vat||p.price) + ' \u20ac c/IVA</div>' +
         '</div>' +
         '<button class="oferta-added-remove" onclick="removeOfertaLibreItem(' + p.id + ')" title="Eliminar">&times;</button>';
       container.appendChild(div);
