@@ -2765,7 +2765,8 @@
       '</tr>';
     }).join('');
 
-    document.getElementById('print-area').innerHTML =
+    var printContent =
+      '<html><head><meta charset="UTF-8"><style>body{margin:0;padding:0;font-family:Arial,sans-serif}@media print{@page{margin:15mm}}</style></head><body>' +
       '<div style="font-family:Arial,sans-serif;padding:32px;max-width:800px;margin:0 auto">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3A2A;padding-bottom:16px;margin-bottom:20px">' +
         '<div><h1 style="margin:0;font-size:22px;color:#1A3A2A">Comercial A. Puchol S.A.</h1>' +
@@ -2788,8 +2789,12 @@
       '<div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#999">' +
         'Precios sin IVA salvo indicación. Válidos salvo error tipográfico o agotado de existencias. ' +
         'Generado el ' + fecha + ' por ' + vendorName + '.' +
-      '</div></div>';
-    window.print();
+      '</div></div></body></html>';
+    var w = window.open('', '_blank', 'width=900,height=700');
+    w.document.write(printContent);
+    w.document.close();
+    w.focus();
+    setTimeout(function(){ w.print(); }, 600);
   });
 
   // Email oferta libre
