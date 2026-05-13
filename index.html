@@ -1084,8 +1084,6 @@
     facturasLoaded = false;
     selectedInvoices = {};
     customPrices = {};
-    ofertaSelected = {};
-    ofertaLoaded = false;
     document.getElementById('panel-facturas').style.display = 'none';
     document.getElementById('tab-facturas').classList.remove('active');
     quantities = {};
@@ -1408,7 +1406,8 @@
           return '<div class="history-line">' +
             '<span class="history-line-name">' + l.product + '</span>' +
             '<span class="history-line-qty">' + l.qty + ' uds.</span>' +
-            '<span class="history-line-price">' + fmt(l.subtotal) + ' €</span>' +
+            '<span style="color:var(--text-muted);font-size:12px;margin-right:8px">' + fmt(l.subtotal) + ' € s/IVA</span>' +
+            '<span class="history-line-price">' + fmt(l.total_with_vat || l.subtotal) + ' € c/IVA</span>' +
           '</div>';
         }).join('');
         card.innerHTML =
@@ -2396,89 +2395,9 @@
 
 
   // ── OFERTA DE PRECIOS ────────────────────────────────
-  var ofertaSelected = {};  // product_id -> product obj
-  var ofertaLoaded = false;
 
 
 
-  function loadOferta() {
-    ofertaLoaded = true;
-    ofertaSelected = {};
-    var list = document.getElementById('oferta-list');
-    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando productos...</div>';
-    // Usar el catalogo ya cargado
-    if (allProducts.length) {
-      renderOfertaList();
-    } else {
-      list.innerHTML = '<div class="oferta-empty">Primero carga el cat\u00e1logo en "Hacer pedido"</div>';
-    }
-  }
-
-  function renderOfertaList() {
-    var list = document.getElementById('oferta-list');
-    list.innerHTML = '';
-    allProducts.forEach(function(p) {
-      var custom = customPrices[p.id];
-      var price = custom ? custom.price : p.price;
-      var priceVat = custom
-        ? round2(custom.price * (1 + (p.tax_rate||0)/100))
-        : (p.price_with_vat || p.price);
-      var isSelected = !!ofertaSelected[p.id];
-      var card = document.createElement('div');
-      card.className = 'oferta-product-card' + (isSelected ? ' selected' : '');
-      card.id = 'ocard-' + p.id;
-      card.innerHTML =
-        '<div class="oferta-check" id="ocheck-' + p.id + '">' + (isSelected ? '\u2713' : '') + '</div>' +
-        '<div class="oferta-info">' +
-          '<div class="oferta-ref">' + (p.ref || '') + '</div>' +
-          '<div class="oferta-name">' + p.name + '</div>' +
-          '<div class="oferta-format">' + (p.uom||'') + (p.box_qty>1?' \u00b7 '+p.box_qty+' uds/'+(p.box_name||'caja'):'') + '</div>' +
-        '</div>' +
-        '<div class="oferta-price">' +
-          '<div class="oferta-price-main">' + fmt(price) + ' \u20ac<small style="font-size:10px;font-weight:400">/' + (p.box_name||'caja') + ' s/IVA</small></div>' +
-          '<div class="oferta-price-vat">' + fmt(priceVat) + ' \u20ac c/IVA</div>' +
-        '</div>';
-      card.addEventListener('click', function(){ toggleOfertaProduct(p); });
-      list.appendChild(card);
-    });
-  }
-
-  function toggleOfertaProduct(p) {
-    var custom = customPrices[p.id];
-    var price = custom ? custom.price : p.price;
-    var priceVat = custom ? round2(custom.price*(1+(p.tax_rate||0)/100)) : (p.price_with_vat||p.price);
-    if (ofertaSelected[p.id]) {
-      delete ofertaSelected[p.id];
-    } else {
-      ofertaSelected[p.id] = Object.assign({}, p, {price: price, price_with_vat: priceVat});
-    }
-    var card = document.getElementById('ocard-' + p.id);
-    var check = document.getElementById('ocheck-' + p.id);
-    var sel = !!ofertaSelected[p.id];
-    card.classList.toggle('selected', sel);
-    check.textContent = sel ? '\u2713' : '';
-    updateOfertaSummary();
-  }
-
-  function updateOfertaSummary() {
-    var keys = Object.keys(ofertaSelected);
-    var btn = document.getElementById('btn-oferta-email');
-    var btnPdf = document.getElementById('btn-oferta-pdf');
-    var summaryEl = document.getElementById('oferta-summary');
-    var itemsEl = document.getElementById('oferta-summary-items');
-
-    if (!keys.length) {
-      btn.disabled = true;
-      summaryEl.style.display = 'none';
-      return;
-    }
-    btn.disabled = false;
-    summaryEl.style.display = 'block';
-    itemsEl.innerHTML = keys.map(function(k) {
-      var p = ofertaSelected[k];
-      return '<div class="oferta-summary-item"><span>' + p.name + '</span><strong>' + fmt(p.price) + ' \u20ac</strong></div>';
-    }).join('');
-  }
 
   // ── PDF OFERTA ───────────────────────────────────────
   document.getElementById('btn-oferta-pdf').addEventListener('click', function(){
@@ -2814,7 +2733,6 @@
   });
 
   window.togglePriceEditor  = togglePriceEditor;
-  window.toggleOfertaProduct = toggleOfertaProduct;
   window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
   window.applyCustomPrice   = applyCustomPrice;
