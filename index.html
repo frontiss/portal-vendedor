@@ -386,6 +386,34 @@
   /* Modal email oferta */
   .modal-email{background:white;border-radius:20px;padding:36px 32px;max-width:480px;width:92%;animation:fadeUp .3s ease}
   .modal-email h2{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--primary);margin-bottom:20px}
+
+  /* ── PANEL PEDIDOS HOY ── */
+  .pedidos-hoy-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.3);z-index:200;display:none;animation:fadeIn .2s ease}
+  .pedidos-hoy-overlay.open{display:block}
+  .pedidos-hoy-panel{position:fixed;top:0;right:-420px;bottom:0;width:400px;background:white;z-index:201;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15);transition:right .3s ease;border-left:1px solid var(--border)}
+  .pedidos-hoy-overlay.open .pedidos-hoy-panel{right:0}
+  .pedidos-hoy-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--primary)}
+  .pedidos-hoy-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:white}
+  .pedidos-hoy-close{background:none;border:none;color:white;font-size:22px;cursor:pointer;line-height:1;padding:4px}
+  .pedidos-hoy-close:hover{opacity:.7}
+  .pedidos-hoy-body{flex:1;overflow-y:auto;padding:16px}
+  .pedidos-hoy-item{background:var(--bg);border-radius:12px;padding:14px 16px;margin-bottom:10px;border-left:3px solid var(--accent)}
+  .pedidos-hoy-ref{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+  .pedidos-hoy-cliente{font-size:14px;font-weight:600;color:var(--primary);margin:4px 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pedidos-hoy-hora{font-size:11px;color:var(--text-muted)}
+  .pedidos-hoy-precios{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+  .pedidos-hoy-siniva{font-size:12px;color:var(--text-muted)}
+  .pedidos-hoy-coniva{font-size:15px;font-weight:700;color:var(--primary)}
+  .pedidos-hoy-empty{text-align:center;padding:40px 20px;color:var(--text-muted);font-style:italic}
+  .pedidos-hoy-footer{padding:20px 24px;border-top:2px solid var(--border);background:var(--bg)}
+  .pedidos-hoy-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .pedidos-hoy-total-label{font-size:13px;color:var(--text-muted);font-weight:600}
+  .pedidos-hoy-total-val{font-size:16px;font-weight:700;color:var(--primary)}
+  .pedidos-hoy-total-val.grande{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--accent)}
+  .pedidos-hoy-num{font-size:12px;color:var(--text-muted);text-align:center;margin-top:8px}
+  .btn-pedidos-hoy{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.4);padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+  .btn-pedidos-hoy:hover{background:rgba(255,255,255,.25)}
+  .pedidos-hoy-badge{background:var(--accent);color:white;border-radius:20px;font-size:11px;font-weight:700;padding:1px 7px;min-width:18px;text-align:center}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -441,7 +469,7 @@
       <span class="header-logo-text">Comercial A. Puchol</span>
       <span class="vendor-pill" id="vendor-pill"></span>
     </div>
-    <div style="display:flex;gap:8px;align-items:center"><button class="btn-back" id="btn-oferta-libre-nav" style="font-size:13px">Crear oferta</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">Liquidación</button><button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn-pedidos-hoy" id="btn-pedidos-hoy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Pedidos hoy <span class="pedidos-hoy-badge" id="pedidos-hoy-badge">0</span></button><button class="btn-back" id="btn-oferta-libre-nav" style="font-size:13px">Crear oferta</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:13px">Liquidación</button><button class="btn-logout" id="btn-logout-clients">Cerrar sesión</button></div>
   </div>
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
@@ -465,6 +493,34 @@
      PANTALLA 3: PORTAL DE PEDIDO (igual que el original)
 ════════════════════════════════════════════════ -->
 
+
+
+<div class="pedidos-hoy-overlay" id="pedidos-hoy-overlay">
+  <div class="pedidos-hoy-panel">
+    <div class="pedidos-hoy-header">
+      <div>
+        <div class="pedidos-hoy-title">Pedidos de hoy</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6)" id="pedidos-hoy-fecha"></div>
+      </div>
+      <button class="pedidos-hoy-close" id="btn-pedidos-hoy-close">&times;</button>
+    </div>
+    <div class="pedidos-hoy-body" id="pedidos-hoy-body">
+      <div class="pedidos-hoy-empty">Cargando...</div>
+    </div>
+    <div class="pedidos-hoy-footer">
+      <div class="pedidos-hoy-total-row">
+        <span class="pedidos-hoy-total-label">Total s/IVA</span>
+        <span class="pedidos-hoy-total-val" id="pedidos-hoy-siniva">0,00 €</span>
+      </div>
+      <div class="pedidos-hoy-total-row">
+        <span class="pedidos-hoy-total-label">Total c/IVA</span>
+        <span class="pedidos-hoy-total-val grande" id="pedidos-hoy-coniva">0,00 €</span>
+      </div>
+      <div class="pedidos-hoy-num" id="pedidos-hoy-num">0 pedidos</div>
+      <button class="btn-liq" id="btn-pedidos-hoy-refresh" style="width:100%;margin-top:12px;font-size:13px">Actualizar</button>
+    </div>
+  </div>
+</div>
 
 <div id="oferta-libre-screen" style="display:none" class="oferta-libre-screen">
   <div class="clients-header">
@@ -1009,6 +1065,7 @@
       subtitle.textContent = allClients.length + ' cliente' + (allClients.length !== 1 ? 's' : '') + ' asignado' + (allClients.length !== 1 ? 's' : '') + ' — selecciona uno para hacer su pedido';
       buildDayFilters(allClients);
       renderClients(allClients);
+      refreshPedidosHoyBadge();
     })
     .catch(function () {
       clientsGrid.innerHTML = '<div class="loading-box">Error de conexión.</div>';
@@ -1342,6 +1399,7 @@
       document.querySelectorAll('.client-card').forEach(function(cd){
         if(+cd.dataset.clientId===selectedClient.id) cd.classList.add('visited');
       });
+      refreshPedidosHoyBadge();
       modalOk.classList.add('open');
     })
     .catch(function () {
@@ -1930,6 +1988,76 @@
     '</div>';
   }
 
+
+
+  // ── PEDIDOS HOY ──────────────────────────────────────
+  var pedidosHoyData = null;
+
+  function loadPedidosHoy() {
+    var body = document.getElementById('pedidos-hoy-body');
+    body.innerHTML = '<div class="pedidos-hoy-empty">Cargando...</div>';
+    var fecha = new Date().toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
+    document.getElementById('pedidos-hoy-fecha').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+
+    fetch(API + '/pedidos/hoy', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      pedidosHoyData = res;
+      var orders = res.orders || [];
+      var badge = document.getElementById('pedidos-hoy-badge');
+      badge.textContent = orders.length;
+      document.getElementById('pedidos-hoy-siniva').textContent = fmt(res.total_sin_iva) + ' €';
+      document.getElementById('pedidos-hoy-coniva').textContent = fmt(res.total_con_iva) + ' €';
+      document.getElementById('pedidos-hoy-num').textContent = orders.length + ' pedido' + (orders.length !== 1 ? 's' : '');
+
+      if (!orders.length) {
+        body.innerHTML = '<div class="pedidos-hoy-empty">No hay pedidos confirmados hoy.</div>';
+        return;
+      }
+      body.innerHTML = '';
+      orders.forEach(function(o) {
+        var div = document.createElement('div');
+        div.className = 'pedidos-hoy-item';
+        div.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<span class="pedidos-hoy-ref">' + o.ref + '</span>' +
+            '<span class="pedidos-hoy-hora">' + o.hora + '</span>' +
+          '</div>' +
+          '<div class="pedidos-hoy-cliente">' + o.cliente + '</div>' +
+          '<div class="pedidos-hoy-precios">' +
+            '<span class="pedidos-hoy-siniva">' + fmt(o.sin_iva) + ' € s/IVA</span>' +
+            '<span class="pedidos-hoy-coniva">' + fmt(o.con_iva) + ' €</span>' +
+          '</div>';
+        body.appendChild(div);
+      });
+    }).catch(function(){
+      body.innerHTML = '<div class="pedidos-hoy-empty">Error cargando pedidos.</div>';
+    });
+  }
+
+  document.getElementById('btn-pedidos-hoy').addEventListener('click', function(){
+    document.getElementById('pedidos-hoy-overlay').classList.add('open');
+    loadPedidosHoy();
+  });
+
+  document.getElementById('btn-pedidos-hoy-close').addEventListener('click', function(){
+    document.getElementById('pedidos-hoy-overlay').classList.remove('open');
+  });
+
+  document.getElementById('pedidos-hoy-overlay').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  document.getElementById('btn-pedidos-hoy-refresh').addEventListener('click', loadPedidosHoy);
+
+  // Actualizar badge automáticamente al confirmar un pedido
+  function refreshPedidosHoyBadge() {
+    fetch(API + '/pedidos/hoy', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      document.getElementById('pedidos-hoy-badge').textContent = res.num_pedidos;
+    }).catch(function(){});
+  }
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
