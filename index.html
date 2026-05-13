@@ -1538,6 +1538,11 @@
         if (cajas < 1) cajas = 1;
         quantities[product.id] = cajas;
         repeatIds[product.id] = true;
+        // Arrastrar descuento si existe
+        if (line.discount && line.discount > 0) {
+          var newPrice = Math.round(product.price * (1 - line.discount / 100) * 100) / 100;
+          customPrices[product.id] = { price: newPrice, discount: line.discount, mode: 'pct' };
+        }
       } else notFound++;
     });
 
