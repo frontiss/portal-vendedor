@@ -431,6 +431,35 @@
   .modal-detalle-footer{padding:16px 28px;border-top:2px solid var(--border);background:var(--bg);display:flex;justify-content:space-between;align-items:center}
   .modal-detalle-totales{font-size:13px;color:var(--text-muted)}
   .modal-detalle-gran-total{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--accent);font-weight:700}
+
+  /* ── RESUMEN CARRITO ── */
+  .cart-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;transition:transform .3s ease}
+  .cart-tab{background:var(--primary);color:white;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
+  .cart-tab:hover{background:#24503A}
+  .cart-tab-left{display:flex;align-items:center;gap:12px}
+  .cart-tab-icon{font-size:18px}
+  .cart-tab-label{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600}
+  .cart-tab-count{background:var(--accent);color:white;border-radius:20px;font-size:12px;font-weight:700;padding:2px 10px;min-width:24px;text-align:center}
+  .cart-tab-total{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700}
+  .cart-tab-chevron{font-size:18px;transition:transform .3s ease;opacity:.7}
+  .cart-bar.open .cart-tab-chevron{transform:rotate(180deg)}
+  .cart-panel{background:white;border-top:2px solid var(--border);max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .cart-bar.open .cart-panel{max-height:70vh;overflow-y:auto}
+  .cart-panel-inner{padding:16px 24px 24px}
+  .cart-panel-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+  .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+  .cart-item:last-child{border-bottom:none}
+  .cart-item-name{font-size:13px;font-weight:600;color:var(--primary);flex:1}
+  .cart-item-qty{font-size:12px;color:var(--text-muted);margin:2px 0}
+  .cart-item-price{text-align:right;flex-shrink:0;margin-left:12px}
+  .cart-item-siniva{font-size:11px;color:var(--text-muted)}
+  .cart-item-total{font-size:14px;font-weight:700;color:var(--primary)}
+  .cart-notes-wrap{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+  .cart-footer{padding:16px 24px;border-top:2px solid var(--border);background:var(--bg);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .cart-footer-totals{font-size:13px;color:var(--text-muted)}
+  .cart-footer-coniva{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--primary);font-weight:700}
+  /* Espacio para el cart-bar fijo */
+  .main-content{padding-bottom:80px}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -729,22 +758,43 @@
         </div>
       </div>
       <div id="products-area"><div class="loading-box"><div class="big-spinner"></div>Cargando productos...</div></div>
-      <div class="order-summary" id="order-summary" style="display:none">
-        <div class="summary-title">Resumen del pedido</div>
-        <ul class="summary-list" id="summary-list"></ul>
-        <div style="margin-bottom:20px;border-top:1px solid var(--border);padding-top:16px">
-          <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Notas para el almac&eacute;n</label>
-          <textarea id="order-notes" placeholder="Instrucciones especiales, observaciones..." style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:var(--bg);outline:none;resize:vertical;min-height:72px;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)'"></textarea>
-        </div>
-        <div class="summary-footer">
-          <div>
-            <span class="total-label">Total estimado s/IVA</span>
-            <span class="total-amount" id="total-amount">0,00 €</span>
-            <span id="total-with-vat" style="display:block;font-size:12px;color:var(--text-muted);margin-top:2px"></span>
-          </div>
-          <button class="btn-order" id="btn-order" disabled>Confirmar pedido</button>
-        </div>
+      <!-- Espacio para el carrito fijo -->
+      <div style="height:80px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Cart bar fijo -->
+<div class="cart-bar" id="cart-bar" style="display:none">
+  <div class="cart-tab" id="cart-tab">
+    <div class="cart-tab-left">
+      <span class="cart-tab-label">Resumen del pedido</span>
+      <span class="cart-tab-count" id="cart-count">0</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <span class="cart-tab-total" id="total-amount">0,00 &euro; s/IVA</span>
+      <span class="cart-tab-chevron">&#x25b2;</span>
+    </div>
+  </div>
+  <div class="cart-panel" id="cart-panel">
+    <div class="cart-panel-inner">
+      <div class="cart-panel-title">Productos seleccionados</div>
+      <ul class="summary-list" id="summary-list" style="list-style:none;padding:0;margin:0"></ul>
+      <div class="cart-notes-wrap">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Notas para el almac&eacute;n</label>
+        <textarea id="order-notes" placeholder="Instrucciones especiales, observaciones..." style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:var(--bg);outline:none;resize:vertical;min-height:72px;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)'"></textarea>
       </div>
+    </div>
+    <div class="cart-footer">
+      <div>
+        <div class="cart-footer-totals">s/IVA: <strong id="cart-siniva">0,00 &euro;</strong></div>
+        <div class="cart-footer-coniva" id="total-with-vat"></div>
+      </div>
+      <button class="btn-order" id="btn-order" disabled>Confirmar pedido</button>
+    </div>
+  </div>
+</div>
+<div style="display:none" id="order-summary">
     </div>
   </div>
 </div>
@@ -1042,7 +1092,7 @@
   var productsArea   = document.getElementById('products-area');
   var searchBar      = document.getElementById('search-bar');
   var searchField    = document.getElementById('search-field');
-  var summaryEl      = document.getElementById('order-summary');
+  var summaryEl      = document.getElementById('cart-bar');
   var summaryList    = document.getElementById('summary-list');
   var totalAmount    = document.getElementById('total-amount');
   var btnOrder       = document.getElementById('btn-order');
@@ -1233,6 +1283,8 @@
   // ── Botón "← Mis clientes" ──
   document.getElementById('btn-back-clients').addEventListener('click', function () {
     appScreen.style.display = 'none';
+    document.getElementById('cart-bar').style.display = 'none';
+    document.getElementById('cart-bar').classList.remove('open');
     clientsScreen.style.display = 'block';
     applyFilters(allClients);
   });
@@ -1278,6 +1330,7 @@
       document.getElementById('tabs').style.display = 'flex';
       render(allProducts);
       updateSummary();
+      document.getElementById('cart-bar').style.display = 'block';
     })
     .catch(function () {
       productsArea.innerHTML = '<div class="loading-box">Error de conexión.</div>';
@@ -1363,11 +1416,15 @@
 
   function updateSummary() {
     var keys = Object.keys(quantities).filter(function (k) { return quantities[k] > 0; });
+    var cartCount = document.getElementById('cart-count');
+    if (cartCount) cartCount.textContent = keys.length;
     if (!keys.length) {
       summaryList.innerHTML = '<li class="summary-empty">A\u00FAn no has a\u00F1adido productos</li>';
-      totalAmount.textContent = '0,00 \u20ac';
+      totalAmount.textContent = '0,00 \u20ac s/IVA';
       var vatEl = document.getElementById('total-with-vat');
       if (vatEl) vatEl.textContent = '';
+      var sinivaEl = document.getElementById('cart-siniva');
+      if (sinivaEl) sinivaEl.textContent = '0,00 \u20ac';
       btnOrder.disabled = true; return;
     }
     var total = 0;
@@ -1390,7 +1447,9 @@
       }
       return '<li class="summary-item"><span class="si-name">' + p.name + '</span><span class="si-qty">' + q + ' caja' + (q > 1 ? 's' : '') + '</span></li>';
     }).join('');
-    totalAmount.textContent = fmt(total) + ' \u20ac';
+    totalAmount.textContent = fmt(total) + ' \u20ac s/IVA';
+    var sinivaEl2 = document.getElementById('cart-siniva');
+    if (sinivaEl2) sinivaEl2.textContent = fmt(total) + ' \u20ac';
     var vatEl = document.getElementById('total-with-vat');
     if (vatEl) vatEl.textContent = fmt(totalWithVat) + ' \u20ac c/IVA';
     btnOrder.disabled = false;
@@ -2217,6 +2276,12 @@
       body.innerHTML = '<div class="history-empty">Error cargando el detalle.</div>';
     });
   }
+
+
+  // Toggle carrito
+  document.getElementById('cart-tab').addEventListener('click', function(){
+    document.getElementById('cart-bar').classList.toggle('open');
+  });
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
