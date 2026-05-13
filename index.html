@@ -1314,8 +1314,9 @@
           quantity:     quantities[k],
           box_qty:      (prod && prod.box_qty)      ? prod.box_qty      : 1,
           packaging_id: (prod && prod.packaging_id) ? prod.packaging_id : 0,
-          discount:     custom ? custom.discount : 0,
-          custom_price: custom ? custom.price    : null,
+          // Si precio libre: enviar solo custom_price. Si descuento %: enviar solo discount
+          discount:     (custom && custom.mode === 'pct') ? custom.discount : 0,
+          custom_price: (custom && custom.mode === 'fix') ? custom.price    : null,
         };
       });
 
