@@ -1418,7 +1418,8 @@
             '</div>' +
             '<div class="history-right">' +
               '<span class="state-badge ' + stateClass + '">' + order.state + '</span>' +
-              '<span class="history-total">' + fmt(order.total) + ' \u20ac</span>' +
+              (order.amount_untaxed ? '<span style="font-size:11px;color:var(--text-muted);margin-right:6px">' + fmt(order.amount_untaxed) + ' \u20ac s/IVA</span>' : '') +
+              '<span class="history-total">' + fmt(order.total) + ' \u20ac c/IVA</span>' +
               '<button class="btn-repeat">Repetir</button>' +
               '<span class="history-chevron">\u25be</span>' +
             '</div>' +
@@ -2398,112 +2399,6 @@
 
 
 
-
-  // ── PDF OFERTA ───────────────────────────────────────
-  document.getElementById('btn-oferta-pdf').addEventListener('click', function(){
-    var keys = Object.keys(ofertaSelected);
-    if (!keys.length) { alert('Selecciona al menos un producto'); return; }
-    var rows = keys.map(function(k){
-      var p = ofertaSelected[k];
-      return '<tr>' +
-        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + (p.ref||'') + '</td>' +
-        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + p.name + '</td>' +
-        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:center">' + (p.box_qty>1?p.box_qty+' uds/'+(p.box_name||'caja'):'Unidad') + '</td>' +
-        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;font-weight:700">' + fmt(p.price) + ' \u20ac</td>' +
-        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;color:#666">' + fmt(p.price_with_vat||p.price) + ' \u20ac</td>' +
-      '</tr>';
-    }).join('');
-
-    var fecha = new Date().toLocaleDateString('es-ES');
-    var printArea = document.getElementById('oferta-print-area');
-    printArea.innerHTML = '<div style="font-family:Arial,sans-serif;padding:32px;max-width:800px;margin:0 auto">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3A2A;padding-bottom:16px;margin-bottom:20px">' +
-        '<div><h1 style="margin:0;font-size:22px;color:#1A3A2A">Comercial A. Puchol S.A.</h1>' +
-        '<p style="margin:4px 0 0;color:#666;font-size:13px">Lista de precios</p></div>' +
-        '<div style="text-align:right"><p style="margin:0;font-size:13px;color:#333"><strong>' + selectedClient.name + '</strong></p>' +
-        '<p style="margin:2px 0 0;font-size:12px;color:#666">Fecha: ' + fecha + '</p>' +
-        '<p style="margin:2px 0 0;font-size:12px;color:#666">Comercial: ' + vendorName + '</p></div>' +
-      '</div>' +
-      '<table style="width:100%;border-collapse:collapse">' +
-        '<thead><tr style="background:#1A3A2A">' +
-          '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">REF</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">PRODUCTO</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:center;font-size:11px">FORMATO</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/UD</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA S/IVA</th>' +
-          '<th style="padding:10px 12px;color:white;text-align:right;font-size:11px">PRECIO/CAJA C/IVA</th>' +
-        '</tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-      '</table>' +
-      '<div style="margin-top:20px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#999">' +
-        'Precios sin IVA salvo indicaci\u00f3n. V\u00e1lidos salvo error tipogr\u00e1fico o agotado de existencias. ' +
-        'Generado el ' + fecha + ' por ' + vendorName + '.' +
-      '</div></div>';
-    window.print();
-  });
-
-  // ── EMAIL OFERTA ─────────────────────────────────────
-  document.getElementById('btn-oferta-email').addEventListener('click', function(){
-    var keys = Object.keys(ofertaSelected);
-    if (!keys.length) return;
-    // Prellenar email del cliente
-    document.getElementById('oferta-email-input').value = selectedClient.email || '';
-    document.getElementById('oferta-email-subject').value = 'Lista de precios - ' + selectedClient.name;
-    document.getElementById('oferta-email-message').value = '';
-    document.getElementById('modal-oferta-email').classList.add('open');
-  });
-
-  document.getElementById('btn-oferta-email-cancel').addEventListener('click', function(){
-    document.getElementById('modal-oferta-email').classList.remove('open');
-  });
-
-  document.getElementById('btn-oferta-email-send').addEventListener('click', function(){
-    var email = document.getElementById('oferta-email-input').value.trim();
-    if (!email || !email.includes('@')) { alert('Introduce un email v\u00e1lido'); return; }
-    var btn = document.getElementById('btn-oferta-email-send');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>Enviando...';
-
-    var lines = Object.keys(ofertaSelected).map(function(k){
-      var p = ofertaSelected[k];
-      return {
-        product_id:     p.id,
-        name:           p.name,
-        ref:            p.ref || '',
-        price:          p.price,
-        unit_price:     p.unit_price || p.price,
-        box_qty:        p.box_qty || 1,
-        box_name:       p.box_name || 'caja',
-        tax_rate:       p.tax_rate || 0,
-        price_with_vat: p.price_with_vat || p.price,
-      };
-    });
-
-    fetch(API + '/oferta/email?partner_id=' + selectedClient.id, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body: JSON.stringify({
-        lines:   lines,
-        email:   email,
-        subject: document.getElementById('oferta-email-subject').value.trim(),
-        message: document.getElementById('oferta-email-message').value.trim(),
-      })
-    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
-    .then(function(res){
-      btn.disabled = false;
-      btn.innerHTML = 'Enviar email';
-      document.getElementById('modal-oferta-email').classList.remove('open');
-      if (!res.ok) { alert('Error: ' + (res.data.detail||'No se pudo enviar')); return; }
-      showToast('Oferta enviada a ' + email);
-    }).catch(function(){
-      btn.disabled = false;
-      btn.innerHTML = 'Enviar email';
-      alert('Error de conexi\u00f3n al enviar el email');
-    });
-  });
-
-
-  // Exponer funciones de precio al scope global (necesario para onclick en HTML dinámico)
 
   // ── OFERTA LIBRE ─────────────────────────────────────
   var ofertaLibreItems = [];   // productos añadidos
