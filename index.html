@@ -504,10 +504,16 @@
   <div class="pedidos-hoy-panel">
     <div class="pedidos-hoy-header">
       <div>
-        <div class="pedidos-hoy-title">Pedidos de hoy</div>
+        <div class="pedidos-hoy-title">Mis pedidos</div>
         <div style="font-size:12px;color:rgba(255,255,255,.6)" id="pedidos-hoy-fecha"></div>
       </div>
       <button class="pedidos-hoy-close" id="btn-pedidos-hoy-close">&times;</button>
+    </div>
+    <div style="padding:12px 16px;background:#f5f2ec;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="date" id="pedidos-desde" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;flex:1;min-width:0">
+      <span style="font-size:12px;color:var(--text-muted)">hasta</span>
+      <input type="date" id="pedidos-hasta" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;flex:1;min-width:0">
+      <button id="btn-pedidos-filtrar" style="background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Ver</button>
     </div>
     <div class="pedidos-hoy-body" id="pedidos-hoy-body">
       <div class="pedidos-hoy-empty">Cargando...</div>
@@ -1998,34 +2004,63 @@
   // ── PEDIDOS HOY ──────────────────────────────────────
   var pedidosHoyData = null;
 
-  function loadPedidosHoy() {
+  function loadPedidosHoy(desde, hasta) {
+    var hoy = new Date().toISOString().split('T')[0];
+    desde = desde || hoy;
+    hasta = hasta || hoy;
+
+    // Actualizar inputs
+    document.getElementById('pedidos-desde').value = desde;
+    document.getElementById('pedidos-hasta').value = hasta;
+
     var body = document.getElementById('pedidos-hoy-body');
     body.innerHTML = '<div class="pedidos-hoy-empty">Cargando...</div>';
-    var fecha = new Date().toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'});
-    document.getElementById('pedidos-hoy-fecha').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
 
-    fetch(API + '/pedidos/hoy', { headers: { 'Authorization': 'Bearer ' + token } })
+    // Mostrar rango en el header
+    var d1 = new Date(desde + 'T00:00:00');
+    var d2 = new Date(hasta + 'T00:00:00');
+    var opts = {day:'numeric', month:'short'};
+    var label = desde === hasta
+      ? d1.toLocaleDateString('es-ES', {weekday:'long', day:'numeric', month:'long'})
+      : d1.toLocaleDateString('es-ES', opts) + ' — ' + d2.toLocaleDateString('es-ES', opts);
+    document.getElementById('pedidos-hoy-fecha').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+    fetch(API + '/pedidos/hoy?fecha_desde=' + desde + '&fecha_hasta=' + hasta, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
     .then(function(r){ return r.json(); })
     .then(function(res){
       pedidosHoyData = res;
-      var orders = res.orders || [];
-      var badge = document.getElementById('pedidos-hoy-badge');
-      badge.textContent = orders.length;
       document.getElementById('pedidos-hoy-siniva').textContent = fmt(res.total_sin_iva) + ' €';
       document.getElementById('pedidos-hoy-coniva').textContent = fmt(res.total_con_iva) + ' €';
-      document.getElementById('pedidos-hoy-num').textContent = orders.length + ' pedido' + (orders.length !== 1 ? 's' : '');
+      document.getElementById('pedidos-hoy-num').textContent = res.num_pedidos + ' pedido' + (res.num_pedidos !== 1 ? 's' : '');
 
-      if (!orders.length) {
-        body.innerHTML = '<div class="pedidos-hoy-empty">No hay pedidos confirmados hoy.</div>';
+      if (res.solo_resumen) {
+        body.innerHTML =
+          '<div style="padding:24px;text-align:center">' +
+            '<div style="font-size:13px;color:var(--text-muted);margin-bottom:16px">Rango superior a 3 días — mostrando solo resumen</div>' +
+            '<div style="background:var(--bg);border-radius:12px;padding:20px">' +
+              '<div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Pedidos realizados</div>' +
+              '<div style="font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;color:var(--primary)">' + res.num_pedidos + '</div>' +
+              '<div style="font-size:12px;color:var(--text-muted);margin-top:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Importe s/IVA</div>' +
+              '<div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--accent)">' + fmt(res.total_sin_iva) + ' €</div>' +
+            '</div>' +
+          '</div>';
+        return;
+      }
+
+      if (!res.num_pedidos) {
+        body.innerHTML = '<div class="pedidos-hoy-empty">No hay pedidos en este período.</div>';
         return;
       }
       body.innerHTML = '';
-      orders.forEach(function(o) {
+      res.orders.forEach(function(o) {
         var div = document.createElement('div');
         div.className = 'pedidos-hoy-item';
+        var fechaLabel = o.fecha && o.fecha !== desde ? '<span style="font-size:10px;color:var(--text-muted);margin-left:6px">' + new Date(o.fecha+'T00:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + '</span>' : '';
         div.innerHTML =
           '<div style="display:flex;justify-content:space-between;align-items:center">' +
-            '<span class="pedidos-hoy-ref">' + o.ref + '</span>' +
+            '<span class="pedidos-hoy-ref">' + o.ref + fechaLabel + '</span>' +
             '<span class="pedidos-hoy-hora">' + o.hora + '</span>' +
           '</div>' +
           '<div class="pedidos-hoy-cliente">' + o.cliente + '</div>' +
@@ -2042,7 +2077,8 @@
 
   document.getElementById('btn-pedidos-hoy').addEventListener('click', function(){
     document.getElementById('pedidos-hoy-overlay').classList.add('open');
-    loadPedidosHoy();
+    var hoy = new Date().toISOString().split('T')[0];
+    loadPedidosHoy(hoy, hoy);
   });
 
   document.getElementById('btn-pedidos-hoy-close').addEventListener('click', function(){
@@ -2053,11 +2089,25 @@
     if (e.target === this) this.classList.remove('open');
   });
 
-  document.getElementById('btn-pedidos-hoy-refresh').addEventListener('click', loadPedidosHoy);
+  document.getElementById('btn-pedidos-hoy-refresh').addEventListener('click', function(){
+    var hoy = new Date().toISOString().split('T')[0];
+    loadPedidosHoy(hoy, hoy);
+  });
+
+  document.getElementById('btn-pedidos-filtrar').addEventListener('click', function(){
+    var desde = document.getElementById('pedidos-desde').value;
+    var hasta = document.getElementById('pedidos-hasta').value;
+    if (!desde || !hasta) { alert('Selecciona un rango de fechas'); return; }
+    if (desde > hasta) { alert('La fecha inicial no puede ser posterior a la final'); return; }
+    loadPedidosHoy(desde, hasta);
+  });
 
   // Actualizar badge automáticamente al confirmar un pedido
   function refreshPedidosHoyBadge() {
-    fetch(API + '/pedidos/hoy', { headers: { 'Authorization': 'Bearer ' + token } })
+    var hoy = new Date().toISOString().split('T')[0];
+    fetch(API + '/pedidos/hoy?fecha_desde=' + hoy + '&fecha_hasta=' + hoy, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
     .then(function(r){ return r.json(); })
     .then(function(res){
       document.getElementById('pedidos-hoy-badge').textContent = res.num_pedidos;
