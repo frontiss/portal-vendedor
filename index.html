@@ -1538,10 +1538,21 @@
         if (cajas < 1) cajas = 1;
         quantities[product.id] = cajas;
         repeatIds[product.id] = true;
-        // Arrastrar descuento si existe
+        // Arrastrar descuento o precio manual si existe
         if (line.discount && line.discount > 0) {
           var newPrice = Math.round(product.price * (1 - line.discount / 100) * 100) / 100;
           customPrices[product.id] = { price: newPrice, discount: line.discount, mode: 'pct' };
+        } else if (line.price && line.price > 0) {
+          // Precio unitario del pedido anterior (por unidad, convertir a caja)
+          var prevBoxPrice = Math.round(line.price * (product.box_qty || 1) * 100) / 100;
+          // Solo aplicar si difiere del precio actual de tarifa
+          var diff = Math.abs(prevBoxPrice - product.price);
+          if (diff > 0.01) {
+            var pct = Math.round((1 - prevBoxPrice / product.price) * 10000) / 100;
+            if (pct > 0 && pct <= 100) {
+              customPrices[product.id] = { price: prevBoxPrice, discount: pct, mode: 'fix' };
+            }
+          }
         }
       } else notFound++;
     });
@@ -1605,19 +1616,41 @@
       var vatInfo = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(p.price_with_vat || p.price) + '\u20ac c/IVA</small>'
         : '';
+      var custom2 = customPrices[p.id];
+      var displayPrice2 = custom2 ? custom2.price : p.price;
+      var displayVatPrice2 = custom2 ? Math.round(custom2.price*(1+(taxRate/100))*100)/100 : (p.price_with_vat||p.price);
+      var customBadge2 = custom2 ? '<span class="price-custom-badge">-' + custom2.discount + '%</span>' : '';
+      var vatInfo2 = taxRate > 0
+        ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice2) + '\u20ac c/IVA</small>'
+        : '';
       var card = document.createElement('div');
-      card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '');
+      card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         '<div class="product-name">' + p.name + '</div>' +
         '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + '</div>' +
         '<div class="product-footer">' +
-          '<div class="product-price">' + fmt(p.price) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small><br>' + vatInfo + '<br>' + unitInfo + '</div>' +
+          '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
+            fmt(displayPrice2) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge2 + '<br>' +
+            vatInfo2 + '<br>' + unitInfo +
+            '<span class="price-edit-hint">\u270f Modificar precio</span>' +
+          '</div>' +
           '<div class="qty-control">' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="price-editor" id="pe-' + p.id + '">' +
+          '<div class="price-editor-tabs">' +
+            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
+            '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
+          '</div>' +
+          '<div class="price-editor-row">' +
+            '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
+            '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
+            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
           '</div>' +
         '</div>';
       grid.appendChild(card);
