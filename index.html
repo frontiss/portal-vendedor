@@ -1543,6 +1543,8 @@
     btnOrder.innerHTML = 'Confirmar pedido';
     document.getElementById('order-notes').value = '';
     modalOk.classList.remove('open');
+    document.getElementById('cart-bar').style.display = 'none';
+    document.getElementById('cart-bar').classList.remove('open');
     appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
     applyFilters(allClients);
