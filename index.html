@@ -414,6 +414,23 @@
   .btn-pedidos-hoy{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.4);padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
   .btn-pedidos-hoy:hover{background:rgba(255,255,255,.25)}
   .pedidos-hoy-badge{background:var(--accent);color:white;border-radius:20px;font-size:11px;font-weight:700;padding:1px 7px;min-width:18px;text-align:center}
+
+  /* Modal detalle pedido */
+  .modal-detalle{background:white;border-radius:20px;padding:0;max-width:560px;width:94%;max-height:85vh;display:flex;flex-direction:column;animation:fadeUp .3s ease;overflow:hidden}
+  .modal-detalle-header{padding:24px 28px;background:var(--primary);color:white}
+  .modal-detalle-ref{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700}
+  .modal-detalle-cliente{font-size:13px;opacity:.8;margin-top:2px}
+  .modal-detalle-body{flex:1;overflow-y:auto;padding:20px 28px}
+  .modal-detalle-line{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);gap:12px}
+  .modal-detalle-line:last-child{border-bottom:none}
+  .modal-detalle-name{font-size:13px;font-weight:600;color:var(--primary);flex:1}
+  .modal-detalle-qty{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .modal-detalle-price{text-align:right;flex-shrink:0}
+  .modal-detalle-unit{font-size:11px;color:var(--text-muted)}
+  .modal-detalle-total{font-size:14px;font-weight:700;color:var(--primary)}
+  .modal-detalle-footer{padding:16px 28px;border-top:2px solid var(--border);background:var(--bg);display:flex;justify-content:space-between;align-items:center}
+  .modal-detalle-totales{font-size:13px;color:var(--text-muted)}
+  .modal-detalle-gran-total{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--accent);font-weight:700}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -806,6 +823,27 @@
 </div>
 <div id="oferta-print-area"></div>
 
+
+<div class="modal-overlay" id="modal-detalle-pedido">
+  <div class="modal-detalle">
+    <div class="modal-detalle-header">
+      <div class="modal-detalle-ref" id="modal-detalle-ref">-</div>
+      <div class="modal-detalle-cliente" id="modal-detalle-cliente"></div>
+      <div style="font-size:11px;opacity:.6;margin-top:4px" id="modal-detalle-fecha"></div>
+    </div>
+    <div class="modal-detalle-body" id="modal-detalle-body">
+      <div class="loading-box"><div class="big-spinner"></div>Cargando...</div>
+    </div>
+    <div class="modal-detalle-footer">
+      <div>
+        <div class="modal-detalle-totales">Total s/IVA: <strong id="modal-detalle-siniva">-</strong></div>
+        <div class="modal-detalle-gran-total" id="modal-detalle-coniva">-</div>
+      </div>
+      <button class="btn-secondary" onclick="document.getElementById('modal-detalle-pedido').classList.remove('open')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-cobro-ok">
   <div class="modal">
     <div class="modal-icon">💶</div>
@@ -863,6 +901,27 @@
   </div>
 </div>
 <div id="oferta-print-area"></div>
+
+
+<div class="modal-overlay" id="modal-detalle-pedido">
+  <div class="modal-detalle">
+    <div class="modal-detalle-header">
+      <div class="modal-detalle-ref" id="modal-detalle-ref">-</div>
+      <div class="modal-detalle-cliente" id="modal-detalle-cliente"></div>
+      <div style="font-size:11px;opacity:.6;margin-top:4px" id="modal-detalle-fecha"></div>
+    </div>
+    <div class="modal-detalle-body" id="modal-detalle-body">
+      <div class="loading-box"><div class="big-spinner"></div>Cargando...</div>
+    </div>
+    <div class="modal-detalle-footer">
+      <div>
+        <div class="modal-detalle-totales">Total s/IVA: <strong id="modal-detalle-siniva">-</strong></div>
+        <div class="modal-detalle-gran-total" id="modal-detalle-coniva">-</div>
+      </div>
+      <button class="btn-secondary" onclick="document.getElementById('modal-detalle-pedido').classList.remove('open')">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-cobro-ok">
   <div class="modal">
@@ -2057,6 +2116,8 @@
       res.orders.forEach(function(o) {
         var div = document.createElement('div');
         div.className = 'pedidos-hoy-item';
+        div.style.cursor = 'pointer';
+        div.title = 'Ver detalle del pedido';
         var fechaLabel = o.fecha && o.fecha !== desde ? '<span style="font-size:10px;color:var(--text-muted);margin-left:6px">' + new Date(o.fecha+'T00:00:00').toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + '</span>' : '';
         div.innerHTML =
           '<div style="display:flex;justify-content:space-between;align-items:center">' +
@@ -2068,6 +2129,7 @@
             '<span class="pedidos-hoy-siniva">' + fmt(o.sin_iva) + ' € s/IVA</span>' +
             '<span class="pedidos-hoy-coniva">' + fmt(o.con_iva) + ' €</span>' +
           '</div>';
+        (function(order){ div.addEventListener('click', function(){ abrirDetallePedido(order); }); })(o);
         body.appendChild(div);
       });
     }).catch(function(){
@@ -2112,6 +2174,48 @@
     .then(function(res){
       document.getElementById('pedidos-hoy-badge').textContent = res.num_pedidos;
     }).catch(function(){});
+  }
+
+
+  function abrirDetallePedido(order) {
+    var modal = document.getElementById('modal-detalle-pedido');
+    var body = document.getElementById('modal-detalle-body');
+    document.getElementById('modal-detalle-ref').textContent = order.ref;
+    document.getElementById('modal-detalle-cliente').textContent = order.cliente;
+    document.getElementById('modal-detalle-fecha').textContent = order.fecha || order.hora || '';
+    document.getElementById('modal-detalle-siniva').textContent = fmt(order.sin_iva) + ' €';
+    document.getElementById('modal-detalle-coniva').textContent = fmt(order.con_iva) + ' € c/IVA';
+    body.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando líneas...</div>';
+    modal.classList.add('open');
+
+    fetch(API + '/pedidos/' + order.id + '/detalle', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res.lines || !res.lines.length) {
+        body.innerHTML = '<div class="history-empty">No hay líneas en este pedido.</div>';
+        return;
+      }
+      body.innerHTML = '';
+      res.lines.forEach(function(line) {
+        var div = document.createElement('div');
+        div.className = 'modal-detalle-line';
+        var discBadge = line.discount > 0 ? ' <span style="background:#D1E7DD;color:#0A5C36;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px">-' + line.discount + '%</span>' : '';
+        div.innerHTML =
+          '<div class="modal-detalle-info">' +
+            '<div class="modal-detalle-name">' + line.product + discBadge + '</div>' +
+            '<div class="modal-detalle-qty">' + line.qty + ' uds &middot; ' + fmt(line.price_unit) + ' €/ud</div>' +
+          '</div>' +
+          '<div class="modal-detalle-price">' +
+            '<div class="modal-detalle-unit">' + fmt(line.subtotal) + ' € s/IVA</div>' +
+            '<div class="modal-detalle-total">' + fmt(line.total) + ' €</div>' +
+          '</div>';
+        body.appendChild(div);
+      });
+    }).catch(function(){
+      body.innerHTML = '<div class="history-empty">Error cargando el detalle.</div>';
+    });
   }
 
   function showToast(msg) {
