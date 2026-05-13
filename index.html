@@ -460,6 +460,29 @@
   .cart-footer-coniva{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--primary);font-weight:700}
   /* Espacio para el cart-bar fijo */
   .main-content{padding-bottom:80px}
+
+  /* ── ANALISIS ── */
+  .analisis-screen{min-height:100vh;background:var(--bg)}
+  .analisis-content{max-width:960px;margin:0 auto;padding:40px 24px 60px}
+  .analisis-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--primary);margin-bottom:6px}
+  .analisis-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:32px}
+  .analisis-year-btn{padding:8px 20px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s}
+  .analisis-year-btn.active{background:var(--primary);border-color:var(--primary);color:white}
+  .analisis-section{background:white;border-radius:16px;border:1.5px solid var(--border);padding:24px;margin-bottom:24px}
+  .analisis-section-title{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px}
+  .analisis-legend{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+  .analisis-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)}
+  .analisis-legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+  .chart-wrap{position:relative;width:100%;overflow-x:auto}
+  .chart-canvas{display:block;width:100%;height:260px}
+  .analisis-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+  .kpi-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:20px}
+  .kpi-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+  .kpi-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--primary)}
+  .kpi-vs{font-size:12px;margin-top:4px}
+  .kpi-up{color:#0A5C36}
+  .kpi-down{color:var(--danger)}
+  @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -518,7 +541,7 @@
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn-pedidos-hoy" id="btn-pedidos-hoy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Hoy <span class="pedidos-hoy-badge" id="pedidos-hoy-badge">0</span></button>
       <button class="btn-back" id="btn-oferta-libre-nav" style="font-size:12px;padding:6px 12px">Oferta</button>
-      <button class="btn-back" id="btn-liquidacion-nav" style="font-size:12px;padding:6px 12px">Liquidación</button>
+      <button class="btn-back" id="btn-analisis-nav" style="font-size:12px;padding:6px 12px">Análisis</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:12px;padding:6px 12px">Liquidación</button>
       <button class="btn-logout" id="btn-logout-clients" style="font-size:12px;padding:6px 12px">Salir</button>
     </div>
   </div>
@@ -618,6 +641,62 @@
     <div class="oferta-actions">
       <button class="btn-oferta-pdf" id="btn-oferta-libre-pdf" disabled>PDF / Imprimir</button>
       <button class="btn-oferta-email" id="btn-oferta-libre-email" disabled>Enviar por email</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="analisis-screen" style="display:none" class="analisis-screen">
+  <div class="clients-header">
+    <div class="clients-header-left">
+      <span class="header-logo-text">Comercial A. Puchol</span>
+      <span class="vendor-pill" id="analisis-vendor-pill"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-back" id="btn-analisis-back">Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-analisis">Cerrar sesión</button>
+    </div>
+  </div>
+  <div class="analisis-content">
+    <h1 class="analisis-title">Análisis de ventas</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px" id="analisis-vendedor-label"></p>
+    <div class="analisis-controls">
+      <span style="font-size:13px;color:var(--text-muted);font-weight:600">Año:</span>
+      <div id="analisis-year-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <button class="btn-liq" id="btn-analisis-cargar" style="font-size:13px">Ver</button>
+    </div>
+    <div id="analisis-kpis" class="analisis-kpis" style="display:none">
+      <div class="kpi-card">
+        <div class="kpi-label">Total anual s/IVA</div>
+        <div class="kpi-value" id="kpi-total"></div>
+        <div class="kpi-vs" id="kpi-total-vs"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Núm. pedidos</div>
+        <div class="kpi-value" id="kpi-pedidos"></div>
+        <div class="kpi-vs" id="kpi-pedidos-vs"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Media mensual s/IVA</div>
+        <div class="kpi-value" id="kpi-media"></div>
+        <div class="kpi-vs" id="kpi-media-vs"></div>
+      </div>
+    </div>
+    <div class="analisis-section" id="chart-importe-wrap" style="display:none">
+      <div class="analisis-section-title">Importe mensual s/IVA (€)</div>
+      <div class="analisis-legend">
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3A2A"></div><span id="legend-actual-label">2025</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#D48B3A;opacity:.5"></div><span id="legend-anterior-label">2024</span></div>
+      </div>
+      <div class="chart-wrap"><canvas class="chart-canvas" id="chart-importe"></canvas></div>
+    </div>
+    <div class="analisis-section" id="chart-pedidos-wrap" style="display:none">
+      <div class="analisis-section-title">Número de pedidos por mes</div>
+      <div class="analisis-legend">
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3A2A"></div><span>Actual</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#D48B3A;opacity:.5"></div><span>Anterior</span></div>
+      </div>
+      <div class="chart-wrap"><canvas class="chart-canvas" id="chart-pedidos"></canvas></div>
     </div>
   </div>
 </div>
@@ -2284,6 +2363,179 @@
   document.getElementById('cart-tab').addEventListener('click', function(){
     document.getElementById('cart-bar').classList.toggle('open');
   });
+
+
+  // ── ANALISIS DE VENTAS ───────────────────────────────
+  var analisisYear = new Date().getFullYear();
+  var analisisData = null;
+
+  document.getElementById('btn-analisis-nav').addEventListener('click', function(){
+    clientsScreen.style.display = 'none';
+    document.getElementById('analisis-screen').style.display = 'block';
+    document.getElementById('analisis-vendor-pill').textContent = vendorName;
+    document.getElementById('analisis-vendedor-label').textContent = 'Vendedor: ' + vendorName;
+    // Botones de año: año actual y 4 anteriores
+    var btnsWrap = document.getElementById('analisis-year-btns');
+    btnsWrap.innerHTML = '';
+    var currentYear = new Date().getFullYear();
+    for (var y = currentYear; y >= currentYear - 4; y--) {
+      (function(yr){
+        var btn = document.createElement('button');
+        btn.className = 'analisis-year-btn' + (yr === analisisYear ? ' active' : '');
+        btn.textContent = yr;
+        btn.addEventListener('click', function(){
+          analisisYear = yr;
+          document.querySelectorAll('.analisis-year-btn').forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+        btnsWrap.appendChild(btn);
+      })(y);
+    }
+    if (!analisisData) cargarAnalisis();
+  });
+
+  document.getElementById('btn-analisis-back').addEventListener('click', function(){
+    document.getElementById('analisis-screen').style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+  document.getElementById('btn-logout-analisis').addEventListener('click', logout);
+  document.getElementById('btn-analisis-cargar').addEventListener('click', cargarAnalisis);
+
+  function cargarAnalisis() {
+    var btn = document.getElementById('btn-analisis-cargar');
+    btn.textContent = 'Cargando...'; btn.disabled = true;
+    fetch(API + '/analisis/ventas?year=' + analisisYear, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      btn.textContent = 'Ver'; btn.disabled = false;
+      analisisData = res;
+      renderAnalisis(res);
+    }).catch(function(){
+      btn.textContent = 'Ver'; btn.disabled = false;
+      alert('Error cargando datos de ventas');
+    });
+  }
+
+  function renderAnalisis(data) {
+    var meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var actual = data.actual;
+    var anterior = data.anterior;
+
+    // KPIs
+    var totalActual = actual.reduce(function(s,m){ return s+m.importe; }, 0);
+    var totalAnterior = anterior.reduce(function(s,m){ return s+m.importe; }, 0);
+    var pedidosActual = actual.reduce(function(s,m){ return s+m.pedidos; }, 0);
+    var pedidosAnterior = anterior.reduce(function(s,m){ return s+m.pedidos; }, 0);
+    var mesesConVenta = actual.filter(function(m){ return m.importe > 0; }).length || 1;
+
+    document.getElementById('kpi-total').textContent = fmt(totalActual) + ' €';
+    document.getElementById('kpi-pedidos').textContent = pedidosActual;
+    document.getElementById('kpi-media').textContent = fmt(totalActual / mesesConVenta) + ' €';
+    document.getElementById('analisis-kpis').style.display = 'grid';
+
+    function vsText(actual, anterior, isEuro) {
+      if (!anterior) return '';
+      var diff = actual - anterior;
+      var pct = Math.round(diff / anterior * 100);
+      var sign = diff >= 0 ? '+' : '';
+      var cls = diff >= 0 ? 'kpi-up' : 'kpi-down';
+      var valStr = isEuro ? sign + fmt(diff) + ' €' : sign + diff;
+      return '<span class="' + cls + '">' + valStr + ' (' + sign + pct + '%) vs ' + data.year_anterior + '</span>';
+    }
+    document.getElementById('kpi-total-vs').innerHTML = vsText(totalActual, totalAnterior, true);
+    document.getElementById('kpi-pedidos-vs').innerHTML = vsText(pedidosActual, pedidosAnterior, false);
+    document.getElementById('kpi-media-vs').innerHTML = '';
+
+    document.getElementById('legend-actual-label').textContent = data.year;
+    document.getElementById('legend-anterior-label').textContent = data.year_anterior;
+
+    // Gráficas
+    dibujarGrafica('chart-importe',
+      meses,
+      actual.map(function(m){ return m.importe; }),
+      anterior.map(function(m){ return m.importe; }),
+      true
+    );
+    dibujarGrafica('chart-pedidos',
+      meses,
+      actual.map(function(m){ return m.pedidos; }),
+      anterior.map(function(m){ return m.pedidos; }),
+      false
+    );
+
+    document.getElementById('chart-importe-wrap').style.display = 'block';
+    document.getElementById('chart-pedidos-wrap').style.display = 'block';
+  }
+
+  function dibujarGrafica(canvasId, labels, dataActual, dataAnterior, isEuro) {
+    var canvas = document.getElementById(canvasId);
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.parentElement.offsetWidth || 800;
+    var H = 260;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var padL = 70, padR = 16, padT = 16, padB = 40;
+    var chartW = W - padL - padR;
+    var chartH = H - padT - padB;
+    var n = labels.length;
+    var groupW = chartW / n;
+    var barW = groupW * 0.35;
+    var maxVal = Math.max.apply(null, dataActual.concat(dataAnterior).concat([1]));
+    var scale = chartH / maxVal;
+
+    // Limpiar
+    ctx.clearRect(0, 0, W, H);
+
+    // Grid lines
+    ctx.strokeStyle = '#E8E3DA';
+    ctx.lineWidth = 1;
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + chartH - (chartH / 4 * g);
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
+      var gridVal = maxVal / 4 * g;
+      ctx.fillStyle = '#999';
+      ctx.font = '10px Poppins,sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(isEuro ? fmt(gridVal) : Math.round(gridVal), padL - 6, gy + 4);
+    }
+
+    // Barras
+    for (var i = 0; i < n; i++) {
+      var x = padL + i * groupW;
+
+      // Año anterior (dorado suave)
+      var hAnt = dataAnterior[i] * scale;
+      ctx.fillStyle = 'rgba(212,139,58,0.35)';
+      ctx.fillRect(x + groupW * 0.05, padT + chartH - hAnt, barW, hAnt);
+
+      // Año actual (verde oscuro)
+      var hAct = dataActual[i] * scale;
+      ctx.fillStyle = '#1A3A2A';
+      ctx.fillRect(x + groupW * 0.5, padT + chartH - hAct, barW, hAct);
+
+      // Valor encima de barra actual
+      if (dataActual[i] > 0) {
+        ctx.fillStyle = '#1A3A2A';
+        ctx.font = 'bold 9px Poppins,sans-serif';
+        ctx.textAlign = 'center';
+        var label = isEuro ? fmt(dataActual[i]) : dataActual[i];
+        ctx.fillText(label, x + groupW * 0.5 + barW / 2, padT + chartH - hAct - 4);
+      }
+
+      // Etiqueta mes
+      ctx.fillStyle = '#666';
+      ctx.font = '11px Poppins,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(labels[i], x + groupW / 2, H - 8);
+    }
+  }
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
