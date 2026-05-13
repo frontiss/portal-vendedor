@@ -564,7 +564,6 @@
       <button class="tab-btn active" id="tab-pedido">🛒 Hacer pedido</button>
       <button class="tab-btn" id="tab-historial">📋 Pedidos del cliente</button>
       <button class="tab-btn" id="tab-facturas">💶 Facturas y cobros</button>
-      <button class="tab-btn" id="tab-oferta">📋 Oferta</button>
     </div>
 
     <div id="panel-historial" style="display:none">
@@ -637,21 +636,6 @@
       </div>
     </div>
 
-
-    <div id="panel-oferta" style="display:none">
-      <div class="oferta-toolbar">
-        <span style="font-size:13px;color:var(--text-muted)">Selecciona los productos para la oferta</span>
-        <button class="btn-oferta-pdf" id="btn-oferta-pdf">PDF</button>
-        <button class="btn-oferta-email" id="btn-oferta-email" disabled>Enviar por email</button>
-      </div>
-      <div id="oferta-list" class="oferta-list"></div>
-      <div id="oferta-summary" style="display:none">
-        <div class="oferta-summary">
-          <div class="oferta-summary-title">Productos seleccionados</div>
-          <div id="oferta-summary-items"></div>
-        </div>
-      </div>
-    </div>
 
     <div id="panel-pedido">
       <div class="search-bar" id="search-bar" style="display:none">
@@ -2415,31 +2399,7 @@
   var ofertaSelected = {};  // product_id -> product obj
   var ofertaLoaded = false;
 
-  document.getElementById('tab-oferta').addEventListener('click', function(){
-    ['tab-oferta','tab-pedido','tab-historial','tab-facturas'].forEach(function(t){
-      document.getElementById(t).classList.remove('active');
-    });
-    document.getElementById('tab-oferta').classList.add('active');
-    ['panel-pedido','panel-historial','panel-facturas'].forEach(function(p){
-      document.getElementById(p).style.display='none';
-    });
-    document.getElementById('panel-oferta').style.display='block';
-    if (!ofertaLoaded) loadOferta();
-  });
 
-  // Ocultar panel oferta al cambiar de tab
-  document.getElementById('tab-pedido').addEventListener('click', function(){
-    document.getElementById('panel-oferta').style.display='none';
-    document.getElementById('tab-oferta').classList.remove('active');
-  });
-  document.getElementById('tab-historial').addEventListener('click', function(){
-    document.getElementById('panel-oferta').style.display='none';
-    document.getElementById('tab-oferta').classList.remove('active');
-  });
-  document.getElementById('tab-facturas').addEventListener('click', function(){
-    document.getElementById('panel-oferta').style.display='none';
-    document.getElementById('tab-oferta').classList.remove('active');
-  });
 
   function loadOferta() {
     ofertaLoaded = true;
@@ -2756,10 +2716,12 @@
     var clienteNombre = document.getElementById('oferta-libre-cliente').value.trim() || 'Cliente';
     var fecha = new Date().toLocaleDateString('es-ES');
     var rows = ofertaLibreItems.map(function(p){
+      var unitP = p.box_qty > 1 ? fmt(Math.round(p.price / p.box_qty * 1000) / 1000) + ' €' : '-';
       return '<tr>' +
         '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + (p.ref||'') + '</td>' +
         '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px">' + p.name + '</td>' +
         '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:center">' + (p.box_qty>1?p.box_qty+' uds/'+(p.box_name||'caja'):'Unidad') + '</td>' +
+        '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;color:#666">' + unitP + '</td>' +
         '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;font-weight:700">' + fmt(p.price) + ' €</td>' +
         '<td style="padding:10px 12px;border-bottom:1px solid #eee;font-size:12px;text-align:right;color:#666">' + fmt(p.price_with_vat||p.price) + ' €</td>' +
       '</tr>';
