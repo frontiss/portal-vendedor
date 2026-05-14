@@ -1355,7 +1355,8 @@
       var rutaHtml = c.ruta
         ? '<span class="client-ruta">📅 ' + c.ruta + '</span>'
         : '';
-      var tarifaHtml2 = c.pricelist_name ? '<div class="client-tarifa">' + c.pricelist_name + '</div>' : '';
+      var tarifaNombre = c.pricelist_name ? c.pricelist_name.replace(/\s*\(.*?\)/g, '').trim() : '';
+      var tarifaHtml2 = tarifaNombre ? '<div class="client-tarifa">' + tarifaNombre + '</div>' : '';
       card.innerHTML =
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
         '<div class="client-name">' + c.name + '</div>' +
@@ -1395,7 +1396,7 @@
       var tb = document.createElement('span');
       tb.id = 'client-tarifa-badge';
       tb.style.cssText = 'display:inline-flex;align-items:center;background:#EBF3EE;color:#1A3A2A;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
-      tb.textContent = client.pricelist_name;
+      tb.textContent = (client.pricelist_name || '').replace(/\s*\(.*?\)/g, '').trim();
       document.getElementById('page-title').appendChild(tb);
     }
     document.getElementById('modal-confirm-client').textContent = 'Para el cliente: ' + client.name;
@@ -1809,7 +1810,14 @@
     clients.forEach(function(c) {
       if (c.ruta && c.ruta.trim()) { var d = c.ruta.trim(); days[d] = (days[d]||0)+1; }
     });
-    var dayKeys = Object.keys(days).sort();
+    var ORDER = ['Lunes','Martes','Miercoles','Miércoles','Jueves','Viernes','Sábado','Sabado','Domingo'];
+    var dayKeys = Object.keys(days).sort(function(a, b) {
+      var ia = ORDER.findIndex(function(d){ return d.toLowerCase() === a.toLowerCase(); });
+      var ib = ORDER.findIndex(function(d){ return d.toLowerCase() === b.toLowerCase(); });
+      if (ia === -1) ia = 99;
+      if (ib === -1) ib = 99;
+      return ia - ib;
+    });
     if (!dayKeys.length) { container.style.display='none'; return; }
     container.innerHTML=''; container.style.display='flex';
     var btnTodos = document.createElement('button');
