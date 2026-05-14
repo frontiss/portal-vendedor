@@ -491,35 +491,53 @@
   .kpi-down{color:var(--danger)}
 
   /* ── VISTA LISTA CLIENTES ── */
-  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:20px}
+  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:16px}
   .view-btn{padding:6px 12px;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;gap:5px;font-size:13px;font-family:'Poppins',sans-serif;font-weight:500}
   .view-btn.active{background:var(--primary);color:white}
-  .clients-grid.list-view{display:flex;flex-direction:column;gap:6px}
-  .clients-grid.list-view .client-card{display:flex;align-items:center;gap:16px;padding:12px 18px;border-radius:10px}
-  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;min-width:70px}
-  .clients-grid.list-view .client-name{font-size:14px;flex:1;margin-bottom:0}
+  /* Vista tabla */
+  .clients-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 90px;gap:0;background:#1A3A2A;padding:8px 16px}
+  .list-table-header span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+  .clients-grid.list-view .client-card{display:grid;grid-template-columns:90px 1fr 100px 90px;gap:0;padding:9px 16px;border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;cursor:pointer;transition:background .15s;align-items:center}
+  .clients-grid.list-view .client-card:last-child{border-bottom:none}
+  .clients-grid.list-view .client-card:hover{background:#F9F7F4}
+  .clients-grid.list-view .client-card:nth-child(even){background:#FAFAF8}
+  .clients-grid.list-view .client-card:nth-child(even):hover{background:#F5F2EC}
+  .clients-grid.list-view .client-card.visited{background:#F0F6F3}
+  .clients-grid.list-view .client-card.visited:hover{background:#E8F2ED}
+  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;font-weight:500}
+  .clients-grid.list-view .client-name{font-size:12px;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:11px}
+  .clients-grid.list-view .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .clients-grid.list-view .client-address{display:none}
-  .clients-grid.list-view .client-tarifa{display:none}
-  .clients-grid.list-view .ruta-badge{display:none}
+  .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
+  .clients-grid.list-view .ruta-badge .ruta-pill{font-size:10px;padding:2px 8px}
   .clients-grid.list-view .visited-badge{display:none}
-  .clients-grid.list-view .client-card.visited::after{display:none}
-  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:12px;font-weight:700}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
-  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:20px}
+  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:16px}
   .view-btn{padding:6px 12px;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;gap:5px;font-size:13px;font-family:'Poppins',sans-serif;font-weight:500}
   .view-btn.active{background:var(--primary);color:white}
-  .clients-grid.list-view{display:flex;flex-direction:column;gap:6px}
-  .clients-grid.list-view .client-card{display:flex;align-items:center;gap:16px;padding:12px 18px;border-radius:10px}
-  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;min-width:70px}
-  .clients-grid.list-view .client-name{font-size:14px;flex:1;margin-bottom:0}
+  /* Vista tabla */
+  .clients-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
+  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 90px;gap:0;background:#1A3A2A;padding:8px 16px}
+  .list-table-header span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+  .clients-grid.list-view .client-card{display:grid;grid-template-columns:90px 1fr 100px 90px;gap:0;padding:9px 16px;border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;cursor:pointer;transition:background .15s;align-items:center}
+  .clients-grid.list-view .client-card:last-child{border-bottom:none}
+  .clients-grid.list-view .client-card:hover{background:#F9F7F4}
+  .clients-grid.list-view .client-card:nth-child(even){background:#FAFAF8}
+  .clients-grid.list-view .client-card:nth-child(even):hover{background:#F5F2EC}
+  .clients-grid.list-view .client-card.visited{background:#F0F6F3}
+  .clients-grid.list-view .client-card.visited:hover{background:#E8F2ED}
+  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;font-weight:500}
+  .clients-grid.list-view .client-name{font-size:12px;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:11px}
+  .clients-grid.list-view .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .clients-grid.list-view .client-address{display:none}
-  .clients-grid.list-view .client-tarifa{display:none}
-  .clients-grid.list-view .ruta-badge{display:none}
+  .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
+  .clients-grid.list-view .ruta-badge .ruta-pill{font-size:10px;padding:2px 8px}
   .clients-grid.list-view .visited-badge{display:none}
-  .clients-grid.list-view .client-card.visited::after{display:none}
-  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:12px;font-weight:700}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -1319,11 +1337,18 @@
   }
 
   function renderClients(list) {
+    clientsGrid.innerHTML = '';
+    // Cabecera tabla en modo lista
+    if (clientView === 'list') {
+      var header = document.createElement('div');
+      header.className = 'list-table-header';
+      header.innerHTML = '<span>REF</span><span>NOMBRE</span><span>TARIFA</span><span>DÍA</span>';
+      clientsGrid.appendChild(header);
+    }
     if (!list.length) {
       clientsGrid.innerHTML = '<div class="clients-empty">No se encontraron clientes.</div>';
       return;
     }
-    clientsGrid.innerHTML = '';
     list.forEach(function (c) {
       var card = document.createElement('div');
       card.className = 'client-card';
@@ -2604,14 +2629,18 @@
   }
 
   document.getElementById('btn-view-grid').addEventListener('click', function(){
+    var prev = clientView;
     clientView = 'grid';
     localStorage.setItem('clientView', 'grid');
+    if (prev !== 'grid') applyFilters(allClients);
     applyClientView();
   });
 
   document.getElementById('btn-view-list').addEventListener('click', function(){
+    var prev = clientView;
     clientView = 'list';
     localStorage.setItem('clientView', 'list');
+    if (prev !== 'list') applyFilters(allClients);
     applyClientView();
   });
 
