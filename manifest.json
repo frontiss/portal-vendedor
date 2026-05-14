@@ -1,0 +1,34 @@
+{
+  "name": "Portal Vendedor - Comercial A. Puchol",
+  "short_name": "Portal Puchol",
+  "description": "Portal de pedidos y gestión para comerciales de Comercial A. Puchol S.A.",
+  "start_url": "/portal-vendedor/",
+  "scope": "/portal-vendedor/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F5F2EC",
+  "theme_color": "#1A3A2A",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}
