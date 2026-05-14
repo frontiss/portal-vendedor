@@ -593,6 +593,16 @@
     <div style="margin-bottom:24px">
       <button id="btn-new-client" style="display:inline-flex;align-items:center;gap:8px;background:#1A3A2A;color:white;border:none;padding:12px 22px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(26,58,42,.2);transition:all .2s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><path d="M12 13v8M8 17h8"/></svg>Nuevo cliente</button>
     </div>
+    <div class="view-toggle" id="view-toggle">
+      <button class="view-btn active" id="btn-view-grid" title="Vista tarjetas">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        Tarjetas
+      </button>
+      <button class="view-btn" id="btn-view-list" title="Vista lista">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>
+        Lista
+      </button>
+    </div>
     <div class="clients-grid" id="clients-grid">
       <div class="loading-box"><div class="big-spinner"></div>Cargando clientes...</div>
     </div>
