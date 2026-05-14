@@ -513,6 +513,13 @@
   .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
   .clients-grid.list-view .ruta-badge .ruta-pill{font-size:9px;padding:2px 6px;white-space:nowrap}
   .clients-grid.list-view .visited-badge{display:none}
+
+  /* ── SELECTOR VENDEDOR ── */
+  .vendedor-selector-wrap{margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .vendedor-selector-label{font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap}
+  .vendedor-select{padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:white;outline:none;cursor:pointer;transition:border-color .2s;max-width:280px}
+  .vendedor-select:focus{border-color:var(--accent)}
+  .vendedor-badge-otro{display:inline-flex;align-items:center;gap:6px;background:#FFF3CD;color:#856404;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -538,6 +545,13 @@
   .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
   .clients-grid.list-view .ruta-badge .ruta-pill{font-size:9px;padding:2px 6px;white-space:nowrap}
   .clients-grid.list-view .visited-badge{display:none}
+
+  /* ── SELECTOR VENDEDOR ── */
+  .vendedor-selector-wrap{margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .vendedor-selector-label{font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap}
+  .vendedor-select{padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:white;outline:none;cursor:pointer;transition:border-color .2s;max-width:280px}
+  .vendedor-select:focus{border-color:var(--accent)}
+  .vendedor-badge-otro{display:inline-flex;align-items:center;gap:6px;background:#FFF3CD;color:#856404;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -603,6 +617,13 @@
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
     <p class="clients-subtitle" id="clients-subtitle">Selecciona un cliente para hacer su pedido</p>
+    <div class="vendedor-selector-wrap" id="vendedor-selector-wrap">
+      <span class="vendedor-selector-label">Viendo clientes de:</span>
+      <select class="vendedor-select" id="vendedor-select">
+        <option value="">Cargando...</option>
+      </select>
+      <span class="vendedor-badge-otro" id="vendedor-badge-otro" style="display:none">&#x26A0; Clientes de otro comercial</span>
+    </div>
     <div class="day-filters" id="day-filters" style="display:none"></div>
     <div class="clients-search-wrap" style="margin-bottom:16px">
       <svg class="clients-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -1330,6 +1351,7 @@
       buildDayFilters(allClients);
       renderClients(allClients);
       refreshPedidosHoyBadge();
+      loadVendedores();
     })
     .catch(function () {
       clientsGrid.innerHTML = '<div class="loading-box">Error de conexión.</div>';
@@ -2658,6 +2680,59 @@
     _origRenderClients(clients);
     applyClientView();
   };
+
+
+  // ── SELECTOR DE VENDEDOR ─────────────────────────────
+  var selectedVendorUid = null;  // null = propio vendedor
+
+  function loadVendedores() {
+    fetch(API + '/vendedores', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var sel = document.getElementById('vendedor-select');
+      sel.innerHTML = '';
+      (res.vendedores || []).forEach(function(v) {
+        var opt = document.createElement('option');
+        opt.value = v.id;
+        opt.textContent = v.name;
+        if (v.id === vendorUid) {
+          opt.textContent = v.name + ' (yo)';
+          opt.selected = true;
+        }
+        sel.appendChild(opt);
+      });
+      selectedVendorUid = vendorUid;
+    }).catch(function(){ });
+  }
+
+  document.getElementById('vendedor-select').addEventListener('change', function(){
+    var uid = parseInt(this.value);
+    selectedVendorUid = uid;
+    var badge = document.getElementById('vendedor-badge-otro');
+    badge.style.display = uid !== vendorUid ? 'inline-flex' : 'none';
+
+    // Limpiar y recargar clientes
+    allClients = [];
+    visitedClients = {};
+    clientsGrid.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando clientes...</div>';
+
+    var url = uid === vendorUid
+      ? API + '/vendor/clients'
+      : API + '/vendor/clients/' + uid;
+
+    fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      allClients = res.clients || [];
+      document.querySelector('.clients-subtitle').textContent =
+        allClients.length + ' clientes asignados — selecciona uno para hacer su pedido';
+      buildDayFilters(allClients);
+      renderClients(allClients);
+      refreshPedidosHoyBadge();
+    }).catch(function(){
+      clientsGrid.innerHTML = '<div class="clients-empty">Error cargando clientes.</div>';
+    });
+  });
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
