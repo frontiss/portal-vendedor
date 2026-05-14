@@ -1232,6 +1232,7 @@
   // ── ESTADO GLOBAL ────────────────────────────────────
   var token         = null;   // JWT del vendedor
   var vendorName    = '';     // nombre del vendedor
+  var vendorUid     = 0;      // uid del vendedor logueado
   var allClients    = [];     // lista completa de clientes
   var selectedClient = null; // cliente actualmente seleccionado {id, name, ...}
   var allProducts   = [];
@@ -1309,6 +1310,7 @@
       }
       token = res.data.token;
       vendorName = res.data.vendor.user_name;
+      vendorUid  = res.data.vendor.user_id || 0;
       loginScreen.style.display = 'none';
       showClientsScreen();
     })
