@@ -489,7 +489,37 @@
   .kpi-vs{font-size:12px;margin-top:4px}
   .kpi-up{color:#0A5C36}
   .kpi-down{color:var(--danger)}
+
+  /* ── VISTA LISTA CLIENTES ── */
+  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:20px}
+  .view-btn{padding:6px 12px;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;gap:5px;font-size:13px;font-family:'Poppins',sans-serif;font-weight:500}
+  .view-btn.active{background:var(--primary);color:white}
+  .clients-grid.list-view{display:flex;flex-direction:column;gap:6px}
+  .clients-grid.list-view .client-card{display:flex;align-items:center;gap:16px;padding:12px 18px;border-radius:10px}
+  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;min-width:70px}
+  .clients-grid.list-view .client-name{font-size:14px;flex:1;margin-bottom:0}
+  .clients-grid.list-view .client-address{display:none}
+  .clients-grid.list-view .client-tarifa{display:none}
+  .clients-grid.list-view .ruta-badge{display:none}
+  .clients-grid.list-view .visited-badge{display:none}
+  .clients-grid.list-view .client-card.visited::after{display:none}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:12px;font-weight:700}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
+
+  /* ── VISTA LISTA CLIENTES ── */
+  .view-toggle{display:flex;gap:4px;background:white;padding:4px;border-radius:10px;border:1.5px solid var(--border);width:fit-content;margin-bottom:20px}
+  .view-btn{padding:6px 12px;border:none;border-radius:7px;background:transparent;cursor:pointer;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;gap:5px;font-size:13px;font-family:'Poppins',sans-serif;font-weight:500}
+  .view-btn.active{background:var(--primary);color:white}
+  .clients-grid.list-view{display:flex;flex-direction:column;gap:6px}
+  .clients-grid.list-view .client-card{display:flex;align-items:center;gap:16px;padding:12px 18px;border-radius:10px}
+  .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;min-width:70px}
+  .clients-grid.list-view .client-name{font-size:14px;flex:1;margin-bottom:0}
+  .clients-grid.list-view .client-address{display:none}
+  .clients-grid.list-view .client-tarifa{display:none}
+  .clients-grid.list-view .ruta-badge{display:none}
+  .clients-grid.list-view .visited-badge{display:none}
+  .clients-grid.list-view .client-card.visited::after{display:none}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:12px;font-weight:700}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -2543,6 +2573,44 @@
       ctx.fillText(labels[i], x + groupW / 2, H - 8);
     }
   }
+
+
+  // ── TOGGLE VISTA CLIENTES ────────────────────────────
+  var clientView = localStorage.getItem('clientView') || 'grid';
+
+  function applyClientView() {
+    var grid = document.getElementById('clients-grid');
+    var btnGrid = document.getElementById('btn-view-grid');
+    var btnList = document.getElementById('btn-view-list');
+    if (clientView === 'list') {
+      grid.classList.add('list-view');
+      btnList.classList.add('active');
+      btnGrid.classList.remove('active');
+    } else {
+      grid.classList.remove('list-view');
+      btnGrid.classList.add('active');
+      btnList.classList.remove('active');
+    }
+  }
+
+  document.getElementById('btn-view-grid').addEventListener('click', function(){
+    clientView = 'grid';
+    localStorage.setItem('clientView', 'grid');
+    applyClientView();
+  });
+
+  document.getElementById('btn-view-list').addEventListener('click', function(){
+    clientView = 'list';
+    localStorage.setItem('clientView', 'list');
+    applyClientView();
+  });
+
+  // Aplicar vista guardada al renderizar clientes
+  var _origRenderClients = renderClients;
+  renderClients = function(clients) {
+    _origRenderClients(clients);
+    applyClientView();
+  };
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
