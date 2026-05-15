@@ -2796,7 +2796,9 @@
     })
     .then(function(r){ return r.json(); })
     .then(function(res){
+      console.log('Facturas cliente ' + client.id + ':', res);
       var vencidas = (res.invoices || []).filter(function(inv){ return inv.vencida; });
+      console.log('Vencidas:', vencidas.length);
       if (!vencidas.length) return;
 
       var totalVencido = vencidas.reduce(function(s, inv){ return s + inv.pendiente; }, 0);
@@ -2822,7 +2824,7 @@
         var firstChild = panelPedido.firstChild;
         panelPedido.insertBefore(banner, firstChild);
       }
-    }).catch(function(){}); // Silencioso si falla
+    }).catch(function(e){ console.error('Error facturas:', e); });
   }
 
   function showToast(msg) {
