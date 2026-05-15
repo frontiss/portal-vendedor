@@ -1431,7 +1431,7 @@
   function selectClient(client) {
     selectedClient = client;
     // Comprobar facturas vencidas (silencioso)
-    setTimeout(function(){ checkFacturasVencidas(client); }, 1500);
+    setTimeout(function(){ checkFacturasVencidas(client); }, 800);
     // Transición a pantalla de pedido
     clientsScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -2816,9 +2816,12 @@
         document.getElementById('tab-facturas').click();
       });
 
-      // Insertar antes del buscador de productos
-      var searchBar = document.getElementById('search-bar');
-      if (searchBar) searchBar.parentNode.insertBefore(banner, searchBar);
+      // Insertar al principio del panel de pedido
+      var panelPedido = document.getElementById('panel-pedido');
+      if (panelPedido) {
+        var firstChild = panelPedido.firstChild;
+        panelPedido.insertBefore(banner, firstChild);
+      }
     }).catch(function(){}); // Silencioso si falla
   }
 
