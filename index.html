@@ -520,6 +520,18 @@
   .vendedor-select{padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:white;outline:none;cursor:pointer;transition:border-color .2s;max-width:280px}
   .vendedor-select:focus{border-color:var(--accent)}
   .vendedor-badge-otro{display:inline-flex;align-items:center;gap:6px;background:#FFF3CD;color:#856404;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+
+  /* ── BANNER FACTURAS VENCIDAS ── */
+  .banner-vencidas{background:#FFF5F5;border:1.5px solid #F5C6CB;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s}
+  .banner-vencidas:hover{background:#FEE2E2}
+  .banner-vencidas-icon{font-size:22px;flex-shrink:0}
+  .banner-vencidas-text{flex:1}
+  .banner-vencidas-title{font-size:13px;font-weight:700;color:#842029}
+  .banner-vencidas-sub{font-size:12px;color:#A53030;margin-top:2px}
+  .banner-vencidas-arrow{color:#842029;font-size:16px;flex-shrink:0}
+  /* ── ERROR OFFLINE ── */
+  .offline-bar{position:fixed;top:0;left:0;right:0;z-index:999;background:#DC3545;color:white;text-align:center;padding:10px 16px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+  .offline-bar.visible{transform:translateY(0)}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -552,6 +564,18 @@
   .vendedor-select{padding:8px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:white;outline:none;cursor:pointer;transition:border-color .2s;max-width:280px}
   .vendedor-select:focus{border-color:var(--accent)}
   .vendedor-badge-otro{display:inline-flex;align-items:center;gap:6px;background:#FFF3CD;color:#856404;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px}
+
+  /* ── BANNER FACTURAS VENCIDAS ── */
+  .banner-vencidas{background:#FFF5F5;border:1.5px solid #F5C6CB;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .2s}
+  .banner-vencidas:hover{background:#FEE2E2}
+  .banner-vencidas-icon{font-size:22px;flex-shrink:0}
+  .banner-vencidas-text{flex:1}
+  .banner-vencidas-title{font-size:13px;font-weight:700;color:#842029}
+  .banner-vencidas-sub{font-size:12px;color:#A53030;margin-top:2px}
+  .banner-vencidas-arrow{color:#842029;font-size:16px;flex-shrink:0}
+  /* ── ERROR OFFLINE ── */
+  .offline-bar{position:fixed;top:0;left:0;right:0;z-index:999;background:#DC3545;color:white;text-align:center;padding:10px 16px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+  .offline-bar.visible{transform:translateY(0)}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -566,6 +590,12 @@
 <!-- ════════════════════════════════════════════════
      PANTALLA 1: LOGIN DEL VENDEDOR
 ════════════════════════════════════════════════ -->
+
+<div class="offline-bar" id="offline-bar">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+  Sin conexión — comprueba tu red antes de confirmar pedidos
+</div>
+
 <div id="login-screen">
   <div class="login-card">
     <div style="margin-bottom:20px">
@@ -1400,6 +1430,8 @@
 
   function selectClient(client) {
     selectedClient = client;
+    // Comprobar facturas vencidas (silencioso)
+    setTimeout(function(){ checkFacturasVencidas(client); }, 1500);
     // Transición a pantalla de pedido
     clientsScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -2735,6 +2767,60 @@
       clientsGrid.innerHTML = '<div class="clients-empty">Error cargando clientes.</div>';
     });
   });
+
+
+  // ── DETECCION OFFLINE ────────────────────────────────
+  function updateOnlineStatus() {
+    var bar = document.getElementById('offline-bar');
+    if (!navigator.onLine) {
+      bar.classList.add('visible');
+    } else {
+      bar.classList.remove('visible');
+    }
+  }
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+
+  // Interceptar confirmación de pedido si está offline
+  var _origBtnOrderClick = null;
+
+  // ── BANNER FACTURAS VENCIDAS ─────────────────────────
+  function checkFacturasVencidas(client) {
+    // Limpiar banner anterior
+    var existing = document.getElementById('banner-vencidas');
+    if (existing) existing.remove();
+
+    fetch(API + '/invoices?partner_id=' + client.id, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var vencidas = (res.invoices || []).filter(function(inv){ return inv.vencida; });
+      if (!vencidas.length) return;
+
+      var totalVencido = vencidas.reduce(function(s, inv){ return s + inv.pendiente; }, 0);
+      var banner = document.createElement('div');
+      banner.className = 'banner-vencidas';
+      banner.id = 'banner-vencidas';
+      banner.innerHTML =
+        '<div class="banner-vencidas-icon">⚠️</div>' +
+        '<div class="banner-vencidas-text">' +
+          '<div class="banner-vencidas-title">' + vencidas.length + ' factura' + (vencidas.length > 1 ? 's' : '') + ' vencida' + (vencidas.length > 1 ? 's' : '') + ' pendiente' + (vencidas.length > 1 ? 's' : '') + ' de cobro</div>' +
+          '<div class="banner-vencidas-sub">Total vencido: ' + fmt(totalVencido) + ' € — Pulsa para ver facturas</div>' +
+        '</div>' +
+        '<div class="banner-vencidas-arrow">→</div>';
+
+      // Al pulsar, ir a la pestaña de facturas
+      banner.addEventListener('click', function(){
+        document.getElementById('tab-facturas').click();
+      });
+
+      // Insertar antes del buscador de productos
+      var searchBar = document.getElementById('search-bar');
+      if (searchBar) searchBar.parentNode.insertBefore(banner, searchBar);
+    }).catch(function(){}); // Silencioso si falla
+  }
 
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
