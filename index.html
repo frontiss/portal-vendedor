@@ -1646,7 +1646,14 @@
       var boxQty = p.box_qty || 1;
       var lineBase;
       if (custom) {
-        lineBase = custom.price * q;
+        if (custom.mode === 'pct') {
+          // Descuento %: calcular desde precio unitario raw para maxima precision
+          var unitRaw2 = p.unit_price_raw || p.unit_price || (p.price / boxQty);
+          lineBase = unitRaw2 * boxQty * q * (1 - custom.discount / 100);
+        } else {
+          // Precio libre: usar el precio de caja introducido directamente
+          lineBase = custom.price * q;
+        }
       } else {
         var unitRaw = p.unit_price_raw || p.unit_price || (p.price / boxQty);
         lineBase = unitRaw * boxQty * q;
