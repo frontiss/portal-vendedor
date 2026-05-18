@@ -1636,30 +1636,44 @@
       btnOrder.disabled = true; return;
     }
     var total = 0;
-    var totalWithVat = 0;
+    var taxGroups = {};  // tax_rate -> base_imponible acumulada
+
     summaryList.innerHTML = keys.map(function (id) {
       var p = allProducts.filter(function (x) { return x.id == id; })[0];
       var q = quantities[id];
       if (!p) return '';
-      // Usar precio personalizado si existe, si no usar unit_price_raw
       var custom = customPrices[+id];
       var boxQty = p.box_qty || 1;
+      var lineBase;
       if (custom) {
-        total += custom.price * q;
-        totalWithVat += custom.price * (1 + (p.tax_rate || 0) / 100) * q;
+        lineBase = custom.price * q;
       } else {
         var unitRaw = p.unit_price_raw || p.unit_price || (p.price / boxQty);
-        total += unitRaw * boxQty * q;
-        var unitRawVat = unitRaw * (1 + (p.tax_rate || 0) / 100);
-        totalWithVat += unitRawVat * boxQty * q;
+        lineBase = unitRaw * boxQty * q;
       }
+      total += lineBase;
+      var taxRate = p.tax_rate || 0;
+      if (!taxGroups[taxRate]) taxGroups[taxRate] = 0;
+      taxGroups[taxRate] += lineBase;
       return '<li class="summary-item"><span class="si-name">' + p.name + '</span><span class="si-qty">' + q + ' caja' + (q > 1 ? 's' : '') + '</span></li>';
     }).join('');
-    totalAmount.textContent = fmt(total) + ' \u20ac s/IVA';
-    var sinivaEl2 = document.getElementById('cart-siniva');
-    if (sinivaEl2) sinivaEl2.textContent = fmt(total) + ' \u20ac';
+
+    // Redondeo global de IVA (igual que Odoo con "Redondear globalmente")
+    var totalIva = 0;
+    Object.keys(taxGroups).forEach(function(rate) {
+      if (+rate > 0) {
+        var baseGrupo = Math.round(taxGroups[rate] * 100) / 100;
+        totalIva += Math.round(baseGrupo * +rate) / 100;
+      }
+    });
+    var totalWithVat = Math.round((total + totalIva) * 100) / 100;
+    total = Math.round(total * 100) / 100;
+
+    totalAmount.textContent = fmt(total) + ' \u20ac';
     var vatEl = document.getElementById('total-with-vat');
     if (vatEl) vatEl.textContent = fmt(totalWithVat) + ' \u20ac c/IVA';
+    var sinivaEl2 = document.getElementById('cart-siniva');
+    if (sinivaEl2) sinivaEl2.textContent = fmt(total) + ' \u20ac';
     btnOrder.disabled = false;
   }
 
@@ -2796,9 +2810,7 @@
     })
     .then(function(r){ return r.json(); })
     .then(function(res){
-      console.log('Facturas cliente ' + client.id + ':', res);
       var vencidas = (res.invoices || []).filter(function(inv){ return inv.vencida; });
-      console.log('Vencidas:', vencidas.length);
       if (!vencidas.length) return;
 
       var totalVencido = vencidas.reduce(function(s, inv){ return s + inv.pendiente; }, 0);
@@ -2824,7 +2836,7 @@
         var firstChild = panelPedido.firstChild;
         panelPedido.insertBefore(banner, firstChild);
       }
-    }).catch(function(e){ console.error('Error facturas:', e); });
+    }).catch(function(){}); // Silencioso si falla
   }
 
   function showToast(msg) {
