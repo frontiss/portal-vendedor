@@ -1559,6 +1559,7 @@
 
   function logout() {
     token = null; vendorName = ''; allClients = []; selectedClient = null;
+    clearImgCache();
     quantities = {}; allProducts = [];
     appScreen.style.display = 'none';
     document.getElementById('panel-facturas').style.display = 'none';
@@ -1639,7 +1640,7 @@
       }
       // Imagen
       var imgHtml = p.image
-        ? '<img class="product-thumb" src="data:image/png;base64,' + p.image + '" alt="' + p.name.replace(/'/g, '') + '" onclick="abrirFotoProducto(' + p.id + ')">'
+        ? '<img class="product-thumb" src="" data-pid="' + p.id + '" data-b64="' + p.image + '" alt="' + p.name.replace(/'/g, '') + '" onclick="abrirFotoProducto(' + p.id + ')" style="opacity:0;transition:opacity .3s">'
         : '<div class="product-thumb-placeholder">📦</div>';
 
       card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
@@ -1671,6 +1672,8 @@ grid.appendChild(card);
     });
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
+    // Cargar imágenes con caché
+    setTimeout(function(){ loadProductImages(list); }, 50);
     productsArea.querySelectorAll('.qty-btn').forEach(function (btn) {
       btn.addEventListener('click', function () { changeQty(+btn.dataset.id, +btn.dataset.d); });
     });
@@ -2144,6 +2147,8 @@ grid.appendChild(card);
     });
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
+    // Cargar imágenes con caché
+    setTimeout(function(){ loadProductImages(list); }, 50);
     productsArea.querySelectorAll('.qty-btn').forEach(function(btn){
       btn.addEventListener('click', function(){ changeQty(+btn.dataset.id, +btn.dataset.d); });
     });
@@ -2913,10 +2918,88 @@ grid.appendChild(card);
   function abrirFotoProducto(pid) {
     var p = allProducts.filter(function(x){ return x.id === +pid; })[0];
     if (!p || !p.image) return;
-    document.getElementById('modal-foto-img').src = 'data:image/png;base64,' + p.image;
+    var modal = document.getElementById('modal-foto');
     document.getElementById('modal-foto-name').textContent = p.name;
     document.getElementById('modal-foto-ref').textContent = p.ref || '';
-    document.getElementById('modal-foto').classList.add('open');
+    modal.classList.add('open');
+    getCachedImage(p.id).then(function(cached) {
+      document.getElementById('modal-foto-img').src = cached || ('data:image/png;base64,' + p.image);
+    });
+  }
+
+
+  // ── CACHE DE IMÁGENES (IndexedDB) ───────────────────
+  var imgCache = {};  // cache en memoria para esta sesión
+  var IMG_DB_NAME = 'portal-img-cache';
+  var IMG_DB_VERSION = 1;
+  var imgDb = null;
+
+  function openImgDb() {
+    return new Promise(function(resolve, reject) {
+      if (imgDb) { resolve(imgDb); return; }
+      var req = indexedDB.open(IMG_DB_NAME, IMG_DB_VERSION);
+      req.onupgradeneeded = function(e) {
+        e.target.result.createObjectStore('images', { keyPath: 'id' });
+      };
+      req.onsuccess = function(e) { imgDb = e.target.result; resolve(imgDb); };
+      req.onerror = function() { reject(); };
+    });
+  }
+
+  function getCachedImage(productId) {
+    if (imgCache[productId]) return Promise.resolve(imgCache[productId]);
+    return openImgDb().then(function(db) {
+      return new Promise(function(resolve) {
+        var tx = db.transaction('images', 'readonly');
+        var req = tx.objectStore('images').get(productId);
+        req.onsuccess = function() {
+          if (req.result) {
+            imgCache[productId] = req.result.data;
+            resolve(req.result.data);
+          } else {
+            resolve(null);
+          }
+        };
+        req.onerror = function() { resolve(null); };
+      });
+    }).catch(function() { return null; });
+  }
+
+  function setCachedImage(productId, data) {
+    imgCache[productId] = data;
+    openImgDb().then(function(db) {
+      var tx = db.transaction('images', 'readwrite');
+      tx.objectStore('images').put({ id: productId, data: data });
+    }).catch(function(){});
+  }
+
+  function clearImgCache() {
+    imgCache = {};
+    openImgDb().then(function(db) {
+      var tx = db.transaction('images', 'readwrite');
+      tx.objectStore('images').clear();
+    }).catch(function(){});
+  }
+
+  // Cargar imágenes de forma asíncrona y actualizar las tarjetas
+  function loadProductImages(products) {
+    products.forEach(function(p) {
+      if (!p.image) return;
+      var imgEl = document.querySelector('img[data-pid="' + p.id + '"]');
+      if (!imgEl) return;
+
+      getCachedImage(p.id).then(function(cached) {
+        if (cached) {
+          imgEl.src = cached;
+          imgEl.style.opacity = '1';
+        } else {
+          // Guardar en caché
+          setCachedImage(p.id, 'data:image/png;base64,' + p.image);
+          imgEl.src = 'data:image/png;base64,' + p.image;
+          imgEl.style.opacity = '1';
+        }
+      });
+    });
   }
 
   function showToast(msg) {
