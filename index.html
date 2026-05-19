@@ -532,6 +532,23 @@
   /* ── ERROR OFFLINE ── */
   .offline-bar{position:fixed;top:0;left:0;right:0;z-index:999;background:#DC3545;color:white;text-align:center;padding:10px 16px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
   .offline-bar.visible{transform:translateY(0)}
+
+  /* ── FOTO Y STOCK PRODUCTO ── */
+  .product-card{position:relative}
+  .product-card-inner{display:flex;gap:12px;align-items:flex-start}
+  .product-thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;transition:transform .2s;border:1px solid var(--border);background:#f5f5f5}
+  .product-thumb:hover{transform:scale(1.05)}
+  .product-thumb-placeholder{width:64px;height:64px;border-radius:8px;background:#f0ece6;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:24px;border:1px solid var(--border)}
+  .product-card-body{flex:1;min-width:0}
+  .stock-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px}
+  .stock-ok{background:#D1E7DD;color:#0A5C36}
+  .stock-low{background:#FFF3CD;color:#856404}
+  .stock-zero{background:#F8D7DA;color:#842029}
+  /* Modal foto ampliada */
+  .modal-foto{background:white;border-radius:16px;padding:20px;max-width:480px;width:92%;text-align:center;animation:fadeUp .3s ease}
+  .modal-foto img{max-width:100%;max-height:60vh;border-radius:10px;object-fit:contain}
+  .modal-foto-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-top:16px;font-weight:700}
+  .modal-foto-ref{font-size:12px;color:var(--text-muted);margin-top:4px}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -576,6 +593,23 @@
   /* ── ERROR OFFLINE ── */
   .offline-bar{position:fixed;top:0;left:0;right:0;z-index:999;background:#DC3545;color:white;text-align:center;padding:10px 16px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;transform:translateY(-100%);transition:transform .3s ease;display:flex;align-items:center;justify-content:center;gap:8px}
   .offline-bar.visible{transform:translateY(0)}
+
+  /* ── FOTO Y STOCK PRODUCTO ── */
+  .product-card{position:relative}
+  .product-card-inner{display:flex;gap:12px;align-items:flex-start}
+  .product-thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;transition:transform .2s;border:1px solid var(--border);background:#f5f5f5}
+  .product-thumb:hover{transform:scale(1.05)}
+  .product-thumb-placeholder{width:64px;height:64px;border-radius:8px;background:#f0ece6;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:24px;border:1px solid var(--border)}
+  .product-card-body{flex:1;min-width:0}
+  .stock-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px}
+  .stock-ok{background:#D1E7DD;color:#0A5C36}
+  .stock-low{background:#FFF3CD;color:#856404}
+  .stock-zero{background:#F8D7DA;color:#842029}
+  /* Modal foto ampliada */
+  .modal-foto{background:white;border-radius:16px;padding:20px;max-width:480px;width:92%;text-align:center;animation:fadeUp .3s ease}
+  .modal-foto img{max-width:100%;max-height:60vh;border-radius:10px;object-fit:contain}
+  .modal-foto-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-top:16px;font-weight:700}
+  .modal-foto-ref{font-size:12px;color:var(--text-muted);margin-top:4px}
   @media(max-width:600px){
     .login-card{padding:36px 24px}
     .main-content{padding:24px 16px 220px}
@@ -1069,6 +1103,16 @@
 <div id="oferta-print-area"></div>
 
 
+
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal-foto">
+    <img id="modal-foto-img" src="" alt="">
+    <div class="modal-foto-name" id="modal-foto-name"></div>
+    <div class="modal-foto-ref" id="modal-foto-ref"></div>
+    <button class="btn-secondary" style="margin-top:16px" onclick="document.getElementById('modal-foto').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-detalle-pedido">
   <div class="modal-detalle">
     <div class="modal-detalle-header">
@@ -1147,6 +1191,16 @@
 </div>
 <div id="oferta-print-area"></div>
 
+
+
+<div class="modal-overlay" id="modal-foto">
+  <div class="modal-foto">
+    <img id="modal-foto-img" src="" alt="">
+    <div class="modal-foto-name" id="modal-foto-name"></div>
+    <div class="modal-foto-ref" id="modal-foto-ref"></div>
+    <button class="btn-secondary" style="margin-top:16px" onclick="document.getElementById('modal-foto').classList.remove('open')">Cerrar</button>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-detalle-pedido">
   <div class="modal-detalle">
@@ -1575,37 +1629,45 @@
       var vatInfo = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice) + '\u20ac c/IVA</small>'
         : '<small style="color:var(--text-muted);font-size:11px">sin IVA</small>';
+            // Stock badge
+      var stock = p.stock !== undefined ? p.stock : null;
+      var stockHtml = '';
+      if (stock !== null) {
+        if (stock <= 0) stockHtml = '<span class="stock-badge stock-zero">Sin stock</span>';
+        else if (stock < 10) stockHtml = '<span class="stock-badge stock-low">Stock: ' + stock + '</span>';
+        else stockHtml = '<span class="stock-badge stock-ok">Stock: ' + stock + '</span>';
+      }
+      // Imagen
+      var imgHtml = p.image
+        ? '<img class="product-thumb" src="data:image/png;base64,' + p.image + '" alt="' + p.name.replace(/'/g, '') + '" onclick="abrirFotoProducto(' + p.id + ')">'
+        : '<div class="product-thumb-placeholder">📦</div>';
+
       card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
-        '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
-        '<div class="product-name">' + p.name + '</div>' +
-        '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
-        '<div class="product-footer">' +
-          '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')" title="Pulsa para modificar el precio">' +
-            fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
-            vatInfo + '<br>' +
-            unitInfo +
-            '<span class="price-edit-hint">\u270f Modificar precio</span>' +
-          '</div>' +
-          '<div class="qty-control">' +
-            '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
-            '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
-            '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
-          '</div>' +
-        '</div>' +
-        '<div class="price-editor" id="pe-' + p.id + '">' +
-          '<div class="price-editor-tabs">' +
-            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
-            '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
-          '</div>' +
-          '<div class="price-editor-row">' +
-            '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
-            '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
-            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
+        '<div class="product-card-inner">' +
+          imgHtml +
+          '<div class="product-card-body">' +
+            '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
+            '<div class="product-name">' + p.name + '</div>' +
+            '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
+            stockHtml +
+            '<div class="product-footer" style="margin-top:8px">' +
+              '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
+                fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
+                vatInfo + '<br>' +
+                unitInfo +
+                '<span class="price-edit-hint">\u270f Modificar precio</span>' +
+              '</div>' +
+              '<div class="qty-control">' +
+                '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
+                '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
+                '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
+              '</div>' +
+            '</div>' +
           '</div>' +
         '</div>';
-      grid.appendChild(card);
+grid.appendChild(card);
     });
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
@@ -2846,6 +2908,17 @@
     }).catch(function(){}); // Silencioso si falla
   }
 
+
+  // ── FOTO PRODUCTO ────────────────────────────────────
+  function abrirFotoProducto(pid) {
+    var p = allProducts.filter(function(x){ return x.id === +pid; })[0];
+    if (!p || !p.image) return;
+    document.getElementById('modal-foto-img').src = 'data:image/png;base64,' + p.image;
+    document.getElementById('modal-foto-name').textContent = p.name;
+    document.getElementById('modal-foto-ref').textContent = p.ref || '';
+    document.getElementById('modal-foto').classList.add('open');
+  }
+
   function showToast(msg) {
     var existing = document.querySelector('.repeat-toast');
     if (existing) existing.remove();
@@ -3582,6 +3655,7 @@
   });
 
   window.togglePriceEditor  = togglePriceEditor;
+  window.abrirFotoProducto  = abrirFotoProducto;
   window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
   window.applyCustomPrice   = applyCustomPrice;
