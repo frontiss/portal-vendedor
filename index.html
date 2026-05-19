@@ -2988,14 +2988,23 @@ grid.appendChild(card);
       var imgEl = document.querySelector('img[data-pid="' + p.id + '"]');
       if (!imgEl) return;
 
+      // Detectar formato real de la imagen (Odoo puede devolver JPEG o PNG)
+      function b64ToDataUrl(b64) {
+        // Si ya tiene prefijo data: lo devolvemos tal cual
+        if (b64.startsWith('data:')) return b64;
+        // Detectar JPEG por cabecera /9j/ o PNG por iVBOR
+        if (b64.startsWith('/9j/')) return 'data:image/jpeg;base64,' + b64;
+        return 'data:image/png;base64,' + b64;
+      }
+
       getCachedImage(p.id).then(function(cached) {
         if (cached) {
           imgEl.src = cached;
           imgEl.style.opacity = '1';
         } else {
-          // Guardar en caché
-          setCachedImage(p.id, 'data:image/png;base64,' + p.image);
-          imgEl.src = 'data:image/png;base64,' + p.image;
+          var dataUrl = b64ToDataUrl(p.image);
+          setCachedImage(p.id, dataUrl);
+          imgEl.src = dataUrl;
           imgEl.style.opacity = '1';
         }
       });
