@@ -95,7 +95,6 @@
   .search-input:focus{border-color:var(--accent)}
   .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:40px}
   .products-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:40px}
-  .products-grid.list-view .product-card{border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;transform:none;padding:11px 20px;display:flex;flex-direction:row;align-items:center;gap:16px;background:white;min-height:0}
   .products-grid.list-view .product-card:last-child{border-bottom:none}
   .products-grid.list-view .product-card:nth-child(even){background:#FAFAF8}
   .products-grid.list-view .product-card:hover{background:#F9F7F4;transform:none;border-color:transparent}
@@ -108,7 +107,9 @@
   .products-grid.list-view .product-footer{flex-shrink:0;flex-direction:row;align-items:center;gap:12px;margin-top:0}
   .products-grid.list-view .product-price{font-size:15px;font-weight:600;white-space:nowrap;min-width:70px;text-align:right}
   .products-grid.list-view .product-price small{display:none}
-  .products-grid.list-view .price-editor{display:none}
+  .products-grid.list-view .price-editor{display:none;flex-basis:100%;order:99;margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
+  .products-grid.list-view .product-card{border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;transform:none;padding:11px 20px;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:16px;background:white;min-height:0}
+  .products-grid.list-view .price-editor.open{display:block}
   .products-grid.list-view .product-price-clickable .price-edit-hint{display:none}
   .product-card{background:white;border-radius:16px;padding:20px;border:1.5px solid var(--border);transition:border-color .2s,box-shadow .2s,transform .15s}
   .product-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-2px)}
@@ -1687,6 +1688,17 @@
             '<button class="qty-btn" data-id="' + p.id + '" data-d="-1">\u2212</button>' +
             '<div class="qty-val" id="qv-' + p.id + '">' + qty + '</div>' +
             '<button class="qty-btn" data-id="' + p.id + '" data-d="1">+</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="price-editor" id="pe-' + p.id + '">' +
+          '<div class="price-editor-tabs">' +
+            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
+            '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
+          '</div>' +
+          '<div class="price-editor-row">' +
+            '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
+            '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
+            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
           '</div>' +
         '</div>';
 grid.appendChild(card);
