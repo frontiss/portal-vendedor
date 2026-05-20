@@ -543,8 +543,8 @@
   .stock-low{background:#FFF3CD;color:#856404}
   .stock-zero{background:#F8D7DA;color:#842029}
   /* Modal foto ampliada */
-  .modal-foto{background:white;border-radius:16px;padding:20px;max-width:480px;width:92%;text-align:center;animation:fadeUp .3s ease}
-  .modal-foto img{max-width:100%;max-height:60vh;border-radius:10px;object-fit:contain}
+  .modal-foto{background:white;border-radius:20px;padding:28px 24px;max-width:720px;width:95%;text-align:center;animation:fadeUp .3s ease}
+  .modal-foto img{max-width:100%;max-height:75vh;border-radius:12px;object-fit:contain;min-height:200px;background:#f5f5f5}
   .modal-foto-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-top:16px;font-weight:700}
   .modal-foto-ref{font-size:12px;color:var(--text-muted);margin-top:4px}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
@@ -602,8 +602,8 @@
   .stock-low{background:#FFF3CD;color:#856404}
   .stock-zero{background:#F8D7DA;color:#842029}
   /* Modal foto ampliada */
-  .modal-foto{background:white;border-radius:16px;padding:20px;max-width:480px;width:92%;text-align:center;animation:fadeUp .3s ease}
-  .modal-foto img{max-width:100%;max-height:60vh;border-radius:10px;object-fit:contain}
+  .modal-foto{background:white;border-radius:20px;padding:28px 24px;max-width:720px;width:95%;text-align:center;animation:fadeUp .3s ease}
+  .modal-foto img{max-width:100%;max-height:75vh;border-radius:12px;object-fit:contain;min-height:200px;background:#f5f5f5}
   .modal-foto-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-top:16px;font-weight:700}
   .modal-foto-ref{font-size:12px;color:var(--text-muted);margin-top:4px}
   @media(max-width:600px){
@@ -2904,6 +2904,15 @@ grid.appendChild(card);
 
 
   // ── FOTO PRODUCTO ────────────────────────────────────
+  var hdImgCache = {};  // caché en memoria para imágenes HD de esta sesión
+
+  function b64ToDataUrl(b64) {
+    if (!b64) return '';
+    if (b64.startsWith('data:')) return b64;
+    if (b64.startsWith('/9j/')) return 'data:image/jpeg;base64,' + b64;
+    return 'data:image/png;base64,' + b64;
+  }
+
   function abrirFotoProducto(pid) {
     var p = allProducts.filter(function(x){ return x.id === +pid; })[0];
     if (!p || !p.image) return;
@@ -2911,19 +2920,36 @@ grid.appendChild(card);
     var imgEl = document.getElementById('modal-foto-img');
     document.getElementById('modal-foto-name').textContent = p.name;
     document.getElementById('modal-foto-ref').textContent = p.ref || '';
-    imgEl.src = '';  // limpiar imagen anterior
     modal.classList.add('open');
-    getCachedImage(p.id).then(function(cached) {
-      if (cached) {
-        imgEl.src = cached;
-      } else {
-        var dataUrl = p.image.startsWith('data:') ? p.image
-          : p.image.startsWith('/9j/') ? 'data:image/jpeg;base64,' + p.image
-          : 'data:image/png;base64,' + p.image;
-        setCachedImage(p.id, dataUrl);
-        imgEl.src = dataUrl;
+
+    // 1) Mostrar miniatura (128px) de inmediato para que no quede en blanco
+    imgEl.style.opacity = '0.5';
+    imgEl.src = b64ToDataUrl(p.image);
+    imgEl.style.opacity = '1';
+
+    // 2) Si ya tenemos la HD en caché, usarla directamente
+    if (hdImgCache[p.id]) {
+      imgEl.src = hdImgCache[p.id];
+      return;
+    }
+
+    // 3) Pedir imagen HD al backend (image_1920)
+    fetch(API + '/products/' + p.id + '/image', {
+      headers: { 'Authorization': 'Bearer ' + (token || '') }
+    })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (data && data.image) {
+        var hdUrl = b64ToDataUrl(data.image);
+        hdImgCache[p.id] = hdUrl;
+        // Solo actualizar si el modal sigue abierto con el mismo producto
+        if (modal.classList.contains('open') &&
+            document.getElementById('modal-foto-name').textContent === p.name) {
+          imgEl.src = hdUrl;
+        }
       }
-    });
+    })
+    .catch(function() { /* si falla, la miniatura ya está visible */ });
   }
 
 
