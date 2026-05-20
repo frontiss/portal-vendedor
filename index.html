@@ -1556,7 +1556,12 @@
   function logout() {
     token = null; vendorName = ''; allClients = []; selectedClient = null;
     clearImgCache();
+    hdImgCache = {};
     quantities = {}; allProducts = [];
+    // Ocultar barra del pedido
+    var cartBar = document.getElementById('cart-bar');
+    cartBar.style.display = 'none';
+    cartBar.classList.remove('open');
     appScreen.style.display = 'none';
     document.getElementById('panel-facturas').style.display = 'none';
     clientsScreen.style.display = 'none';
