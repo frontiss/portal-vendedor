@@ -1392,6 +1392,31 @@
 
   btnLogin.addEventListener('click', doLogin);
 
+  // ── RESTAURAR SESIÓN AL ARRANCAR ─────────────────────
+  (function restoreSession() {
+    var savedToken = localStorage.getItem('session_token');
+    if (!savedToken) return;
+
+    // Validar que el token sigue siendo válido contra el backend
+    fetch(API + '/vendor/clients', {
+      headers: { 'Authorization': 'Bearer ' + savedToken }
+    })
+    .then(function(r) {
+      if (!r.ok) throw new Error('Token expirado');
+      token = savedToken;
+      vendorName = localStorage.getItem('session_name') || '';
+      vendorUid  = parseInt(localStorage.getItem('session_uid') || '0', 10);
+      loginScreen.style.display = 'none';
+      showClientsScreen();
+    })
+    .catch(function() {
+      // Token expirado o inválido — limpiar y pedir login
+      localStorage.removeItem('session_token');
+      localStorage.removeItem('session_name');
+      localStorage.removeItem('session_uid');
+    });
+  })();
+
   function doLogin() {
     var username = document.getElementById('login-user').value.trim();
     var password = document.getElementById('login-pass').value;
@@ -1418,6 +1443,10 @@
       token = res.data.token;
       vendorName = res.data.vendor.user_name;
       vendorUid  = res.data.vendor.user_id || 0;
+      // Persistir sesión para cuando la app vuelve de segundo plano
+      localStorage.setItem('session_token', token);
+      localStorage.setItem('session_name', vendorName);
+      localStorage.setItem('session_uid', vendorUid);
       loginScreen.style.display = 'none';
       showClientsScreen();
     })
@@ -1582,6 +1611,10 @@
 
   function logout() {
     token = null; vendorName = ''; allClients = []; selectedClient = null;
+    // Borrar sesión persistida
+    localStorage.removeItem('session_token');
+    localStorage.removeItem('session_name');
+    localStorage.removeItem('session_uid');
     clearImgCache();
     hdImgCache = {};
     quantities = {}; allProducts = [];
