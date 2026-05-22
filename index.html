@@ -107,6 +107,7 @@
   .products-grid.list-view .product-footer{flex-shrink:0;flex-direction:row;align-items:center;gap:12px;margin-top:0}
   .products-grid.list-view .product-price{font-size:15px;font-weight:600;white-space:nowrap;min-width:70px;text-align:right}
   .products-grid.list-view .product-price small{display:none}
+  .products-grid.list-view .product-price .unit-cost{display:block;font-size:11px;color:var(--text-muted);font-weight:400;text-align:right;margin-top:1px}
   .products-grid.list-view .price-editor{display:none;flex-basis:100%;order:99;margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
   .products-grid.list-view .product-card{border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;transform:none;padding:11px 20px;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:16px;background:white;min-height:0}
   .products-grid.list-view .price-editor.open{display:block}
@@ -1686,7 +1687,7 @@
       var displayVatPrice = custom ? round2(custom.price * (1 + taxRate/100)) : (p.price_with_vat || p.price);
       var customBadge = custom ? '<span class="price-custom-badge">-' + custom.discount + '%</span>' : '';
       var unitInfo = boxQty > 1
-        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt((custom ? custom.price/boxQty : p.unit_price) || p.price) + '\u20ac/ud</small>'
+        ? '<small class="unit-cost" style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt((custom ? custom.price/boxQty : p.unit_price) || p.price) + '\u20ac/ud</small>'
         : '';
       var vatInfo = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice) + '\u20ac c/IVA</small>'
@@ -2166,7 +2167,7 @@ grid.appendChild(card);
       var boxQty = p.box_qty || 1;
       var taxRate = p.tax_rate || 0;
       var unitInfo = boxQty > 1
-        ? '<small style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
+        ? '<small class="unit-cost" style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt(p.unit_price || p.price) + '\u20ac/ud</small>'
         : '';
       var vatInfo = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(p.price_with_vat || p.price) + '\u20ac c/IVA</small>'
