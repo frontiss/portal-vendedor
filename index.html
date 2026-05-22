@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-  <meta name="theme-color" content="#1A3A2A">
+  <meta name="theme-color" content="#1A3356">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,30 +14,30 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#F5F2EC; --surface:#FFFFFF; --primary:#1A3A2A; --accent:#D48B3A;
-    --accent-light:#F5E6CE; --text:#1A1A1A; --text-muted:#6B6B6B;
-    --border:#E0DAD0; --danger:#C0392B;
-    --shadow:0 2px 20px rgba(26,58,42,.08); --shadow-lg:0 8px 40px rgba(26,58,42,.14);
+    --bg:#F0F5FA; --surface:#FFFFFF; --primary:#1A3356; --accent:#F97316;
+    --accent-light:#FEF0E6; --text:#1A2433; --text-muted:#6B8AAA;
+    --border:#DDE8F0; --danger:#C0392B;
+    --shadow:0 2px 20px rgba(26,51,86,.08); --shadow-lg:0 8px 40px rgba(26,51,86,.14);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Poppins',sans-serif;font-weight:500;background:var(--bg);color:var(--text);min-height:100vh}
 
   /* ── LOGIN SCREEN ── */
   #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--primary);position:relative;overflow:hidden}
-  #login-screen::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(212,139,58,.18) 0%,transparent 70%);top:-100px;right:-100px}
-  #login-screen::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(212,139,58,.10) 0%,transparent 70%);bottom:-80px;left:-80px}
+  #login-screen::before{content:'';position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.18) 0%,transparent 70%);top:-100px;right:-100px}
+  #login-screen::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.10) 0%,transparent 70%);bottom:-80px;left:-80px}
   .login-card{background:white;border-radius:20px;padding:56px 48px;width:440px;max-width:90vw;box-shadow:var(--shadow-lg);position:relative;z-index:1;animation:fadeUp .5s ease;text-align:left}
   @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
   .login-card h1{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--primary);margin-bottom:6px}
   .login-card p{color:var(--text-muted);font-size:14px;margin-bottom:32px}
-  .vendor-badge{display:inline-flex;align-items:center;gap:6px;background:#EBF3EE;color:var(--primary);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:24px;border:1px solid rgba(26,58,42,.12)}
+  .vendor-badge{display:inline-flex;align-items:center;gap:6px;background:#EBF0F8;color:var(--primary);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:24px;border:1px solid rgba(26,51,86,.12)}
   .field-label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;display:block}
   .field-wrap{position:relative;margin-bottom:24px}
   .field-input{width:100%;padding:14px 44px 14px 16px;border:2px solid var(--border);border-radius:14px;font-family:'Poppins',sans-serif;font-size:15px;color:var(--primary);background:var(--bg);outline:none;transition:border-color .2s,box-shadow .2s}
-  .field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,139,58,.15);background:#fff}
+  .field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,.15);background:#fff}
   .toggle-pw{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0;font-size:18px}
   .btn-primary{width:100%;padding:16px;background:var(--primary);color:white;border:none;border-radius:12px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;letter-spacing:.02em}
-  .btn-primary:hover{background:#24503A}
+  .btn-primary:hover{background:#163070}
   .btn-primary:disabled{background:#888;cursor:not-allowed}
   .login-error{color:var(--danger);font-size:13px;margin-top:12px;text-align:center;min-height:20px;display:none}
   .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
@@ -76,7 +76,7 @@
   .header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .header-logo{font-family:'Cormorant Garamond',serif;color:white;font-size:20px}
   .header-store{background:rgba(255,255,255,.12);padding:4px 12px;border-radius:20px;color:rgba(255,255,255,.85);font-size:13px;font-weight:500}
-  .header-vendor{background:rgba(212,139,58,.25);padding:4px 12px;border-radius:20px;color:rgba(255,255,255,.9);font-size:12px;font-weight:600}
+  .header-vendor{background:rgba(249,115,22,.25);padding:4px 12px;border-radius:20px;color:rgba(255,255,255,.9);font-size:12px;font-weight:600}
   .header-right{display:flex;align-items:center;gap:8px}
   .btn-back{background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.8);padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
   .btn-back:hover{background:rgba(255,255,255,.1);color:white}
@@ -98,23 +98,20 @@
   .products-grid.list-view .product-card:last-child{border-bottom:none}
   .products-grid.list-view .product-card:nth-child(even){background:#FAFAF8}
   .products-grid.list-view .product-card:hover{background:#F9F7F4;transform:none;border-color:transparent}
-  .products-grid.list-view .product-card.selected{background:#F0F6F3}
-  .products-grid.list-view .product-card.selected:hover{background:#E8F2ED}
+  .products-grid.list-view .product-card.selected{background:#EEF4FB}
+  .products-grid.list-view .product-card.selected:hover{background:#E8F0F8}
   .products-grid.list-view .product-ref{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;width:68px;flex-shrink:0}
   .products-grid.list-view .product-name{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:0;line-height:1;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',serif}
-  .products-grid.list-view .product-format{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;flex-shrink:0;width:140px}
-  .products-grid.list-view .stock-badge{flex-shrink:0;font-size:10px;padding:2px 7px;margin-top:0;width:80px;justify-content:center}
-  .products-grid.list-view .product-footer{flex-shrink:0;flex-direction:row;align-items:center;gap:12px;margin-top:0}
-  .products-grid.list-view .product-price{font-size:15px;font-weight:600;white-space:nowrap;min-width:70px;text-align:right}
-  .products-grid.list-view .product-price small{display:none}
-  .products-grid.list-view .product-price .unit-cost{display:block;font-size:11px;color:var(--text-muted);font-weight:400;text-align:right;margin-top:1px}
+  .products-grid.list-view .product-format{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;flex-shrink:0;width:160px}
+  .products-grid.list-view .product-format .unit-cost{display:block;font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px}
+  .products-grid.list-view .product-price .unit-cost{display:none}
   .products-grid.list-view .price-editor{display:none;flex-basis:100%;order:99;margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
   .products-grid.list-view .product-card{border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;transform:none;padding:11px 20px;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:16px;background:white;min-height:0}
   .products-grid.list-view .price-editor.open{display:block}
   .products-grid.list-view .product-price-clickable .price-edit-hint{display:none}
   .product-card{background:white;border-radius:16px;padding:20px;border:1.5px solid var(--border);transition:border-color .2s,box-shadow .2s,transform .15s}
   .product-card:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-2px)}
-  .product-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .product-card.selected{border-color:var(--primary);background:#EEF4FB}
   .product-ref{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
   .product-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--primary);margin-bottom:4px;line-height:1.3}
   .product-format{font-size:12px;color:var(--text-muted);margin-bottom:16px}
@@ -150,8 +147,8 @@
   .history-total{font-size:16px;font-weight:700;color:var(--primary)}
   .state-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
   .state-draft{background:#FFF3CD;color:#856404}
-  .state-sale{background:#D1E7DD;color:#0A5C36}
-  .state-done{background:#D1E7DD;color:#0A5C36}
+  .state-sale{background:#D1E4F5;color:#1A3356}
+  .state-done{background:#D1E4F5;color:#1A3356}
   .state-cancel{background:#F8D7DA;color:#842029}
   .history-chevron{color:var(--text-muted);transition:transform .2s;font-size:18px}
   .history-card.open .history-chevron{transform:rotate(180deg)}
@@ -164,7 +161,7 @@
   .history-line-price{font-weight:600;color:var(--primary);white-space:nowrap}
   .history-empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-style:italic}
   .btn-repeat{background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
-  .btn-repeat:hover{background:#24503A}
+  .btn-repeat:hover{background:#163070}
   .repeat-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:var(--primary);color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:9999;animation:fadeUp .3s ease;box-shadow:var(--shadow-lg)}
   /* modales */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
@@ -187,10 +184,10 @@
   .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .facturas-resumen-label{font-size:13px;color:var(--text-muted)}
   .facturas-total-pendiente{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--danger);font-weight:700}
-  .facturas-total-pendiente.ok{color:#0A5C36}
+  .facturas-total-pendiente.ok{color:#1A3356}
   .factura-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s,box-shadow .15s}
   .factura-card:hover{box-shadow:var(--shadow)}
-  .factura-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .factura-card.selected{border-color:var(--primary);background:#EEF4FB}
   .factura-card.vencida{border-color:#F5C6CB}
   .factura-card.vencida.selected{border-color:var(--danger);background:#FFF5F5}
   .factura-check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -230,8 +227,8 @@
   .day-btn.all.active{background:var(--accent);border-color:var(--accent);color:white}
   /* Cliente tarjeta */
   .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:2px}
-  .client-card.visited{border-color:#1A3A2A !important;background:#F0F6F3}
-  .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3A2A;margin-top:8px;background:#D1E7DD;padding:3px 10px;border-radius:20px;width:fit-content}
+  .client-card.visited{border-color:#1A3356 !important;background:#EEF4FB}
+  .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3356;margin-top:8px;background:#D1E4F5;padding:3px 10px;border-radius:20px;width:fit-content}
   .client-card.visited .visited-badge{display:block}
   /* Habituales y pedido anterior */
   .product-habitual-badge{display:inline-flex;align-items:center;gap:4px;background:#FFF3CD;color:#856404;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;width:fit-content}
@@ -245,10 +242,10 @@
   .facturas-resumen-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
   .facturas-resumen-label{font-size:13px;color:var(--text-muted)}
   .facturas-total-pendiente{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--danger);font-weight:700}
-  .facturas-total-pendiente.ok{color:#0A5C36}
+  .facturas-total-pendiente.ok{color:#1A3356}
   .factura-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .2s,box-shadow .15s}
   .factura-card:hover{box-shadow:var(--shadow)}
-  .factura-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .factura-card.selected{border-color:var(--primary);background:#EEF4FB}
   .factura-card.vencida{border-color:#F5C6CB}
   .factura-card.vencida.selected{border-color:var(--danger);background:#FFF5F5}
   .factura-check{width:22px;height:22px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -325,15 +322,15 @@
   .edit-field.full{grid-column:1/-1}
   .edit-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
   .edit-input{padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;color:var(--primary);background:white;outline:none;transition:border-color .2s}
-  .edit-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,139,58,.12)}
+  .edit-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,.12)}
   .edit-textarea{resize:vertical;min-height:70px;font-family:'Poppins',sans-serif}
   .edit-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
   .btn-save{background:var(--primary);color:white;border:none;padding:12px 28px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
-  .btn-save:hover{background:#24503A}
+  .btn-save:hover{background:#163070}
   .btn-save:disabled{background:#888;cursor:not-allowed}
 
   /* ── EDITOR DE PRECIO ── */
-  .price-editor{display:none;margin-top:10px;background:white;border-radius:10px;padding:12px;border:1.5px solid var(--accent);box-shadow:0 4px 12px rgba(212,139,58,.15)}
+  .price-editor{display:none;margin-top:10px;background:white;border-radius:10px;padding:12px;border:1.5px solid var(--accent);box-shadow:0 4px 12px rgba(249,115,22,.15)}
   .price-editor.open{display:block}
   .price-editor-tabs{display:flex;gap:4px;margin-bottom:10px}
   .price-editor-tab{flex:1;padding:6px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s;text-align:center}
@@ -342,10 +339,10 @@
   .price-editor-input{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;min-width:0}
   .price-editor-input:focus{border-color:var(--accent)}
   .price-editor-btn{padding:8px 14px;background:var(--primary);color:white;border:none;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0}
-  .price-editor-btn:hover{background:#24503A}
+  .price-editor-btn:hover{background:#163070}
   .price-editor-reset{padding:8px 10px;background:var(--bg);color:var(--text-muted);border:1.5px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0;line-height:1}
   .price-editor-reset:hover{border-color:var(--danger);color:var(--danger)}
-  .price-custom-badge{display:inline-block;background:#D1E7DD;color:#0A5C36;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px;vertical-align:middle}
+  .price-custom-badge{display:inline-block;background:#D1E4F5;color:#1A3356;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:4px;vertical-align:middle}
   .product-price-clickable{cursor:pointer}
   .product-price-clickable:hover .price-edit-hint{opacity:1}
   .price-edit-hint{font-size:10px;color:var(--accent);opacity:0;transition:opacity .2s;display:block;margin-top:2px}
@@ -382,12 +379,12 @@
   .btn-oferta-pdf{display:inline-flex;align-items:center;gap:8px;background:var(--danger);color:white;border:none;padding:11px 20px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
   .btn-oferta-pdf:hover{background:#A93226}
   .btn-oferta-email{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:white;border:none;padding:11px 20px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
-  .btn-oferta-email:hover{background:#24503A}
+  .btn-oferta-email:hover{background:#163070}
   .btn-oferta-email:disabled{background:#888;cursor:not-allowed}
   .oferta-empty{text-align:center;padding:60px 20px;color:var(--text-muted);font-style:italic}
   .oferta-product-card{background:white;border-radius:14px;border:1.5px solid var(--border);padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s,background .15s}
   .oferta-product-card:hover{border-color:var(--accent)}
-  .oferta-product-card.selected{border-color:var(--primary);background:#F0F6F3}
+  .oferta-product-card.selected{border-color:var(--primary);background:#EEF4FB}
   .oferta-check{width:20px;height:20px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
   .oferta-product-card.selected .oferta-check{background:var(--primary);border-color:var(--primary);color:white}
   .oferta-info{flex:1}
@@ -460,7 +457,7 @@
   /* ── RESUMEN CARRITO ── */
   .cart-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;transition:transform .3s ease}
   .cart-tab{background:var(--primary);color:white;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;box-shadow:0 -4px 20px rgba(0,0,0,.15)}
-  .cart-tab:hover{background:#24503A}
+  .cart-tab:hover{background:#163070}
   .cart-tab-left{display:flex;align-items:center;gap:12px}
   .cart-tab-icon{font-size:18px}
   .cart-tab-label{font-family:'Poppins',sans-serif;font-size:14px;font-weight:600}
@@ -505,7 +502,7 @@
   .kpi-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
   .kpi-value{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--primary)}
   .kpi-vs{font-size:12px;margin-top:4px}
-  .kpi-up{color:#0A5C36}
+  .kpi-up{color:#1A3356}
   .kpi-down{color:var(--danger)}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -514,18 +511,18 @@
   .view-btn.active{background:var(--primary);color:white}
   /* Vista tabla */
   .clients-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
-  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;background:#1A3A2A;padding:8px 16px}
+  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;background:#1A3356;padding:8px 16px}
   .list-table-header span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
   .clients-grid.list-view .client-card{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;padding:9px 16px;border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;cursor:pointer;transition:background .15s;align-items:center}
   .clients-grid.list-view .client-card:last-child{border-bottom:none}
   .clients-grid.list-view .client-card:hover{background:#F9F7F4}
   .clients-grid.list-view .client-card:nth-child(even){background:#FAFAF8}
   .clients-grid.list-view .client-card:nth-child(even):hover{background:#F5F2EC}
-  .clients-grid.list-view .client-card.visited{background:#F0F6F3}
-  .clients-grid.list-view .client-card.visited:hover{background:#E8F2ED}
+  .clients-grid.list-view .client-card.visited{background:#EEF4FB}
+  .clients-grid.list-view .client-card.visited:hover{background:#E8F0F8}
   .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;font-weight:500}
   .clients-grid.list-view .client-name{font-size:12px;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0}
-  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:11px}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3356;font-size:11px}
   .clients-grid.list-view .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .clients-grid.list-view .client-address{display:none}
   .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
@@ -557,7 +554,7 @@
   .product-name-foto:hover{text-decoration:underline;text-decoration-color:var(--accent)}
   .foto-icon{font-size:13px;opacity:0.6;vertical-align:middle}
   .stock-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px}
-  .stock-ok{background:#D1E7DD;color:#0A5C36}
+  .stock-ok{background:#D1E4F5;color:#1A3356}
   .stock-low{background:#FFF3CD;color:#856404}
   .stock-zero{background:#F8D7DA;color:#842029}
   /* Modal foto ampliada */
@@ -573,18 +570,18 @@
   .view-btn.active{background:var(--primary);color:white}
   /* Vista tabla */
   .clients-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden}
-  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;background:#1A3A2A;padding:8px 16px}
+  .list-table-header{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;background:#1A3356;padding:8px 16px}
   .list-table-header span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65)}
   .clients-grid.list-view .client-card{display:grid;grid-template-columns:90px 1fr 100px 100px;gap:0;padding:9px 16px;border-radius:0;border:none;border-bottom:1px solid var(--border);box-shadow:none;cursor:pointer;transition:background .15s;align-items:center}
   .clients-grid.list-view .client-card:last-child{border-bottom:none}
   .clients-grid.list-view .client-card:hover{background:#F9F7F4}
   .clients-grid.list-view .client-card:nth-child(even){background:#FAFAF8}
   .clients-grid.list-view .client-card:nth-child(even):hover{background:#F5F2EC}
-  .clients-grid.list-view .client-card.visited{background:#F0F6F3}
-  .clients-grid.list-view .client-card.visited:hover{background:#E8F2ED}
+  .clients-grid.list-view .client-card.visited{background:#EEF4FB}
+  .clients-grid.list-view .client-card.visited:hover{background:#E8F0F8}
   .clients-grid.list-view .client-ref{font-size:10px;color:var(--text-muted);white-space:nowrap;font-weight:500}
   .clients-grid.list-view .client-name{font-size:12px;font-weight:700;color:var(--primary);font-family:'Poppins',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:0}
-  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3A2A;font-size:11px}
+  .clients-grid.list-view .client-card.visited .client-name::after{content:' ✓';color:#1A3356;font-size:11px}
   .clients-grid.list-view .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .clients-grid.list-view .client-address{display:none}
   .clients-grid.list-view .ruta-badge{display:flex;justify-content:flex-start}
@@ -616,7 +613,7 @@
   .product-name-foto:hover{text-decoration:underline;text-decoration-color:var(--accent)}
   .foto-icon{font-size:13px;opacity:0.6;vertical-align:middle}
   .stock-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:4px}
-  .stock-ok{background:#D1E7DD;color:#0A5C36}
+  .stock-ok{background:#D1E4F5;color:#1A3356}
   .stock-low{background:#FFF3CD;color:#856404}
   .stock-zero{background:#F8D7DA;color:#842029}
   /* Modal foto ampliada */
@@ -708,7 +705,7 @@
       <input type="text" id="client-search" class="field-input" style="padding-left:42px;border-radius:10px;border:1.5px solid var(--border);background:white" placeholder="Buscar cliente...">
     </div>
     <div style="margin-bottom:24px">
-      <button id="btn-new-client" style="display:inline-flex;align-items:center;gap:8px;background:#1A3A2A;color:white;border:none;padding:12px 22px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(26,58,42,.2);transition:all .2s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><path d="M12 13v8M8 17h8"/></svg>Nuevo cliente</button>
+      <button id="btn-new-client" style="display:inline-flex;align-items:center;gap:8px;background:#1A3356;color:white;border:none;padding:12px 22px;border-radius:12px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(26,51,86,.2);transition:all .2s"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><path d="M12 13v8M8 17h8"/></svg>Nuevo cliente</button>
     </div>
     <div class="view-toggle" id="view-toggle">
       <button class="view-btn active" id="btn-view-grid" title="Vista tarjetas">
@@ -849,16 +846,16 @@
     <div class="analisis-section" id="chart-importe-wrap" style="display:none">
       <div class="analisis-section-title">Importe mensual s/IVA (€)</div>
       <div class="analisis-legend">
-        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3A2A"></div><span id="legend-actual-label">2025</span></div>
-        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#D48B3A;opacity:.5"></div><span id="legend-anterior-label">2024</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3356"></div><span id="legend-actual-label">2025</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#F97316;opacity:.5"></div><span id="legend-anterior-label">2024</span></div>
       </div>
       <div class="chart-wrap"><canvas class="chart-canvas" id="chart-importe"></canvas></div>
     </div>
     <div class="analisis-section" id="chart-pedidos-wrap" style="display:none">
       <div class="analisis-section-title">Número de pedidos por mes</div>
       <div class="analisis-legend">
-        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3A2A"></div><span>Actual</span></div>
-        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#D48B3A;opacity:.5"></div><span>Anterior</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#1A3356"></div><span>Actual</span></div>
+        <div class="analisis-legend-item"><div class="analisis-legend-dot" style="background:#F97316;opacity:.5"></div><span>Anterior</span></div>
       </div>
       <div class="chart-wrap"><canvas class="chart-canvas" id="chart-pedidos"></canvas></div>
     </div>
@@ -1558,7 +1555,7 @@
     if (client.pricelist_name) {
       var tb = document.createElement('span');
       tb.id = 'client-tarifa-badge';
-      tb.style.cssText = 'display:inline-flex;align-items:center;background:#EBF3EE;color:#1A3A2A;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
+      tb.style.cssText = 'display:inline-flex;align-items:center;background:#EBF0F8;color:#1A3356;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
       tb.textContent = (client.pricelist_name || '').replace(/\s*\(.*?\)/g, '').trim();
       document.getElementById('page-title').appendChild(tb);
     }
@@ -1709,13 +1706,12 @@
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         nameHtml +
-        '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + '</div>' +
+        '<div class="product-format">' + (p.uom || '') + (boxQty > 1 ? ' &middot; ' + boxQty + ' uds/' + boxLabel : '') + (unitInfo ? unitInfo : '') + '</div>' +
         stockHtml +
         '<div class="product-footer" style="margin-top:8px">' +
           '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
             fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
             vatInfo + '<br>' +
-            unitInfo +
             '<span class="price-edit-hint">\u270f Modificar precio</span>' +
           '</div>' +
           '<div class="qty-control">' +
@@ -2188,11 +2184,11 @@ grid.appendChild(card);
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         nameHtml2 +
-        '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + '</div>' +
+        '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + (unitInfo ? unitInfo : '') + '</div>' +
         '<div class="product-footer">' +
           '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
             fmt(displayPrice2) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge2 + '<br>' +
-            vatInfo2 + '<br>' + unitInfo +
+            vatInfo2 + '<br>' +
             '<span class="price-edit-hint">\u270f Modificar precio</span>' +
           '</div>' +
           '<div class="qty-control">' +
@@ -2470,16 +2466,16 @@ grid.appendChild(card);
       rows+='<tr><td>'+c.cliente+'</td><td>'+co.ref+'</td><td>'+co.diario+'</td>'+(mode==='facturas'?'<td>'+f+'</td>':'')+'<td style="text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
     });});
     return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">' +
-      '<div style="border-bottom:2px solid #1A3A2A;padding-bottom:12px;margin-bottom:20px">' +
-        '<h1 style="font-size:22px;color:#1A3A2A;margin:0">Liquidacion de cobros</h1>' +
+      '<div style="border-bottom:2px solid #1A3356;padding-bottom:12px;margin-bottom:20px">' +
+        '<h1 style="font-size:22px;color:#1A3356;margin:0">Liquidacion de cobros</h1>' +
         '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: '+data.vendedor+' | Fecha: '+formatDateES(data.fecha)+'</p></div>' +
       '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.clientes.length+'</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3A2A">'+data.num_cobros+'</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#D48B3A">'+fmt(data.total)+' \u20ac</div></div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3356">'+data.clientes.length+'</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3356">'+data.num_cobros+'</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#F97316">'+fmt(data.total)+' \u20ac</div></div></div>' +
       (mode!=='resumen'?
         '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
-          '<thead><tr style="background:#1A3A2A;color:white">' +
+          '<thead><tr style="background:#1A3356;color:white">' +
             '<th style="padding:10px 12px;text-align:left">Cliente</th><th style="padding:10px 12px;text-align:left">Referencia</th><th style="padding:10px 12px;text-align:left">Diario</th>' +
             (mode==='facturas'?'<th style="padding:10px 12px;text-align:left">Facturas</th>':'') +
             '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>' +
@@ -2633,7 +2629,7 @@ grid.appendChild(card);
       res.lines.forEach(function(line) {
         var div = document.createElement('div');
         div.className = 'modal-detalle-line';
-        var discBadge = line.discount > 0 ? ' <span style="background:#D1E7DD;color:#0A5C36;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px">-' + line.discount + '%</span>' : '';
+        var discBadge = line.discount > 0 ? ' <span style="background:#D1E4F5;color:#1A3356;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px">-' + line.discount + '%</span>' : '';
         div.innerHTML =
           '<div class="modal-detalle-info">' +
             '<div class="modal-detalle-name">' + line.product + discBadge + '</div>' +
@@ -2804,17 +2800,17 @@ grid.appendChild(card);
 
       // Año anterior (dorado suave)
       var hAnt = dataAnterior[i] * scale;
-      ctx.fillStyle = 'rgba(212,139,58,0.35)';
+      ctx.fillStyle = 'rgba(249,115,22,0.35)';
       ctx.fillRect(x + groupW * 0.05, padT + chartH - hAnt, barW, hAnt);
 
       // Año actual (verde oscuro)
       var hAct = dataActual[i] * scale;
-      ctx.fillStyle = '#1A3A2A';
+      ctx.fillStyle = '#1A3356';
       ctx.fillRect(x + groupW * 0.5, padT + chartH - hAct, barW, hAct);
 
       // Valor encima de barra actual
       if (dataActual[i] > 0) {
-        ctx.fillStyle = '#1A3A2A';
+        ctx.fillStyle = '#1A3356';
         ctx.font = 'bold 9px Poppins,sans-serif';
         ctx.textAlign = 'center';
         var label = isEuro ? fmt(dataActual[i]) : dataActual[i];
@@ -3501,7 +3497,7 @@ grid.appendChild(card);
       if (selectedClient.pricelist_name) {
         var tb2 = document.createElement('span');
         tb2.id = 'client-tarifa-badge';
-        tb2.style.cssText = 'display:inline-flex;align-items:center;background:#EBF3EE;color:#1A3A2A;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
+        tb2.style.cssText = 'display:inline-flex;align-items:center;background:#EBF0F8;color:#1A3356;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:12px;vertical-align:middle';
         tb2.textContent = selectedClient.pricelist_name;
         document.getElementById('page-title').appendChild(tb2);
       }
@@ -3769,15 +3765,15 @@ grid.appendChild(card);
     var printContent =
       '<html><head><meta charset="UTF-8"><style>body{margin:0;padding:0;font-family:Arial,sans-serif}@media print{@page{margin:15mm}}</style></head><body>' +
       '<div style="font-family:Arial,sans-serif;padding:32px;max-width:800px;margin:0 auto">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3A2A;padding-bottom:16px;margin-bottom:20px">' +
-        '<div><h1 style="margin:0;font-size:22px;color:#1A3A2A">Comercial A. Puchol S.A.</h1>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1A3356;padding-bottom:16px;margin-bottom:20px">' +
+        '<div><h1 style="margin:0;font-size:22px;color:#1A3356">Comercial A. Puchol S.A.</h1>' +
         '<p style="margin:4px 0 0;color:#666;font-size:13px">Oferta de precios</p></div>' +
         '<div style="text-align:right"><p style="margin:0;font-size:13px;color:#333"><strong>' + clienteNombre + '</strong></p>' +
         '<p style="margin:2px 0 0;font-size:12px;color:#666">Fecha: ' + fecha + '</p>' +
         '<p style="margin:2px 0 0;font-size:12px;color:#666">Comercial: ' + vendorName + '</p></div>' +
       '</div>' +
       '<table style="width:100%;border-collapse:collapse">' +
-        '<thead><tr style="background:#1A3A2A">' +
+        '<thead><tr style="background:#1A3356">' +
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">REF</th>' +
           '<th style="padding:10px 12px;color:white;text-align:left;font-size:11px">PRODUCTO</th>' +
           '<th style="padding:10px 12px;color:white;text-align:center;font-size:11px">FORMATO</th>' +
