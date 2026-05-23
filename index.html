@@ -1713,6 +1713,7 @@
   document.getElementById('btn-logout-app').addEventListener('click', logout);
 
   function logout() {
+    if (!confirm('¿Seguro que quieres cerrar sesión?')) return;
     token = null; vendorName = ''; allClients = []; selectedClient = null;
     // Borrar sesión persistida
     localStorage.removeItem('session_token');
@@ -3125,6 +3126,9 @@ grid.appendChild(card);
     body.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando...</div>';
     modal.classList.add('open');
 
+    // Precio de tarifa real = el que ya tiene aplicada la tarifa del cliente
+    var listPrice = p ? (p.price || 0) : 0;
+
     fetch(API + '/products/' + pid + '/price-history?partner_id=' + selectedClient.id, {
       headers: { 'Authorization': 'Bearer ' + token }
     })
@@ -3135,8 +3139,6 @@ grid.appendChild(card);
         body.innerHTML = '<div class="mph-empty">📋 No hay pedidos anteriores de este producto<br>para este cliente.</div>';
         return;
       }
-
-      var listPrice = data.list_price || 0;
 
       // Filtrar: solo mostrar filas donde el precio cambia respecto al anterior
       var changes = [];
@@ -3155,16 +3157,14 @@ grid.appendChild(card);
 
       var rows = changes.map(function(h) {
         var dateStr = h.date ? h.date.split('-').reverse().join('/') : '';
-        var pct = h.pct_vs_list;
+        // Recalcular diferencia vs tarifa real del cliente
+        var diff = listPrice ? round2(h.effective_price - listPrice) : null;
         var badgeHtml = '';
-        if (pct !== null && pct !== undefined) {
-          if (pct < -0.5) {
-            // Por debajo de tarifa → descuento
-            var diff = listPrice ? fmt(listPrice - h.effective_price) : '';
-            badgeHtml = '<span class="mph-badge down">−' + diff + ' € s/tarifa</span>';
-          } else if (pct > 0.5) {
-            var diff2 = listPrice ? fmt(h.effective_price - listPrice) : '';
-            badgeHtml = '<span class="mph-badge up">+' + diff2 + ' € s/tarifa</span>';
+        if (diff !== null) {
+          if (diff < -0.005) {
+            badgeHtml = '<span class="mph-badge down">' + fmt(diff) + ' € s/tarifa</span>';
+          } else if (diff > 0.005) {
+            badgeHtml = '<span class="mph-badge up">+' + fmt(diff) + ' € s/tarifa</span>';
           } else {
             badgeHtml = '<span class="mph-badge ok">Precio tarifa</span>';
           }
