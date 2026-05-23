@@ -91,7 +91,9 @@
   .search-bar{display:flex;gap:12px;margin-bottom:28px}
   .search-wrap{flex:1;position:relative}
   .search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
-  .search-input{width:100%;padding:12px 16px 12px 42px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;background:white;outline:none;transition:border-color .2s}
+  .search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:4px;display:none;border-radius:50%;transition:color .2s}
+  .search-clear:hover{color:var(--primary)}
+  .search-input{width:100%;padding:12px 36px 12px 42px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;background:white;outline:none;transition:border-color .2s}
   .search-input:focus{border-color:var(--accent)}
   .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:40px}
   .products-grid.list-view{display:block;background:white;border-radius:14px;border:1.5px solid var(--border);overflow:hidden;margin-bottom:40px}
@@ -1084,6 +1086,7 @@
         <div class="search-wrap">
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input class="search-input" id="search-field" type="text" placeholder="Buscar producto...">
+          <button class="search-clear" id="search-clear-btn" title="Borrar búsqueda">✕</button>
         </div>
         <div class="view-toggle" id="products-view-toggle" style="margin-bottom:0;flex-shrink:0">
           <button class="view-btn active" id="btn-prod-grid" title="Vista tarjetas">
@@ -1765,11 +1768,21 @@
     });
   }
 
+  var searchClearBtn = document.getElementById('search-clear-btn');
+
   searchField.addEventListener('input', function () {
     var q = searchField.value.toLowerCase();
+    searchClearBtn.style.display = q ? 'block' : 'none';
     render(q ? allProducts.filter(function (p) {
       return (p.name + p.ref + p.category).toLowerCase().indexOf(q) !== -1;
     }) : allProducts);
+  });
+
+  searchClearBtn.addEventListener('click', function () {
+    searchField.value = '';
+    searchClearBtn.style.display = 'none';
+    searchField.focus();
+    render(allProducts);
   });
 
   function render(products) {
@@ -1799,9 +1812,11 @@
       var stock = p.stock !== undefined ? p.stock : null;
       var stockHtml = '';
       if (stock !== null) {
+        var stockCajas = boxQty > 1 ? Math.floor(stock / boxQty) : stock;
+        var stockLabel = boxQty > 1 ? (stockCajas + ' cj') : stock;
         if (stock <= 0) stockHtml = '<span class="stock-badge stock-zero">Sin stock</span>';
-        else if (stock < 10) stockHtml = '<span class="stock-badge stock-low">Stock: ' + stock + '</span>';
-        else stockHtml = '<span class="stock-badge stock-ok">Stock: ' + stock + '</span>';
+        else if (stockCajas < 10) stockHtml = '<span class="stock-badge stock-low">Stock: ' + stockLabel + '</span>';
+        else stockHtml = '<span class="stock-badge stock-ok">Stock: ' + stockLabel + '</span>';
       }
       var nameHtml = p.image
         ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>'
@@ -2287,10 +2302,20 @@ grid.appendChild(card);
       var card = document.createElement('div');
       card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '');
       card.id = 'card-' + p.id;
+      var stock2 = p.stock !== undefined ? p.stock : null;
+      var stockHtml2 = '';
+      if (stock2 !== null) {
+        var stockCajas2 = boxQty > 1 ? Math.floor(stock2 / boxQty) : stock2;
+        var stockLabel2 = boxQty > 1 ? (stockCajas2 + ' cj') : stock2;
+        if (stock2 <= 0) stockHtml2 = '<span class="stock-badge stock-zero">Sin stock</span>';
+        else if (stockCajas2 < 10) stockHtml2 = '<span class="stock-badge stock-low">Stock: ' + stockLabel2 + '</span>';
+        else stockHtml2 = '<span class="stock-badge stock-ok">Stock: ' + stockLabel2 + '</span>';
+      }
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
         nameHtml2 +
         '<div class="product-format">' + (p.uom||'') + (boxQty>1?' &middot; '+boxQty+' uds/'+boxLabel:'') + (unitInfo ? unitInfo : '') + '</div>' +
+        stockHtml2 +
         '<div class="product-footer">' +
           '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
             fmt(displayPrice2) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge2 + '<br>' +
@@ -3151,7 +3176,7 @@ grid.appendChild(card);
         }
       });
 
-      var header = listPrice
+      changes = changes.slice(0, 5);
         ? '<div class="mph-list-price" style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">Precio de tarifa actual: <strong>' + fmt(listPrice) + ' €</strong></div>'
         : '';
 
@@ -3161,10 +3186,12 @@ grid.appendChild(card);
         var diff = listPrice ? round2(h.effective_price - listPrice) : null;
         var badgeHtml = '';
         if (diff !== null) {
-          if (diff < -0.005) {
-            badgeHtml = '<span class="mph-badge down">' + fmt(diff) + ' € s/tarifa</span>';
+          if (h.discount > 0) {
+            badgeHtml = '<span class="mph-badge down">Dto ' + fmt(h.discount) + '%</span>';
+          } else if (diff < -0.005) {
+            badgeHtml = '<span class="mph-badge down">Precio modificado</span>';
           } else if (diff > 0.005) {
-            badgeHtml = '<span class="mph-badge up">+' + fmt(diff) + ' € s/tarifa</span>';
+            badgeHtml = '<span class="mph-badge up">Por encima tarifa</span>';
           } else {
             badgeHtml = '<span class="mph-badge ok">Precio tarifa</span>';
           }
