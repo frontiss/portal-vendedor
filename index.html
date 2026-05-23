@@ -562,6 +562,28 @@
   .modal-foto img{max-width:100%;max-height:75vh;border-radius:12px;object-fit:contain;min-height:200px;background:#f5f5f5}
   .modal-foto-name{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--primary);margin-top:16px;font-weight:700}
   .modal-foto-ref{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+  /* ── MODAL HISTORIAL PRECIOS ── */
+  .modal-price-history{background:white;border-radius:20px;padding:28px 28px 24px;max-width:620px;width:95%;animation:fadeUp .3s ease;max-height:85vh;display:flex;flex-direction:column}
+  .mph-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-shrink:0}
+  .mph-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--primary);font-weight:700;line-height:1.2}
+  .mph-subtitle{font-size:12px;color:var(--text-muted);margin-top:4px}
+  .mph-list-price{font-size:12px;color:var(--text-muted);margin-top:2px}
+  #mph-body{overflow-y:auto;flex:1}
+  .mph-row{display:grid;grid-template-columns:90px 1fr auto auto;align-items:center;gap:8px 12px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .mph-row:last-child{border-bottom:none}
+  .mph-date{font-size:13px;font-weight:600;color:var(--text)}
+  .mph-ref{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .mph-price{font-size:18px;font-weight:700;color:var(--primary);text-align:right}
+  .mph-qty{font-size:11px;color:var(--text-muted);margin-top:2px;text-align:right}
+  .mph-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;text-align:center}
+  .mph-badge.ok{background:#D1E4F5;color:#1A3356}
+  .mph-badge.down{background:#D4EDDA;color:#155724}
+  .mph-badge.up{background:#F8D7DA;color:#721c24}
+  .mph-vendor{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .mph-empty{text-align:center;color:var(--text-muted);padding:40px 0;font-size:14px}
+  .btn-price-history{background:none;border:none;cursor:pointer;font-size:13px;padding:0 4px;opacity:0.5;transition:opacity .2s;vertical-align:middle}
+  .btn-price-history:hover{opacity:1}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -1199,6 +1221,22 @@
   </div>
 </div>
 
+<!-- Modal historial de precios -->
+<div class="modal-overlay" id="modal-price-history">
+  <div class="modal-price-history">
+    <div class="mph-header">
+      <div>
+        <div class="mph-title" id="mph-title">Historial de precios</div>
+        <div class="mph-subtitle" id="mph-subtitle"></div>
+      </div>
+      <button class="modal-close-btn" onclick="document.getElementById('modal-price-history').classList.remove('open')">✕</button>
+    </div>
+    <div id="mph-body">
+      <div class="loading-box"><div class="big-spinner"></div>Cargando...</div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-detalle-pedido">
   <div class="modal-detalle">
     <div class="modal-detalle-header">
@@ -1763,8 +1801,8 @@
         else stockHtml = '<span class="stock-badge stock-ok">Stock: ' + stock + '</span>';
       }
       var nameHtml = p.image
-        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div>'
-        : '<div class="product-name">' + p.name + '</div>';
+        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span><button class="btn-price-history" onclick="event.stopPropagation();abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>'
+        : '<div class="product-name">' + p.name + '<button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>';
 
       card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
       card.id = 'card-' + p.id;
@@ -2241,8 +2279,8 @@ grid.appendChild(card);
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice2) + '\u20ac c/IVA</small>'
         : '';
       var nameHtml2 = p.image
-        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div>'
-        : '<div class="product-name">' + p.name + '</div>';
+        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span><button class="btn-price-history" onclick="event.stopPropagation();abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>'
+        : '<div class="product-name">' + p.name + '<button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>';
       var card = document.createElement('div');
       card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '');
       card.id = 'card-' + p.id;
@@ -3073,6 +3111,72 @@ grid.appendChild(card);
     }).catch(function(){}); // Silencioso si falla
   }
 
+
+  // ── HISTORIAL DE PRECIOS ────────────────────────────
+  function abrirHistorialPrecios(pid) {
+    if (!selectedClient) return;
+    var p = allProducts.filter(function(x){ return x.id === +pid; })[0];
+    var modal = document.getElementById('modal-price-history');
+    var body  = document.getElementById('mph-body');
+    document.getElementById('mph-title').textContent = p ? p.name : 'Historial de precios';
+    document.getElementById('mph-subtitle').textContent = selectedClient.name;
+    body.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando...</div>';
+    modal.classList.add('open');
+
+    fetch(API + '/products/' + pid + '/price-history?partner_id=' + selectedClient.id, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var history = data.history || [];
+      if (!history.length) {
+        body.innerHTML = '<div class="mph-empty">📋 No hay pedidos anteriores de este producto<br>para este cliente.</div>';
+        return;
+      }
+
+      var listPrice = data.list_price || 0;
+      var header = listPrice
+        ? '<div class="mph-list-price" style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">Precio de tarifa actual: <strong>' + fmt(listPrice) + ' €</strong></div>'
+        : '';
+
+      var rows = history.map(function(h) {
+        var dateStr = h.date ? h.date.split('-').reverse().join('/') : '';
+        var pct = h.pct_vs_list;
+        var badgeClass = 'ok', badgeText = 'Tarifa';
+        if (pct !== null && pct !== undefined) {
+          if (pct < -0.5) { badgeClass = 'down'; badgeText = fmt(Math.abs(pct)) + '% ↓'; }
+          else if (pct > 0.5) { badgeClass = 'up';  badgeText = '+' + fmt(pct) + '% ↑'; }
+        }
+        var discountStr = h.discount > 0 ? ' (−' + fmt(h.discount) + '%)' : '';
+
+        return '<div class="mph-row">' +
+          '<div>' +
+            '<div class="mph-date">' + dateStr + '</div>' +
+            '<div class="mph-ref">' + h.order_ref + '</div>' +
+            (h.vendor ? '<div class="mph-vendor">' + h.vendor + '</div>' : '') +
+          '</div>' +
+          '<div>' +
+            '<div class="mph-qty">' + h.qty + ' uds' + discountStr + '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="mph-price">' + fmt(h.effective_price) + ' €</div>' +
+            '<div class="mph-qty">' + fmt(h.subtotal) + ' € s/IVA</div>' +
+          '</div>' +
+          '<span class="mph-badge ' + badgeClass + '">' + badgeText + '</span>' +
+        '</div>';
+      }).join('');
+
+      body.innerHTML = header + rows;
+    })
+    .catch(function(){
+      body.innerHTML = '<div class="mph-empty">Error cargando el historial.</div>';
+    });
+  }
+
+  // Cerrar al clicar fuera
+  document.getElementById('modal-price-history').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('open');
+  });
 
   // ── FOTO PRODUCTO ────────────────────────────────────
   var hdImgCache = {};  // caché en memoria para imágenes HD de esta sesión
