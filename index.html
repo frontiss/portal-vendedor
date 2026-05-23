@@ -3137,19 +3137,39 @@ grid.appendChild(card);
       }
 
       var listPrice = data.list_price || 0;
+
+      // Filtrar: solo mostrar filas donde el precio cambia respecto al anterior
+      var changes = [];
+      var lastPrice = null;
+      history.forEach(function(h) {
+        var precio = Math.round(h.effective_price * 10000);
+        if (lastPrice === null || precio !== lastPrice) {
+          changes.push(h);
+          lastPrice = precio;
+        }
+      });
+
       var header = listPrice
         ? '<div class="mph-list-price" style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">Precio de tarifa actual: <strong>' + fmt(listPrice) + ' €</strong></div>'
         : '';
 
-      var rows = history.map(function(h) {
+      var rows = changes.map(function(h) {
         var dateStr = h.date ? h.date.split('-').reverse().join('/') : '';
         var pct = h.pct_vs_list;
-        var badgeClass = 'ok', badgeText = 'Tarifa';
+        var badgeHtml = '';
         if (pct !== null && pct !== undefined) {
-          if (pct < -0.5) { badgeClass = 'down'; badgeText = fmt(Math.abs(pct)) + '% ↓'; }
-          else if (pct > 0.5) { badgeClass = 'up';  badgeText = '+' + fmt(pct) + '% ↑'; }
+          if (pct < -0.5) {
+            // Por debajo de tarifa → descuento
+            var diff = listPrice ? fmt(listPrice - h.effective_price) : '';
+            badgeHtml = '<span class="mph-badge down">−' + diff + ' € s/tarifa</span>';
+          } else if (pct > 0.5) {
+            var diff2 = listPrice ? fmt(h.effective_price - listPrice) : '';
+            badgeHtml = '<span class="mph-badge up">+' + diff2 + ' € s/tarifa</span>';
+          } else {
+            badgeHtml = '<span class="mph-badge ok">Precio tarifa</span>';
+          }
         }
-        var discountStr = h.discount > 0 ? ' (−' + fmt(h.discount) + '%)' : '';
+        var discountStr = h.discount > 0 ? ' · dto ' + fmt(h.discount) + '%' : '';
 
         return '<div class="mph-row">' +
           '<div>' +
@@ -3157,14 +3177,11 @@ grid.appendChild(card);
             '<div class="mph-ref">' + h.order_ref + '</div>' +
             (h.vendor ? '<div class="mph-vendor">' + h.vendor + '</div>' : '') +
           '</div>' +
-          '<div>' +
-            '<div class="mph-qty">' + h.qty + ' uds' + discountStr + '</div>' +
-          '</div>' +
-          '<div>' +
+          '<div class="mph-qty" style="font-size:12px;color:var(--text-muted)">' + h.qty + ' uds' + discountStr + '</div>' +
+          '<div style="text-align:right">' +
             '<div class="mph-price">' + fmt(h.effective_price) + ' €</div>' +
-            '<div class="mph-qty">' + fmt(h.subtotal) + ' € s/IVA</div>' +
+            badgeHtml +
           '</div>' +
-          '<span class="mph-badge ' + badgeClass + '">' + badgeText + '</span>' +
         '</div>';
       }).join('');
 
@@ -3748,7 +3765,7 @@ grid.appendChild(card);
       inp.placeholder = '% descuento (0-100)';
       inp.step = '0.1';
     } else {
-      inp.placeholder = 'Precio caja s/IVA (max ' + fmt(p.price) + ')';
+      inp.placeholder = 'Precio caja s/IVA';
       inp.step = '0.01';
     }
     inp.value = '';
@@ -3768,9 +3785,8 @@ grid.appendChild(card);
       discount = val;
       newPrice = round2(p.price * (1 - val / 100));
     } else {
-      if (val > p.price) { alert('El precio no puede ser mayor al precio de tarifa (' + fmt(p.price) + '€)'); return; }
       newPrice = round2(val);
-      discount = round2((1 - val / p.price) * 100);
+      discount = round2((1 - val / p.price) * 100);  // negativo si está por encima de tarifa
     }
 
     customPrices[pid] = { price: newPrice, discount: round2(discount), mode: mode };
