@@ -582,8 +582,10 @@
   .mph-badge.up{background:#F8D7DA;color:#721c24}
   .mph-vendor{font-size:11px;color:var(--text-muted);margin-top:2px}
   .mph-empty{text-align:center;color:var(--text-muted);padding:40px 0;font-size:14px}
-  .btn-price-history{background:none;border:none;cursor:pointer;font-size:13px;padding:0 4px;opacity:0.5;transition:opacity .2s;vertical-align:middle}
+  .btn-price-history{background:none;border:none;cursor:pointer;font-size:13px;padding:0 4px;opacity:0.4;transition:opacity .2s;vertical-align:middle;line-height:1;margin-left:2px}
   .btn-price-history:hover{opacity:1}
+  /* En vista lista, el botón queda en la misma fila que el nombre */
+  .products-grid.list-view .btn-price-history{display:inline}
   @media(max-width:600px){.analisis-kpis{grid-template-columns:1fr 1fr}}
 
   /* ── VISTA LISTA CLIENTES ── */
@@ -1801,8 +1803,8 @@
         else stockHtml = '<span class="stock-badge stock-ok">Stock: ' + stock + '</span>';
       }
       var nameHtml = p.image
-        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span><button class="btn-price-history" onclick="event.stopPropagation();abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>'
-        : '<div class="product-name">' + p.name + '<button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>';
+        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>'
+        : '<div class="product-name">' + p.name + '</div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>';
 
       card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
       card.id = 'card-' + p.id;
@@ -2279,8 +2281,8 @@ grid.appendChild(card);
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice2) + '\u20ac c/IVA</small>'
         : '';
       var nameHtml2 = p.image
-        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span><button class="btn-price-history" onclick="event.stopPropagation();abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>'
-        : '<div class="product-name">' + p.name + '<button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button></div>';
+        ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>'
+        : '<div class="product-name">' + p.name + '</div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>';
       var card = document.createElement('div');
       card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '');
       card.id = 'card-' + p.id;
