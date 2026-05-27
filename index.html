@@ -2399,16 +2399,7 @@ grid.appendChild(card);
     }).catch(function(){ list.innerHTML = '<div class="history-empty">Error cargando facturas.</div>'; });
   }
 
-  function setupJournalButtons() {
-    var efectivo = journals.find(function(j){ return j.type==='cash'; });
-    var pagare = journals.find(function(j){ return j.name.toLowerCase().indexOf('pagar')!==-1; });
-    var btnE = document.getElementById('metodo-efectivo');
-    var btnP = document.getElementById('metodo-pagare');
-    if (efectivo) { btnE.dataset.journal = efectivo.id; selectedJournalId = efectivo.id; }
-    else { btnE.disabled = true; }
-    if (pagare) { btnP.dataset.journal = pagare.id; }
-    else { btnP.disabled = true; }
-  }
+
 
   function toggleInvoice(inv, card) {
     if (selectedInvoices[inv.id]) {
@@ -2436,58 +2427,7 @@ grid.appendChild(card);
     btnCobrar.disabled = !selectedJournalId;
   }
 
-  document.getElementById('metodo-efectivo').addEventListener('click', function(){
-    selectedMetodo = 'efectivo'; selectedJournalId = +this.dataset.journal || null;
-    document.getElementById('metodo-efectivo').classList.add('active');
-    document.getElementById('metodo-pagare').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display = 'none';
-    updateCobroPanel();
-  });
-  document.getElementById('metodo-pagare').addEventListener('click', function(){
-    selectedMetodo = 'pagare'; selectedJournalId = +this.dataset.journal || null;
-    document.getElementById('metodo-pagare').classList.add('active');
-    document.getElementById('metodo-efectivo').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display = 'block';
-    updateCobroPanel();
-  });
 
-  document.getElementById('btn-cobrar').addEventListener('click', function(){
-    var keys = Object.keys(selectedInvoices).map(Number);
-    if (!keys.length || !selectedJournalId) return;
-    var btnCobrar = document.getElementById('btn-cobrar');
-    btnCobrar.disabled = true;
-    btnCobrar.innerHTML = '<span class="spinner"></span>Procesando...';
-    var memo = selectedMetodo==='pagare'
-      ? (document.getElementById('cobro-ref').value.trim() || 'Pagare')
-      : 'Cobro en efectivo - ' + vendorName;
-    fetch(API+'/invoices/pay?partner_id='+selectedClient.id, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body: JSON.stringify({invoice_ids:keys, journal_id:selectedJournalId, memo:memo})
-    }).then(function(r){ return r.json().then(function(d){ return {ok:r.ok,data:d}; }); })
-    .then(function(res){
-      btnCobrar.disabled = false; btnCobrar.innerHTML = 'Registrar cobro';
-      if (!res.ok) { modalErrMsg.textContent = res.data.detail||'Error al registrar el cobro.'; modalErr.classList.add('open'); return; }
-      document.getElementById('modal-cobro-msg').textContent = fmt(res.data.amount) + '\u20ac cobrados - ' + (selectedMetodo==='efectivo'?'Efectivo':'Pagare');
-      document.getElementById('modal-cobro-ref').textContent = res.data.invoices_paid.join(', ');
-      document.getElementById('modal-cobro-ok').classList.add('open');
-      facturasLoaded = false; selectedInvoices = {};
-    }).catch(function(){
-      btnCobrar.disabled = false; btnCobrar.innerHTML = 'Registrar cobro';
-      modalErrMsg.textContent = 'Error de conexion.'; modalErr.classList.add('open');
-    });
-  });
-
-  document.getElementById('btn-cobro-ok-close').addEventListener('click', function(){
-    document.getElementById('modal-cobro-ok').classList.remove('open');
-    var list = document.getElementById('facturas-list');
-    var totalEl = document.getElementById('facturas-total-pendiente');
-    list.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando...</div>';
-    totalEl.textContent = '-';
-    document.getElementById('cobro-panel').style.display = 'none';
-    selectedInvoices = {}; facturasLoaded = false;
-    setTimeout(function(){ loadFacturas(); }, 1500);
-  });
 
   // ── LIQUIDACION ─────────────────────────────────────
   var liqData = null; var liqMode = 'clientes';
@@ -3437,6 +3377,8 @@ grid.appendChild(card);
     if (efectivo) {
       btnEfectivo.dataset.journal = efectivo.id;
       selectedJournalId = efectivo.id;
+      var nombreCaja = efectivo.display_name || ('💵 Efectivo (' + vendorName.split(' ')[0] + ')');
+      btnEfectivo.textContent = nombreCaja;
     } else {
       btnEfectivo.disabled = true;
       btnEfectivo.textContent = '💵 Efectivo (no configurado)';
