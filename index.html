@@ -102,9 +102,16 @@
   .products-grid.list-view .product-card:hover{background:#F9F7F4;transform:none;border-color:transparent}
   .products-grid.list-view .product-card.selected{background:#EEF4FB}
   .products-grid.list-view .product-card.selected:hover{background:#E8F0F8}
-  .products-grid.list-view .product-ref{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;width:68px;flex-shrink:0}
-  .products-grid.list-view .product-name{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:0;line-height:1;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',serif}
-  .products-grid.list-view .product-format{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;flex-shrink:0;width:160px}
+  .products-grid.list-view .product-ref{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;width:60px;flex-shrink:0}
+  .products-grid.list-view .product-name{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:0;line-height:1.2;flex:1;overflow:hidden;text-overflow:ellipsis;font-family:'Cormorant Garamond',serif;min-width:0}
+  .products-grid.list-view .product-format{font-size:12px;color:var(--text-muted);margin-bottom:0;white-space:nowrap;flex-shrink:0;max-width:130px}
+  @media(max-width:768px){
+    .products-grid.list-view .product-ref{width:50px;font-size:10px}
+    .products-grid.list-view .product-name{font-size:13px;white-space:normal;word-break:break-word}
+    .products-grid.list-view .product-format{max-width:90px;font-size:10px}
+    .products-grid.list-view .product-card{gap:8px;padding:10px 12px}
+    .products-grid.list-view .product-price{font-size:13px;min-width:55px}
+  }
   .products-grid.list-view .product-format .unit-cost{display:block;font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px}
   .products-grid.list-view .product-price .unit-cost{display:none}
   .products-grid.list-view .price-editor{display:none;flex-basis:100%;order:99;margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
