@@ -55,6 +55,14 @@
   .clients-content{max-width:900px;margin:0 auto;padding:40px 24px}
   .clients-title{font-family:'Cormorant Garamond',serif;font-size:34px;color:var(--primary);margin-bottom:6px}
   .clients-subtitle{color:var(--text-muted);font-size:14px;margin-bottom:28px}
+  .objetivo-bar-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .objetivo-bar-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted)}
+  .objetivo-bar-pct{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--primary)}
+  .objetivo-bar-track{height:10px;background:#E8EEF5;border-radius:99px;overflow:hidden;margin-bottom:6px}
+  .objetivo-bar-fill{height:100%;border-radius:99px;background:var(--primary);transition:width .8s ease;min-width:2px}
+  .objetivo-bar-fill.conseguido{background:#2E7D32}
+  .objetivo-bar-fill.cerca{background:#F97316}
+  .objetivo-bar-sub{font-size:12px;color:var(--text-muted)}
   .clients-search{width:100%;max-width:400px;padding:12px 16px 12px 42px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;background:white;outline:none;transition:border-color .2s;margin-bottom:28px;display:block;position:relative}
   .clients-search:focus{border-color:var(--accent)}
   .clients-search-wrap{position:relative;max-width:400px;margin-bottom:28px}
@@ -272,9 +280,19 @@
   .panel-pedido-comercial{font-size:12px;color:var(--text-muted);width:90px;flex-shrink:0;text-align:right}
   .panel-pedido-importe{font-weight:700;color:var(--primary);width:90px;text-align:right;flex-shrink:0}
   .panel-empty{text-align:center;color:var(--text-muted);padding:30px 0;font-size:14px}
+  .obj-row{padding:16px 0;border-bottom:1px solid var(--border)}
+  .obj-row:last-child{border-bottom:none}
+  .obj-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .obj-name{font-weight:700;color:var(--primary);font-size:15px}
+  .obj-edit-wrap{display:flex;gap:8px;align-items:center}
+  .obj-input{width:130px;padding:7px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+  .obj-input:focus{border-color:var(--accent)}
+  .obj-save-btn{background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+  .obj-save-btn:hover{background:#163070}
+  .obj-sub{font-size:12px;color:var(--text-muted);margin-top:6px}
   .inactivo-badge{display:inline-block;background:#FCE8D5;color:#B5532A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:6px;width:fit-content}
   .inactivo-badge.nunca{background:#F0E0E0;color:#9C3030}
-  .client-card.inactivo{border-left:3px solid #E8A87C}
+  .client-card.inactivo{border-left:3px solid #E0B080}
   .clients-grid.list-view .inactivo-badge{font-size:9px;padding:1px 6px;margin-top:2px}
   .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3356;margin-top:8px;background:#D1E4F5;padding:3px 10px;border-radius:20px;width:fit-content}
   .client-card.visited .visited-badge{display:block}
@@ -826,6 +844,16 @@
   <div class="clients-content">
     <h1 class="clients-title">Tus clientes</h1>
     <p class="clients-subtitle" id="clients-subtitle">Selecciona un cliente para hacer su pedido</p>
+    <div id="objetivo-bar-wrap" style="display:none;margin-bottom:20px">
+      <div class="objetivo-bar-header">
+        <span class="objetivo-bar-label" id="objetivo-bar-label">Objetivo del mes</span>
+        <span class="objetivo-bar-pct" id="objetivo-bar-pct"></span>
+      </div>
+      <div class="objetivo-bar-track">
+        <div class="objetivo-bar-fill" id="objetivo-bar-fill"></div>
+      </div>
+      <div class="objetivo-bar-sub" id="objetivo-bar-sub"></div>
+    </div>
     <div class="vendedor-selector-wrap" id="vendedor-selector-wrap">
       <span class="vendedor-selector-label">Viendo clientes de:</span>
       <select class="vendedor-select" id="vendedor-select">
@@ -1032,6 +1060,11 @@
       </div>
 
       <div class="panel-section">
+        <div class="panel-section-title">🎯 Objetivos del mes</div>
+        <div id="panel-objetivos"></div>
+      </div>
+
+      <div class="panel-section">
         <div class="panel-section-title">🏆 Ranking de comerciales (este mes)</div>
         <div id="panel-ranking"></div>
       </div>
@@ -1043,6 +1076,8 @@
     </div>
   </div>
 </div>
+
+<div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
   <div class="clients-header">
     <div class="clients-header-left">
       <span class="header-logo-text">Comercial A. Puchol</span>
@@ -1692,6 +1727,47 @@
     }
     clientsGrid.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando tus clientes...</div>';
     loadClients();
+    cargarObjetivoMes();
+  }
+
+  function cargarObjetivoMes() {
+    var hoy = new Date();
+    fetch(API + '/objetivos', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.es_gerente) return; // gerente lo ve en el panel
+      var uid = String(vendorUid);
+      var key = uid + '_' + hoy.getFullYear() + '_' + String(hoy.getMonth() + 1).padStart(2, '0');
+      var obj = data.objetivos[key];
+      if (!obj || !obj.objetivo) {
+        document.getElementById('objetivo-bar-wrap').style.display = 'none';
+        return;
+      }
+      fetch(API + '/analisis/ventas?year=' + hoy.getFullYear(), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(analisis){
+        var mesActual = hoy.getMonth() + 1;
+        var dataMes = (analisis.actual || []).find(function(m){ return m.mes === mesActual; });
+        var ventasMes = dataMes ? dataMes.importe : 0;
+        var objetivo = obj.objetivo;
+        var pctReal = Math.round(ventasMes / objetivo * 100);
+        var pct = Math.min(pctReal, 100);
+        var wrap = document.getElementById('objetivo-bar-wrap');
+        var fill = document.getElementById('objetivo-bar-fill');
+        var nombreMes = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+          'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][hoy.getMonth()];
+        document.getElementById('objetivo-bar-label').textContent = 'Objetivo ' + nombreMes;
+        document.getElementById('objetivo-bar-pct').textContent = pctReal + '%';
+        fill.style.width = pct + '%';
+        fill.className = 'objetivo-bar-fill' +
+          (pctReal >= 100 ? ' conseguido' : pctReal >= 80 ? ' cerca' : '');
+        document.getElementById('objetivo-bar-sub').textContent =
+          fmt(ventasMes) + ' € de ' + fmt(objetivo) + ' € objetivo s/IVA';
+        wrap.style.display = 'block';
+      }).catch(function(){});
+    }).catch(function(){});
   }
 
   function loadClients() {
@@ -1774,8 +1850,13 @@
     selectedClient = client;
     // Comprobar facturas vencidas (silencioso)
     setTimeout(function(){ checkFacturasVencidas(client); }, 800);
-    // Transición a pantalla de pedido
+    // Ocultar todas las pantallas secundarias
     clientsScreen.style.display = 'none';
+    document.getElementById('liq-screen').style.display = 'none';
+    document.getElementById('analisis-screen').style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'none';
+    var ofertaScreen = document.getElementById('oferta-libre-screen');
+    if (ofertaScreen) ofertaScreen.style.display = 'none';
     appScreen.style.display = 'block';
 
     storeBadge.textContent = client.name;
@@ -2602,6 +2683,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-liq-back').addEventListener('click', function(){
     document.getElementById('liq-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-liq').addEventListener('click', logout);
@@ -2906,6 +2988,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-analisis-back').addEventListener('click', function(){
     document.getElementById('analisis-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-analisis').addEventListener('click', logout);
@@ -2921,6 +3004,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-panel-back').addEventListener('click', function(){
     document.getElementById('panel-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-panel').addEventListener('click', logout);
@@ -2929,9 +3013,19 @@ grid.appendChild(card);
     document.getElementById('panel-loading').style.display = 'block';
     document.getElementById('panel-content').style.display = 'none';
 
-    fetch(API + '/dashboard', { headers: { 'Authorization': 'Bearer ' + token } })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
+    var hoy = new Date();
+    var mesActual = hoy.getMonth() + 1;
+    var yearActual = hoy.getFullYear();
+
+    Promise.all([
+      fetch(API + '/dashboard', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); }),
+      fetch(API + '/objetivos', { headers: { 'Authorization': 'Bearer ' + token } }).then(function(r){ return r.json(); })
+    ])
+    .then(function(results){
+      var d = results[0];
+      var objData = results[1];
+      var objetivos = objData.objetivos || {};
+
       document.getElementById('panel-loading').style.display = 'none';
       document.getElementById('panel-content').style.display = 'block';
       document.getElementById('panel-mes-label').textContent = 'Resumen de ' + (d.mes_nombre || '');
@@ -2942,20 +3036,61 @@ grid.appendChild(card);
       document.getElementById('panel-ventas-mes').textContent = fmt(d.ventas_mes) + ' €';
       document.getElementById('panel-pedidos-mes').textContent = d.pedidos_mes + ' pedido' + (d.pedidos_mes !== 1 ? 's' : '');
 
+      // Sección de objetivos con editor
+      var objWrap = document.getElementById('panel-objetivos');
+      if (d.ranking && d.ranking.length) {
+        objWrap.innerHTML = d.ranking.map(function(r){
+          var key = r.uid + '_' + yearActual + '_' + String(mesActual).padStart(2, '0');
+          var obj = objetivos[key] || {};
+          var objVal = obj.objetivo || 0;
+          var pctReal = objVal > 0 ? Math.round(r.importe / objVal * 100) : null;
+          var pct = objVal > 0 ? Math.min(pctReal, 100) : 0;
+          var fillClass = pctReal >= 100 ? 'conseguido' : pctReal >= 80 ? 'cerca' : '';
+          var nombreMes = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+            'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'][hoy.getMonth()];
+
+          return '<div class="obj-row" id="obj-row-' + r.uid + '">' +
+            '<div class="obj-header">' +
+              '<span class="obj-name">' + r.name + '</span>' +
+              '<div class="obj-edit-wrap">' +
+                '<input class="obj-input" type="number" min="0" step="100" id="obj-input-' + r.uid + '" value="' + (objVal || '') + '" placeholder="Objetivo €">' +
+                '<button class="obj-save-btn" onclick="guardarObjetivo(' + r.uid + ',\'' + r.name + '\',' + yearActual + ',' + mesActual + ')">' +
+                  (objVal ? 'Actualizar' : 'Fijar') +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+            (objVal > 0
+              ? '<div class="objetivo-bar-track" style="margin-top:8px">' +
+                  '<div class="objetivo-bar-fill ' + fillClass + '" style="width:' + pct + '%"></div>' +
+                '</div>' +
+                '<div class="obj-sub">' + fmt(r.importe) + ' € de ' + fmt(objVal) + ' € · ' + (pctReal !== null ? pctReal + '%' : '') + '</div>'
+              : '<div class="obj-sub" style="color:var(--text-muted)">Sin objetivo fijado para ' + nombreMes + '</div>') +
+          '</div>';
+        }).join('');
+      } else {
+        objWrap.innerHTML = '<div class="panel-empty">Sin datos de comerciales.</div>';
+      }
+
       // Ranking
       var rankWrap = document.getElementById('panel-ranking');
       if (d.ranking && d.ranking.length) {
         rankWrap.innerHTML = d.ranking.map(function(r, i){
+          var key = r.uid + '_' + yearActual + '_' + String(mesActual).padStart(2, '0');
+          var obj = objetivos[key] || {};
+          var objVal = obj.objetivo || 0;
+          var pctBadge = objVal > 0
+            ? ' <span style="font-size:11px;background:#EBF0F8;color:#1A3356;padding:2px 7px;border-radius:20px;font-weight:700">' + Math.round(r.importe / objVal * 100) + '% obj</span>'
+            : '';
           return '<div class="panel-rank-row">' +
             '<div class="panel-rank-pos">' + (i + 1) + '</div>' +
-            '<div class="panel-rank-name">' + r.name +
+            '<div class="panel-rank-name">' + r.name + pctBadge +
               '<div class="panel-rank-pedidos">' + r.pedidos + ' pedidos</div>' +
             '</div>' +
             '<div class="panel-rank-importe">' + fmt(r.importe) + ' €</div>' +
           '</div>';
         }).join('');
       } else {
-        rankWrap.innerHTML = '<div class="panel-empty">Sin datos este mes.</div>';
+        rankWrap.innerHTML = '<div class="panel-empty">Sin pedidos este mes.</div>';
       }
 
       // Pedidos de hoy
@@ -2976,6 +3111,21 @@ grid.appendChild(card);
     .catch(function(){
       document.getElementById('panel-loading').innerHTML = 'Error cargando el panel.';
     });
+  }
+
+  function guardarObjetivo(uid, nombre, year, month) {
+    var input = document.getElementById('obj-input-' + uid);
+    var val = parseFloat(input.value);
+    if (!val || val <= 0) { input.focus(); return; }
+
+    fetch(API + '/objetivos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ vendor_id: uid, vendor_name: nombre, year: year, month: month, objetivo: val })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ cargarPanel(); })
+    .catch(function(){ alert('Error guardando el objetivo'); });
   }
 
   function cargarAnalisis() {
@@ -4287,6 +4437,7 @@ grid.appendChild(card);
   window.togglePriceEditor  = togglePriceEditor;
   window.abrirFotoProducto  = abrirFotoProducto;
   window.abrirHistorialPrecios = abrirHistorialPrecios;
+  window.guardarObjetivo    = guardarObjetivo;
   window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
   window.applyCustomPrice   = applyCustomPrice;
