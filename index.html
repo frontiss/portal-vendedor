@@ -292,7 +292,7 @@
   .obj-sub{font-size:12px;color:var(--text-muted);margin-top:6px}
   .inactivo-badge{display:inline-block;background:#FCE8D5;color:#B5532A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:6px;width:fit-content}
   .inactivo-badge.nunca{background:#F0E0E0;color:#9C3030}
-  .client-card.inactivo{border-left:3px solid #E8A87C}
+  .client-card.inactivo{border-left:3px solid #E0B080}
   .clients-grid.list-view .inactivo-badge{font-size:9px;padding:1px 6px;margin-top:2px}
   .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3356;margin-top:8px;background:#D1E4F5;padding:3px 10px;border-radius:20px;width:fit-content}
   .client-card.visited .visited-badge{display:block}
@@ -1848,8 +1848,13 @@
     selectedClient = client;
     // Comprobar facturas vencidas (silencioso)
     setTimeout(function(){ checkFacturasVencidas(client); }, 800);
-    // Transición a pantalla de pedido
+    // Ocultar todas las pantallas secundarias
     clientsScreen.style.display = 'none';
+    document.getElementById('liq-screen').style.display = 'none';
+    document.getElementById('analisis-screen').style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'none';
+    var ofertaScreen = document.getElementById('oferta-libre-screen');
+    if (ofertaScreen) ofertaScreen.style.display = 'none';
     appScreen.style.display = 'block';
 
     storeBadge.textContent = client.name;
@@ -2676,6 +2681,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-liq-back').addEventListener('click', function(){
     document.getElementById('liq-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-liq').addEventListener('click', logout);
@@ -2980,6 +2986,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-analisis-back').addEventListener('click', function(){
     document.getElementById('analisis-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-analisis').addEventListener('click', logout);
@@ -2995,6 +3002,7 @@ grid.appendChild(card);
 
   document.getElementById('btn-panel-back').addEventListener('click', function(){
     document.getElementById('panel-screen').style.display = 'none';
+    appScreen.style.display = 'none';
     clientsScreen.style.display = 'block';
   });
   document.getElementById('btn-logout-panel').addEventListener('click', logout);
