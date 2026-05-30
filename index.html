@@ -251,6 +251,31 @@
   /* Cliente tarjeta */
   .client-tarifa{font-size:11px;color:var(--text-muted);margin-top:2px}
   .client-card.visited{border-color:#1A3356 !important;background:#EEF4FB}
+  .panel-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px}
+  .panel-kpi{background:white;border-radius:16px;padding:22px;border:1.5px solid var(--border);box-shadow:var(--shadow)}
+  .panel-kpi-label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+  .panel-kpi-value{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--primary);line-height:1}
+  .panel-kpi-sub{font-size:13px;color:var(--text-muted);margin-top:6px}
+  .panel-section{background:white;border-radius:16px;padding:24px;border:1.5px solid var(--border);margin-bottom:20px}
+  .panel-section-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--primary);margin-bottom:16px}
+  .panel-rank-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .panel-rank-row:last-child{border-bottom:none}
+  .panel-rank-pos{width:32px;height:32px;border-radius:50%;background:#EBF0F8;color:#1A3356;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .panel-rank-row:first-child .panel-rank-pos{background:#FCEFC7;color:#B8941F}
+  .panel-rank-name{flex:1;font-weight:600;color:var(--primary)}
+  .panel-rank-pedidos{font-size:12px;color:var(--text-muted)}
+  .panel-rank-importe{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--primary)}
+  .panel-pedido-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px}
+  .panel-pedido-row:last-child{border-bottom:none}
+  .panel-pedido-hora{font-size:12px;color:var(--text-muted);width:48px;flex-shrink:0}
+  .panel-pedido-cliente{flex:1;color:var(--primary);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .panel-pedido-comercial{font-size:12px;color:var(--text-muted);width:90px;flex-shrink:0;text-align:right}
+  .panel-pedido-importe{font-weight:700;color:var(--primary);width:90px;text-align:right;flex-shrink:0}
+  .panel-empty{text-align:center;color:var(--text-muted);padding:30px 0;font-size:14px}
+  .inactivo-badge{display:inline-block;background:#FCE8D5;color:#B5532A;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:6px;width:fit-content}
+  .inactivo-badge.nunca{background:#F0E0E0;color:#9C3030}
+  .client-card.inactivo{border-left:3px solid #E8A87C}
+  .clients-grid.list-view .inactivo-badge{font-size:9px;padding:1px 6px;margin-top:2px}
   .visited-badge{display:none;font-size:11px;font-weight:700;color:#1A3356;margin-top:8px;background:#D1E4F5;padding:3px 10px;border-radius:20px;width:fit-content}
   .client-card.visited .visited-badge{display:block}
   /* Habituales y pedido anterior */
@@ -792,6 +817,7 @@
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn-pedidos-hoy" id="btn-pedidos-hoy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Hoy <span class="pedidos-hoy-badge" id="pedidos-hoy-badge">0</span></button>
+      <button class="btn-back" id="btn-panel-nav" style="font-size:12px;padding:6px 12px;display:none">📊 Panel</button>
       <button class="btn-back" id="btn-oferta-libre-nav" style="font-size:12px;padding:6px 12px">Oferta</button>
       <button class="btn-back" id="btn-analisis-nav" style="font-size:12px;padding:6px 12px">Análisis</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:12px;padding:6px 12px">Liquidación</button>
       <button class="btn-logout" id="btn-logout-clients" style="font-size:12px;padding:6px 12px">Salir</button>
@@ -970,7 +996,53 @@
   </div>
 </div>
 
-<div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
+<div id="panel-screen" style="display:none;min-height:100vh;background:var(--bg)">
+  <div class="clients-header">
+    <div class="clients-header-left">
+      <span class="header-logo-text">Comercial A. Puchol</span>
+      <span class="vendor-pill" id="panel-vendor-pill"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-back" id="btn-panel-back">Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-panel">Cerrar sesión</button>
+    </div>
+  </div>
+  <div style="max-width:1100px;margin:0 auto;padding:32px 24px">
+    <h1 class="clients-title">Panel de control</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px" id="panel-mes-label"></p>
+
+    <div id="panel-loading" class="loading-box"><div class="big-spinner"></div>Cargando datos...</div>
+
+    <div id="panel-content" style="display:none">
+      <div class="panel-kpis">
+        <div class="panel-kpi">
+          <div class="panel-kpi-label">Ventas hoy</div>
+          <div class="panel-kpi-value" id="panel-ventas-hoy">0 €</div>
+          <div class="panel-kpi-sub" id="panel-pedidos-hoy">0 pedidos</div>
+        </div>
+        <div class="panel-kpi">
+          <div class="panel-kpi-label">Ventas esta semana</div>
+          <div class="panel-kpi-value" id="panel-ventas-semana">0 €</div>
+        </div>
+        <div class="panel-kpi">
+          <div class="panel-kpi-label">Ventas este mes</div>
+          <div class="panel-kpi-value" id="panel-ventas-mes">0 €</div>
+          <div class="panel-kpi-sub" id="panel-pedidos-mes">0 pedidos</div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">🏆 Ranking de comerciales (este mes)</div>
+        <div id="panel-ranking"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-section-title">📦 Pedidos de hoy</div>
+        <div id="panel-pedidos-lista"></div>
+      </div>
+    </div>
+  </div>
+</div>
   <div class="clients-header">
     <div class="clients-header-left">
       <span class="header-logo-text">Comercial A. Puchol</span>
@@ -1479,6 +1551,7 @@
   var token         = null;   // JWT del vendedor
   var vendorName    = '';     // nombre del vendedor
   var vendorUid     = 0;      // uid del vendedor logueado
+  var vendorLogin   = '';     // email/login del vendedor
   var allClients    = [];     // lista completa de clientes
   var selectedClient = null; // cliente actualmente seleccionado {id, name, ...}
   var allProducts   = [];
@@ -1545,6 +1618,7 @@
       token = savedToken;
       vendorName = localStorage.getItem('session_name') || '';
       vendorUid  = parseInt(localStorage.getItem('session_uid') || '0', 10);
+      vendorLogin = localStorage.getItem('session_login') || '';
       loginScreen.style.display = 'none';
       showClientsScreen();
     })
@@ -1582,10 +1656,12 @@
       token = res.data.token;
       vendorName = res.data.vendor.user_name;
       vendorUid  = res.data.vendor.user_id || 0;
+      vendorLogin = res.data.vendor.user_login || '';
       // Persistir sesión para cuando la app vuelve de segundo plano
       localStorage.setItem('session_token', token);
       localStorage.setItem('session_name', vendorName);
       localStorage.setItem('session_uid', vendorUid);
+      localStorage.setItem('session_login', vendorLogin);
       loginScreen.style.display = 'none';
       showClientsScreen();
     })
@@ -1608,6 +1684,12 @@
   function showClientsScreen() {
     clientsScreen.style.display = 'block';
     vendorPill.textContent = vendorName;
+    // El botón Panel solo es visible para gerencia
+    var GERENTES = ['antonio@comercialpuchol.es'];
+    var btnPanel = document.getElementById('btn-panel-nav');
+    if (btnPanel) {
+      btnPanel.style.display = GERENTES.indexOf((vendorLogin || '').toLowerCase()) !== -1 ? 'inline-flex' : 'none';
+    }
     clientsGrid.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando tus clientes...</div>';
     loadClients();
   }
@@ -1656,11 +1738,24 @@
         : '';
       var tarifaNombre = c.pricelist_name ? c.pricelist_name.replace(/\s*\(.*?\)/g, '').trim() : '';
       var tarifaHtml2 = tarifaNombre ? '<div class="client-tarifa">' + tarifaNombre + '</div>' : '';
+
+      // Badge de inactividad
+      var inactivoHtml = '';
+      var dias = c.dias_inactivo;
+      if (dias === -1) {
+        inactivoHtml = '<span class="inactivo-badge nunca">Sin pedidos</span>';
+        card.classList.add('inactivo');
+      } else if (dias !== null && dias !== undefined && dias >= UMBRAL_INACTIVO) {
+        var texto = dias >= 60 ? Math.floor(dias / 30) + ' meses sin pedir' : dias + ' días sin pedir';
+        inactivoHtml = '<span class="inactivo-badge">⚠ ' + texto + '</span>';
+        card.classList.add('inactivo');
+      }
+
       card.innerHTML =
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
         '<div class="client-name">' + c.name + '</div>' +
         '<div class="client-address">' + (c.address || '') + '</div>' +
-        tarifaHtml2 + rutaHtml +
+        tarifaHtml2 + rutaHtml + inactivoHtml +
         '<div class="visited-badge">Pedido realizado hoy</div>';
       card.dataset.clientId = c.id;
       if (visitedClients[c.id]) card.classList.add('visited');
@@ -1668,6 +1763,8 @@
       clientsGrid.appendChild(card);
     });
   }
+
+  var UMBRAL_INACTIVO = 30;  // días sin pedir para marcar como inactivo
 
   clientSearch.addEventListener('input', function () { applyFilters(allClients); });
 
@@ -1751,10 +1848,12 @@
   function logout() {
     if (!confirm('¿Seguro que quieres cerrar sesión?')) return;
     token = null; vendorName = ''; allClients = []; selectedClient = null;
+    vendorLogin = '';
     // Borrar sesión persistida
     localStorage.removeItem('session_token');
     localStorage.removeItem('session_name');
     localStorage.removeItem('session_uid');
+    localStorage.removeItem('session_login');
     clearImgCache();
     hdImgCache = {};
     quantities = {}; allProducts = [];
@@ -1764,6 +1863,8 @@
     cartBar.classList.remove('open');
     appScreen.style.display = 'none';
     document.getElementById('panel-facturas').style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'none';
+    document.getElementById('analisis-screen').style.display = 'none';
     clientsScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
     document.getElementById('login-user').value = '';
@@ -2809,6 +2910,73 @@ grid.appendChild(card);
   });
   document.getElementById('btn-logout-analisis').addEventListener('click', logout);
   document.getElementById('btn-analisis-cargar').addEventListener('click', cargarAnalisis);
+
+  // ── PANEL DE CONTROL ─────────────────────────────────
+  document.getElementById('btn-panel-nav').addEventListener('click', function(){
+    clientsScreen.style.display = 'none';
+    document.getElementById('panel-screen').style.display = 'block';
+    document.getElementById('panel-vendor-pill').textContent = vendorName;
+    cargarPanel();
+  });
+
+  document.getElementById('btn-panel-back').addEventListener('click', function(){
+    document.getElementById('panel-screen').style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+  document.getElementById('btn-logout-panel').addEventListener('click', logout);
+
+  function cargarPanel() {
+    document.getElementById('panel-loading').style.display = 'block';
+    document.getElementById('panel-content').style.display = 'none';
+
+    fetch(API + '/dashboard', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById('panel-loading').style.display = 'none';
+      document.getElementById('panel-content').style.display = 'block';
+      document.getElementById('panel-mes-label').textContent = 'Resumen de ' + (d.mes_nombre || '');
+
+      document.getElementById('panel-ventas-hoy').textContent = fmt(d.ventas_hoy) + ' €';
+      document.getElementById('panel-pedidos-hoy').textContent = d.pedidos_hoy + ' pedido' + (d.pedidos_hoy !== 1 ? 's' : '');
+      document.getElementById('panel-ventas-semana').textContent = fmt(d.ventas_semana) + ' €';
+      document.getElementById('panel-ventas-mes').textContent = fmt(d.ventas_mes) + ' €';
+      document.getElementById('panel-pedidos-mes').textContent = d.pedidos_mes + ' pedido' + (d.pedidos_mes !== 1 ? 's' : '');
+
+      // Ranking
+      var rankWrap = document.getElementById('panel-ranking');
+      if (d.ranking && d.ranking.length) {
+        rankWrap.innerHTML = d.ranking.map(function(r, i){
+          return '<div class="panel-rank-row">' +
+            '<div class="panel-rank-pos">' + (i + 1) + '</div>' +
+            '<div class="panel-rank-name">' + r.name +
+              '<div class="panel-rank-pedidos">' + r.pedidos + ' pedidos</div>' +
+            '</div>' +
+            '<div class="panel-rank-importe">' + fmt(r.importe) + ' €</div>' +
+          '</div>';
+        }).join('');
+      } else {
+        rankWrap.innerHTML = '<div class="panel-empty">Sin datos este mes.</div>';
+      }
+
+      // Pedidos de hoy
+      var pedWrap = document.getElementById('panel-pedidos-lista');
+      if (d.pedidos_hoy_lista && d.pedidos_hoy_lista.length) {
+        pedWrap.innerHTML = d.pedidos_hoy_lista.map(function(p){
+          return '<div class="panel-pedido-row">' +
+            '<span class="panel-pedido-hora">' + (p.hora || '') + '</span>' +
+            '<span class="panel-pedido-cliente">' + p.cliente + '</span>' +
+            '<span class="panel-pedido-comercial">' + p.comercial + '</span>' +
+            '<span class="panel-pedido-importe">' + fmt(p.importe) + ' €</span>' +
+          '</div>';
+        }).join('');
+      } else {
+        pedWrap.innerHTML = '<div class="panel-empty">No hay pedidos hoy todavía.</div>';
+      }
+    })
+    .catch(function(){
+      document.getElementById('panel-loading').innerHTML = 'Error cargando el panel.';
+    });
+  }
 
   function cargarAnalisis() {
     var btn = document.getElementById('btn-analisis-cargar');
