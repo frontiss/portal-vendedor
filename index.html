@@ -2189,10 +2189,9 @@ grid.appendChild(card);
         var custom = customPrices[+k];
         return {
           product_id:   +k,
-          quantity:     quantities[k],
-          box_qty:      (prod && prod.box_qty)      ? prod.box_qty      : 1,
+          quantity:     Math.round(quantities[k]),  // siempre entero
+          box_qty:      (prod && prod.box_qty)      ? Math.round(prod.box_qty) : 1,
           packaging_id: (prod && prod.packaging_id) ? prod.packaging_id : 0,
-          // Si precio libre: enviar solo custom_price. Si descuento %: enviar solo discount
           discount:     (custom && custom.mode === 'pct') ? custom.discount : 0,
           custom_price: (custom && custom.mode === 'fix') ? custom.price    : null,
         };
@@ -2214,7 +2213,18 @@ grid.appendChild(card);
       btnOrder.innerHTML = 'Confirmar pedido';
       modifyingOrderId = null;
       historyLoaded = false;
-      if (!res.ok) { modalErrMsg.textContent = res.data.detail || 'Error al enviar.'; modalErr.classList.add('open'); return; }
+      if (!res.ok) {
+        var detalle = res.data.detail;
+        if (Array.isArray(detalle)) {
+          // Error de validación FastAPI — extraer el mensaje
+          detalle = detalle.map(function(e){ return (e.loc ? e.loc.join('.')+': ' : '') + e.msg; }).join('\n');
+        } else if (typeof detalle === 'object') {
+          detalle = JSON.stringify(detalle);
+        }
+        modalErrMsg.textContent = detalle || 'Error al enviar.';
+        modalErr.classList.add('open');
+        return;
+      }
       modalRef.textContent = res.data.order_ref;
       visitedClients[selectedClient.id] = true;
       document.querySelectorAll('.client-card').forEach(function(cd){
