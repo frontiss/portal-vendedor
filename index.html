@@ -342,7 +342,7 @@
   .btn-cobrar:hover{background:#C07828}
   .btn-cobrar:disabled{background:#CCC;cursor:not-allowed}
   /* Liquidacion */
-  @media print{body>*:not(#print-area){display:none!important}#print-area{display:block!important}.no-print{display:none!important}}
+  @media print{body.printing-liq>*:not(#print-area){display:none!important}body.printing-liq #print-area{display:block!important}.no-print{display:none!important}}
   #print-area{display:none}
   .liq-screen-content{max-width:900px;margin:0 auto;padding:40px 24px 60px}
   .liq-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
@@ -467,8 +467,8 @@
   .oferta-summary-item:last-child{border-bottom:none}
   /* Print oferta */
   @media print{
-    body>*:not(#oferta-print-area){display:none!important}
-    #oferta-print-area{display:block!important}
+    body.printing-oferta>*:not(#oferta-print-area){display:none!important}
+    body.printing-oferta #oferta-print-area{display:block!important}
   }
   #oferta-print-area{display:none}
   /* Modal email oferta */
@@ -2707,7 +2707,9 @@ grid.appendChild(card);
   document.getElementById('btn-liq-print').addEventListener('click', function(){
     if (!liqData) return;
     document.getElementById('print-area').innerHTML = buildPrintHTML(liqData, liqMode);
+    document.body.classList.add('printing-liq');
     window.print();
+    setTimeout(function(){ document.body.classList.remove('printing-liq'); }, 500);
   });
 
   document.querySelectorAll('.liq-detail-btn').forEach(function(btn){
@@ -3798,6 +3800,8 @@ grid.appendChild(card);
 
     if (!keys.length) {
       panel.style.display = 'none';
+      importeInput.value = '';       // limpiar importe al deseleccionar todo
+      importeInfo.textContent = '';
       return;
     }
 
@@ -3816,11 +3820,8 @@ grid.appendChild(card);
     seleccionEl.innerHTML = '<strong>' + selTexto + '</strong>';
     totalEl.textContent = fmt(totalCobro) + ' €';
 
-    // Actualizar campo importe si está vacío o supera el total
-    var importeActual = parseFloat(importeInput.value);
-    if (!importeActual || importeActual > totalCobro) {
-      importeInput.value = totalCobro.toFixed(2);
-    }
+    // El importe siempre se recalcula al total de lo seleccionado
+    importeInput.value = totalCobro.toFixed(2);
     importeInfo.textContent = 'Total a cobrar (facturas − abonos): ' + fmt(totalCobro) + ' €';
 
     var importeValido = parseFloat(importeInput.value) > 0;
