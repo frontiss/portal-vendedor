@@ -3901,7 +3901,8 @@ grid.appendChild(card);
         invoice_ids: keys,
         journal_id: selectedJournalId,
         memo: memo,
-        amount: importeCustom  // importe personalizado (puede ser parcial)
+        amount: importeCustom,  // importe personalizado (puede ser parcial)
+        metodo: selectedMetodo  // 'efectivo' o 'pagare'
       })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
