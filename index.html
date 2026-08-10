@@ -4258,32 +4258,48 @@ grid.appendChild(card);
 
   // Tarifas disponibles para aplicar a un producto puntual
   var tarifasDisponibles = [];
-
-  function cargarTarifasDisponibles() {
-    if (tarifasDisponibles.length) return Promise.resolve(tarifasDisponibles);
-    return fetch(API + '/pricelists', { headers: { 'Authorization': 'Bearer ' + token } })
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        tarifasDisponibles = d.pricelists || [];
-        return tarifasDisponibles;
-      })
-      .catch(function(){ return []; });
-  }
+  var tarifasPrecioCache = {};   // { product_id: [ {id, name, unit_price}, ... ] }
 
   function poblarSelectTarifas(pid) {
     var sel = document.getElementById('pes-' + pid);
     if (!sel) return;
-    sel.innerHTML = '<option value="">Cargando tarifas...</option>';
-    cargarTarifasDisponibles().then(function(tarifas){
+    var p = allProducts.filter(function(x){ return x.id === pid; })[0];
+    var boxQty = (p && p.box_qty > 0) ? p.box_qty : 1;
+
+    function pintar(tarifas) {
       if (!tarifas.length) {
         sel.innerHTML = '<option value="">Sin tarifas disponibles</option>';
         return;
       }
       var actual = selectedClient && selectedClient.pricelist_id;
       sel.innerHTML = tarifas.map(function(t){
-        var esActual = (t.id === actual) ? ' (actual)' : '';
-        return '<option value="' + t.id + '">' + t.name + esActual + '</option>';
+        var precioCaja = round2(t.unit_price * boxQty);
+        var esActual = (t.id === actual) ? ' ★' : '';
+        return '<option value="' + t.id + '">' +
+                 t.name + esActual + ' — ' + fmt(precioCaja) + ' €' +
+               '</option>';
       }).join('');
+    }
+
+    // Si ya tenemos los precios cacheados para este producto, pintar directo
+    if (tarifasPrecioCache[pid]) {
+      pintar(tarifasPrecioCache[pid]);
+      return;
+    }
+
+    sel.innerHTML = '<option value="">Cargando precios...</option>';
+    fetch(API + '/product-prices?product_id=' + pid, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var tarifas = d.tarifas || [];
+      tarifasPrecioCache[pid] = tarifas;
+      tarifasDisponibles = tarifas;   // para resolver el nombre al aplicar
+      pintar(tarifas);
+    })
+    .catch(function(){
+      sel.innerHTML = '<option value="">Error cargando tarifas</option>';
     });
   }
 
@@ -4294,35 +4310,23 @@ grid.appendChild(card);
     var plId = parseInt(sel.value, 10);
     if (!plId) return;
 
-    var tarifa = tarifasDisponibles.filter(function(t){ return t.id === plId; })[0];
-    sel.disabled = true;
+    var lista  = tarifasPrecioCache[pid] || [];
+    var tarifa = lista.filter(function(t){ return t.id === plId; })[0];
+    if (!tarifa) return;
 
-    fetch(API + '/product-price?product_id=' + pid + '&pricelist_id=' + plId, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      sel.disabled = false;
-      if (d.unit_price === undefined || d.unit_price === null) return;
-      // El precio del backend es por unidad; lo pasamos a precio de caja
-      var boxQty   = p.box_qty && p.box_qty > 0 ? p.box_qty : 1;
-      var newPrice = round2(d.unit_price * boxQty);
-      var discount = p.price > 0 ? round2((1 - newPrice / p.price) * 100) : 0;
+    var boxQty   = p.box_qty && p.box_qty > 0 ? p.box_qty : 1;
+    var newPrice = round2(tarifa.unit_price * boxQty);
+    var discount = p.price > 0 ? round2((1 - newPrice / p.price) * 100) : 0;
 
-      customPrices[pid] = {
-        price:    newPrice,
-        discount: discount,
-        mode:     'fix',                          // se envía a Odoo como precio libre
-        tarifa:   tarifa ? tarifa.name : ''       // solo informativo
-      };
-      document.getElementById('pe-' + pid).classList.remove('open');
-      render(allProducts);
-      updateSummary();
-    })
-    .catch(function(){
-      sel.disabled = false;
-      alert('No se pudo obtener el precio de esa tarifa');
-    });
+    customPrices[pid] = {
+      price:    newPrice,
+      discount: discount,
+      mode:     'fix',            // se envía a Odoo como precio libre
+      tarifa:   tarifa.name       // solo informativo, para el badge
+    };
+    document.getElementById('pe-' + pid).classList.remove('open');
+    render(allProducts);
+    updateSummary();
   }
 
   function applyCustomPrice(pid) {
