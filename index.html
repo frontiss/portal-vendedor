@@ -399,7 +399,7 @@
   .price-editor{display:none;margin-top:10px;background:white;border-radius:10px;padding:12px;border:1.5px solid var(--accent);box-shadow:0 4px 12px rgba(249,115,22,.15)}
   .price-editor.open{display:block}
   .price-editor-tabs{display:flex;gap:4px;margin-bottom:10px}
-  .price-editor-tab{flex:1;padding:6px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s;text-align:center}
+  .price-editor-tab{flex:1;padding:6px 4px;border:1.5px solid var(--border);border-radius:8px;background:white;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .2s;text-align:center;white-space:nowrap}
   .price-editor-tab.active{background:var(--primary);border-color:var(--primary);color:white}
   .price-editor-row{display:flex;align-items:center;gap:6px}
   .price-editor-input{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;outline:none;min-width:0}
@@ -835,6 +835,7 @@
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn-pedidos-hoy" id="btn-pedidos-hoy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Hoy <span class="pedidos-hoy-badge" id="pedidos-hoy-badge">0</span></button>
+      <button class="btn-back" id="btn-refresh-clients" style="font-size:12px;padding:6px 12px" title="Actualizar lista de clientes">↻</button>
       <button class="btn-back" id="btn-panel-nav" style="font-size:12px;padding:6px 12px;display:none">📊 Panel</button>
       <button class="btn-back" id="btn-oferta-libre-nav" style="font-size:12px;padding:6px 12px">Oferta</button>
       <button class="btn-back" id="btn-analisis-nav" style="font-size:12px;padding:6px 12px">Análisis</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:12px;padding:6px 12px">Liquidación</button>
@@ -2016,7 +2017,11 @@
       var custom = customPrices[p.id];
       var displayPrice = custom ? custom.price : p.price;
       var displayVatPrice = custom ? round2(custom.price * (1 + taxRate/100)) : (p.price_with_vat || p.price);
-      var customBadge = custom ? '<span class="price-custom-badge">-' + custom.discount + '%</span>' : '';
+      var customBadge = custom
+        ? (custom.tarifa
+            ? '<span class="price-custom-badge">' + custom.tarifa + '</span>'
+            : '<span class="price-custom-badge">-' + custom.discount + '%</span>')
+        : '';
       var unitInfo = boxQty > 1
         ? '<small class="unit-cost" style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt((custom ? custom.price/boxQty : p.unit_price) || p.price) + '\u20ac/ud</small>'
         : '';
@@ -2058,12 +2063,18 @@
         '</div>' +
         '<div class="price-editor" id="pe-' + p.id + '">' +
           '<div class="price-editor-tabs">' +
-            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
+            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Dto</div>' +
             '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
+            '<div class="price-editor-tab" id="pet-tar-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'tar\')">Tarifa</div>' +
           '</div>' +
-          '<div class="price-editor-row">' +
+          '<div class="price-editor-row" id="per-input-' + p.id + '">' +
             '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
             '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
+            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
+          '</div>' +
+          '<div class="price-editor-row" id="per-tarifa-' + p.id + '" style="display:none">' +
+            '<select class="price-editor-input" id="pes-' + p.id + '"></select>' +
+            '<button class="price-editor-btn" onclick="applyTarifaPrice(' + p.id + ')">OK</button>' +
             '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
           '</div>' +
         '</div>';
@@ -2517,7 +2528,11 @@ grid.appendChild(card);
       var custom2 = customPrices[p.id];
       var displayPrice2 = custom2 ? custom2.price : p.price;
       var displayVatPrice2 = custom2 ? Math.round(custom2.price*(1+(taxRate/100))*100)/100 : (p.price_with_vat||p.price);
-      var customBadge2 = custom2 ? '<span class="price-custom-badge">-' + custom2.discount + '%</span>' : '';
+      var customBadge2 = custom2
+        ? (custom2.tarifa
+            ? '<span class="price-custom-badge">' + custom2.tarifa + '</span>'
+            : '<span class="price-custom-badge">-' + custom2.discount + '%</span>')
+        : '';
       var vatInfo2 = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice2) + '\u20ac c/IVA</small>'
         : '';
@@ -2555,12 +2570,18 @@ grid.appendChild(card);
         '</div>' +
         '<div class="price-editor" id="pe-' + p.id + '">' +
           '<div class="price-editor-tabs">' +
-            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Descuento</div>' +
+            '<div class="price-editor-tab active" id="pet-pct-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'pct\')">% Dto</div>' +
             '<div class="price-editor-tab" id="pet-fix-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'fix\')">Precio libre</div>' +
+            '<div class="price-editor-tab" id="pet-tar-' + p.id + '" onclick="setPriceEditorMode(' + p.id + ',\'tar\')">Tarifa</div>' +
           '</div>' +
-          '<div class="price-editor-row">' +
+          '<div class="price-editor-row" id="per-input-' + p.id + '">' +
             '<input class="price-editor-input" id="pei-' + p.id + '" type="number" min="0" step="0.01" placeholder="0">' +
             '<button class="price-editor-btn" onclick="applyCustomPrice(' + p.id + ')">OK</button>' +
+            '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
+          '</div>' +
+          '<div class="price-editor-row" id="per-tarifa-' + p.id + '" style="display:none">' +
+            '<select class="price-editor-input" id="pes-' + p.id + '"></select>' +
+            '<button class="price-editor-btn" onclick="applyTarifaPrice(' + p.id + ')">OK</button>' +
             '<button class="price-editor-reset" onclick="resetCustomPrice(' + p.id + ')">&#x21ba;</button>' +
           '</div>' +
         '</div>';
@@ -2677,6 +2698,33 @@ grid.appendChild(card);
 
   // ── LIQUIDACION ─────────────────────────────────────
   var liqData = null; var liqMode = 'clientes';
+
+  document.getElementById('btn-refresh-clients').addEventListener('click', function() {
+    var btn = document.getElementById('btn-refresh-clients');
+    btn.textContent = '...';
+    btn.disabled = true;
+    fetch(API + '/cache/clients', {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function() {
+      clientsGrid.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Actualizando clientes...</div>';
+      return fetch(API + '/vendor/clients', { headers: { 'Authorization': 'Bearer ' + token } });
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      allClients = res.clients || [];
+      buildDayFilters(allClients);
+      applyFilters(allClients);
+      btn.textContent = '↻';
+      btn.disabled = false;
+      showToast('Lista de clientes actualizada');
+    })
+    .catch(function(){
+      btn.textContent = '↻';
+      btn.disabled = false;
+    });
+  });
 
   document.getElementById('btn-liquidacion-nav').addEventListener('click', function(){
     clientsScreen.style.display = 'none';
@@ -3901,7 +3949,8 @@ grid.appendChild(card);
         invoice_ids: keys,
         journal_id: selectedJournalId,
         memo: memo,
-        amount: importeCustom  // importe personalizado (puede ser parcial)
+        amount: importeCustom,  // importe personalizado (puede ser parcial)
+        metodo: selectedMetodo  // 'efectivo' o 'pagare'
       })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
@@ -4139,8 +4188,12 @@ grid.appendChild(card);
     })
     .catch(function(){
       btn.disabled = false;
-      btn.innerHTML = 'Guardar cambios';
-      alert('Error de conexion al guardar');
+      btn.innerHTML = editMode === 'new' ? 'Crear cliente' : 'Guardar cambios';
+      if (editMode === 'new') {
+        alert('Error de conexión. Es posible que el cliente SÍ se haya creado en Odoo.\n\nCierra este formulario y recarga la lista de clientes antes de volver a intentarlo para evitar duplicados.');
+      } else {
+        alert('Error de conexión al guardar. Inténtalo de nuevo.');
+      }
     });
   });
 
@@ -4156,8 +4209,13 @@ grid.appendChild(card);
     if (!el) return;
     el.classList.toggle('open');
     if (el.classList.contains('open')) {
-      var inp = document.getElementById('pei-' + pid);
       var custom = customPrices[pid];
+      // Si el precio viene de una tarifa, abrir directamente en modo tarifa
+      if (custom && custom.tarifa) {
+        setPriceEditorMode(pid, 'tar');
+        return;
+      }
+      var inp = document.getElementById('pei-' + pid);
       if (custom) inp.value = custom.discount;
       else inp.value = '';
       inp.focus();
@@ -4168,6 +4226,23 @@ grid.appendChild(card);
     priceEditorMode[pid] = mode;
     document.getElementById('pet-pct-' + pid).classList.toggle('active', mode === 'pct');
     document.getElementById('pet-fix-' + pid).classList.toggle('active', mode === 'fix');
+    var tabTar = document.getElementById('pet-tar-' + pid);
+    if (tabTar) tabTar.classList.toggle('active', mode === 'tar');
+
+    var rowInput  = document.getElementById('per-input-' + pid);
+    var rowTarifa = document.getElementById('per-tarifa-' + pid);
+
+    if (mode === 'tar') {
+      // Mostrar el desplegable de tarifas
+      if (rowInput)  rowInput.style.display  = 'none';
+      if (rowTarifa) rowTarifa.style.display = 'flex';
+      poblarSelectTarifas(pid);
+      return;
+    }
+
+    if (rowInput)  rowInput.style.display  = 'flex';
+    if (rowTarifa) rowTarifa.style.display = 'none';
+
     var inp = document.getElementById('pei-' + pid);
     var p = allProducts.filter(function(x){ return x.id === pid; })[0];
     if (!p) return;
@@ -4179,6 +4254,79 @@ grid.appendChild(card);
       inp.step = '0.01';
     }
     inp.value = '';
+  }
+
+  // Tarifas disponibles para aplicar a un producto puntual
+  var tarifasDisponibles = [];
+  var tarifasPrecioCache = {};   // { product_id: [ {id, name, unit_price}, ... ] }
+
+  function poblarSelectTarifas(pid) {
+    var sel = document.getElementById('pes-' + pid);
+    if (!sel) return;
+    var p = allProducts.filter(function(x){ return x.id === pid; })[0];
+    var boxQty = (p && p.box_qty > 0) ? p.box_qty : 1;
+
+    function pintar(tarifas) {
+      if (!tarifas.length) {
+        sel.innerHTML = '<option value="">Sin tarifas disponibles</option>';
+        return;
+      }
+      var actual = selectedClient && selectedClient.pricelist_id;
+      sel.innerHTML = tarifas.map(function(t){
+        var precioCaja = round2(t.unit_price * boxQty);
+        var esActual = (t.id === actual) ? ' ★' : '';
+        return '<option value="' + t.id + '">' +
+                 t.name + esActual + ' — ' + fmt(precioCaja) + ' €' +
+               '</option>';
+      }).join('');
+    }
+
+    // Si ya tenemos los precios cacheados para este producto, pintar directo
+    if (tarifasPrecioCache[pid]) {
+      pintar(tarifasPrecioCache[pid]);
+      return;
+    }
+
+    sel.innerHTML = '<option value="">Cargando precios...</option>';
+    fetch(API + '/product-prices?product_id=' + pid, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var tarifas = d.tarifas || [];
+      tarifasPrecioCache[pid] = tarifas;
+      tarifasDisponibles = tarifas;   // para resolver el nombre al aplicar
+      pintar(tarifas);
+    })
+    .catch(function(){
+      sel.innerHTML = '<option value="">Error cargando tarifas</option>';
+    });
+  }
+
+  function applyTarifaPrice(pid) {
+    var sel = document.getElementById('pes-' + pid);
+    var p = allProducts.filter(function(x){ return x.id === pid; })[0];
+    if (!sel || !p) return;
+    var plId = parseInt(sel.value, 10);
+    if (!plId) return;
+
+    var lista  = tarifasPrecioCache[pid] || [];
+    var tarifa = lista.filter(function(t){ return t.id === plId; })[0];
+    if (!tarifa) return;
+
+    var boxQty   = p.box_qty && p.box_qty > 0 ? p.box_qty : 1;
+    var newPrice = round2(tarifa.unit_price * boxQty);
+    var discount = p.price > 0 ? round2((1 - newPrice / p.price) * 100) : 0;
+
+    customPrices[pid] = {
+      price:    newPrice,
+      discount: discount,
+      mode:     'fix',            // se envía a Odoo como precio libre
+      tarifa:   tarifa.name       // solo informativo, para el badge
+    };
+    document.getElementById('pe-' + pid).classList.remove('open');
+    render(allProducts);
+    updateSummary();
   }
 
   function applyCustomPrice(pid) {
@@ -4452,6 +4600,7 @@ grid.appendChild(card);
   window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
   window.applyCustomPrice   = applyCustomPrice;
+  window.applyTarifaPrice   = applyTarifaPrice;
   window.resetCustomPrice   = resetCustomPrice;
   window.toggleLiqCard      = toggleLiqCard;
 
