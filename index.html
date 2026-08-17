@@ -344,6 +344,43 @@
   /* Liquidacion */
   @media print{body.printing-liq>*:not(#print-area){display:none!important}body.printing-liq #print-area{display:block!important}.no-print{display:none!important}}
   #print-area{display:none}
+  @media print{
+    body.printing-pend>*:not(#pend-print-area){display:none!important}
+    body.printing-pend #pend-print-area{display:block!important}
+  }
+  #pend-print-area{display:none}
+  .pend-card{background:white;border:1.5px solid var(--border);border-radius:14px;margin-bottom:14px;overflow:hidden}
+  .pend-card.tiene-vencidas{border-left:4px solid var(--danger)}
+  .pend-card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;transition:background .2s}
+  .pend-card-head:hover{background:#F7FAFD}
+  .pend-cli-info{flex:1;min-width:0}
+  .pend-cli-name{font-weight:700;color:var(--primary);font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pend-cli-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+  .pend-cli-total{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--primary);flex-shrink:0}
+  .pend-venc-badge{display:inline-block;background:#FDE8E8;color:var(--danger);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px}
+  .pend-card-body{display:none;border-top:1px solid var(--border);padding:6px 18px 12px}
+  .pend-card.open .pend-card-body{display:block}
+  .pend-fact-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F4F8;font-size:13px}
+  .pend-fact-row:last-child{border-bottom:none}
+  .pend-fact-ref{font-weight:600;color:var(--primary);width:130px;flex-shrink:0}
+  .pend-fact-fecha{color:var(--text-muted);font-size:12px;flex:1}
+  .pend-fact-imp{font-weight:700;color:var(--primary);text-align:right;width:100px;flex-shrink:0}
+  .pend-fact-row.vencida .pend-fact-imp{color:var(--danger)}
+  .pend-fact-row.abono .pend-fact-imp{color:#2E7D32}
+  .pend-chev{color:var(--text-muted);flex-shrink:0;transition:transform .2s}
+  .pend-card.open .pend-chev{transform:rotate(180deg)}
+  /* Impresión del resumen */
+  .pp-wrap{font-family:Arial,Helvetica,sans-serif;color:#111;padding:18px}
+  .pp-title{font-size:20px;font-weight:bold;margin-bottom:2px}
+  .pp-sub{font-size:12px;color:#555;margin-bottom:14px}
+  .pp-tot{font-size:13px;font-weight:bold;margin-bottom:14px;padding:8px 10px;background:#F0F4F8;border-radius:6px}
+  .pp-cli{margin-bottom:14px;page-break-inside:avoid}
+  .pp-cli-h{font-size:13px;font-weight:bold;border-bottom:1.5px solid #333;padding-bottom:3px;margin-bottom:5px;display:flex;justify-content:space-between}
+  .pp-t{width:100%;border-collapse:collapse;font-size:11px}
+  .pp-t th{text-align:left;border-bottom:1px solid #999;padding:3px 4px;font-size:10px;color:#555}
+  .pp-t td{padding:3px 4px;border-bottom:1px solid #EEE}
+  .pp-r{text-align:right}
+  .pp-venc{color:#C0392B;font-weight:bold}
   .liq-screen-content{max-width:900px;margin:0 auto;padding:40px 24px 60px}
   .liq-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
   .liq-title{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--primary)}
@@ -836,6 +873,7 @@
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button class="btn-pedidos-hoy" id="btn-pedidos-hoy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Hoy <span class="pedidos-hoy-badge" id="pedidos-hoy-badge">0</span></button>
       <button class="btn-back" id="btn-refresh-clients" style="font-size:12px;padding:6px 12px" title="Actualizar lista de clientes">↻</button>
+      <button class="btn-back" id="btn-pendientes-nav" style="font-size:12px;padding:6px 12px">💰 Pendientes</button>
       <button class="btn-back" id="btn-panel-nav" style="font-size:12px;padding:6px 12px;display:none">📊 Panel</button>
       <button class="btn-back" id="btn-oferta-libre-nav" style="font-size:12px;padding:6px 12px">Oferta</button>
       <button class="btn-back" id="btn-analisis-nav" style="font-size:12px;padding:6px 12px">Análisis</button><button class="btn-back" id="btn-liquidacion-nav" style="font-size:12px;padding:6px 12px">Liquidación</button>
@@ -1077,6 +1115,28 @@
     </div>
   </div>
 </div>
+
+<div id="pend-screen" style="display:none;min-height:100vh;background:var(--bg)">
+  <div class="clients-header no-print">
+    <div class="clients-header-left">
+      <span class="header-logo-text">Comercial A. Puchol</span>
+      <span class="vendor-pill" id="pend-vendor-pill"></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-back" id="btn-pend-print" style="font-size:12px;padding:6px 12px">🖨 Imprimir</button>
+      <button class="btn-back" id="btn-pend-back">Mis clientes</button>
+      <button class="btn-logout" id="btn-logout-pend">Cerrar sesión</button>
+    </div>
+  </div>
+  <div style="max-width:1000px;margin:0 auto;padding:32px 24px 60px">
+    <h1 class="clients-title">Facturas pendientes</h1>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px" id="pend-subtitle"></p>
+    <div id="pend-kpis" class="panel-kpis" style="display:none"></div>
+    <div id="pend-content"><div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div></div>
+  </div>
+</div>
+
+<div id="pend-print-area"></div>
 
 <div id="liq-screen" style="display:none;min-height:100vh;background:var(--bg)">
   <div class="clients-header">
@@ -1856,6 +1916,7 @@
     document.getElementById('liq-screen').style.display = 'none';
     document.getElementById('analisis-screen').style.display = 'none';
     document.getElementById('panel-screen').style.display = 'none';
+    document.getElementById('pend-screen').style.display = 'none';
     var ofertaScreen = document.getElementById('oferta-libre-screen');
     if (ofertaScreen) ofertaScreen.style.display = 'none';
     appScreen.style.display = 'block';
@@ -1947,6 +2008,7 @@
     document.getElementById('panel-facturas').style.display = 'none';
     document.getElementById('panel-screen').style.display = 'none';
     document.getElementById('analisis-screen').style.display = 'none';
+    document.getElementById('pend-screen').style.display = 'none';
     clientsScreen.style.display = 'none';
     loginScreen.style.display = 'flex';
     document.getElementById('login-user').value = '';
@@ -2699,6 +2761,148 @@ grid.appendChild(card);
   // ── LIQUIDACION ─────────────────────────────────────
   var liqData = null; var liqMode = 'clientes';
 
+  // ── FACTURAS PENDIENTES DE TODOS LOS CLIENTES ─────────
+  var pendData = null;
+
+  document.getElementById('btn-pendientes-nav').addEventListener('click', function(){
+    clientsScreen.style.display = 'none';
+    appScreen.style.display = 'none';
+    document.getElementById('pend-screen').style.display = 'block';
+    document.getElementById('pend-vendor-pill').textContent = vendorName;
+    cargarPendientes();
+  });
+
+  document.getElementById('btn-pend-back').addEventListener('click', function(){
+    document.getElementById('pend-screen').style.display = 'none';
+    appScreen.style.display = 'none';
+    clientsScreen.style.display = 'block';
+  });
+  document.getElementById('btn-logout-pend').addEventListener('click', logout);
+
+  document.getElementById('btn-pend-print').addEventListener('click', function(){
+    if (!pendData) return;
+    document.getElementById('pend-print-area').innerHTML = buildPendPrintHTML(pendData);
+    document.body.classList.add('printing-pend');
+    window.print();
+    setTimeout(function(){ document.body.classList.remove('printing-pend'); }, 500);
+  });
+
+  function cargarPendientes() {
+    var cont = document.getElementById('pend-content');
+    var kpis = document.getElementById('pend-kpis');
+    cont.innerHTML = '<div class="loading-box"><div class="big-spinner"></div>Cargando facturas...</div>';
+    kpis.style.display = 'none';
+
+    fetch(API + '/invoices/resumen', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      pendData = d;
+      document.getElementById('pend-subtitle').textContent =
+        d.num_clientes + ' cliente' + (d.num_clientes !== 1 ? 's' : '') + ' con facturas pendientes';
+
+      kpis.style.display = 'grid';
+      kpis.innerHTML =
+        '<div class="panel-kpi">' +
+          '<div class="panel-kpi-label">Total pendiente</div>' +
+          '<div class="panel-kpi-value">' + fmt(d.total_pendiente) + ' €</div>' +
+          '<div class="panel-kpi-sub">' + d.num_facturas + ' facturas</div>' +
+        '</div>' +
+        '<div class="panel-kpi">' +
+          '<div class="panel-kpi-label">Facturas vencidas</div>' +
+          '<div class="panel-kpi-value" style="color:' + (d.num_vencidas > 0 ? 'var(--danger)' : 'var(--primary)') + '">' + d.num_vencidas + '</div>' +
+          '<div class="panel-kpi-sub">de ' + d.num_facturas + ' pendientes</div>' +
+        '</div>' +
+        '<div class="panel-kpi">' +
+          '<div class="panel-kpi-label">Clientes</div>' +
+          '<div class="panel-kpi-value">' + d.num_clientes + '</div>' +
+          '<div class="panel-kpi-sub">con saldo pendiente</div>' +
+        '</div>';
+
+      if (!d.clientes || !d.clientes.length) {
+        cont.innerHTML = '<div class="panel-empty">No hay facturas pendientes. 🎉</div>';
+        return;
+      }
+
+      cont.innerHTML = d.clientes.map(function(c){
+        var vencBadge = c.num_vencidas > 0
+          ? '<span class="pend-venc-badge">' + c.num_vencidas + ' vencida' + (c.num_vencidas > 1 ? 's' : '') + '</span>'
+          : '';
+        var filas = c.facturas.map(function(f){
+          var cls = f.es_abono ? ' abono' : (f.vencida ? ' vencida' : '');
+          var etiqueta = f.es_abono
+            ? '<span class="abono-badge">ABONO</span>'
+            : (f.vencida ? '<span class="pend-venc-badge">VENCIDA</span>' : '');
+          var fechas = 'Emisión ' + formatDate(f.fecha) + (f.vence ? ' · Vence ' + formatDate(f.vence) : '');
+          var imp = (f.es_abono ? '−' : '') + fmt(Math.abs(f.pendiente)) + ' €';
+          return '<div class="pend-fact-row' + cls + '">' +
+                   '<span class="pend-fact-ref">' + f.name + etiqueta + '</span>' +
+                   '<span class="pend-fact-fecha">' + fechas + '</span>' +
+                   '<span class="pend-fact-imp">' + imp + '</span>' +
+                 '</div>';
+        }).join('');
+
+        return '<div class="pend-card' + (c.num_vencidas > 0 ? ' tiene-vencidas' : '') + '" id="pend-c-' + c.partner_id + '">' +
+                 '<div class="pend-card-head" onclick="togglePendCard(' + c.partner_id + ')">' +
+                   '<div class="pend-cli-info">' +
+                     '<div class="pend-cli-name">' + c.cliente + vencBadge + '</div>' +
+                     '<div class="pend-cli-sub">' + (c.ref ? c.ref + ' · ' : '') + c.facturas.length + ' factura' + (c.facturas.length !== 1 ? 's' : '') + '</div>' +
+                   '</div>' +
+                   '<div class="pend-cli-total">' + fmt(c.total_pendiente) + ' €</div>' +
+                   '<svg class="pend-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>' +
+                 '</div>' +
+                 '<div class="pend-card-body">' + filas + '</div>' +
+               '</div>';
+      }).join('');
+    })
+    .catch(function(){
+      cont.innerHTML = '<div class="panel-empty">Error cargando las facturas pendientes.</div>';
+    });
+  }
+
+  function togglePendCard(pid) {
+    var el = document.getElementById('pend-c-' + pid);
+    if (el) el.classList.toggle('open');
+  }
+
+  function buildPendPrintHTML(d) {
+    var hoy = new Date().toLocaleDateString('es-ES');
+    var bloques = d.clientes.map(function(c){
+      var filas = c.facturas.map(function(f){
+        var cls = f.vencida ? ' class="pp-venc"' : '';
+        var imp = (f.es_abono ? '−' : '') + fmt(Math.abs(f.pendiente)) + ' €';
+        var tipo = f.es_abono ? 'ABONO' : (f.vencida ? 'VENCIDA' : '');
+        return '<tr>' +
+                 '<td' + cls + '>' + f.name + '</td>' +
+                 '<td>' + formatDate(f.fecha) + '</td>' +
+                 '<td' + cls + '>' + (f.vence ? formatDate(f.vence) : '—') + '</td>' +
+                 '<td' + cls + '>' + tipo + '</td>' +
+                 '<td class="pp-r"' + (f.vencida ? ' style="color:#C0392B;font-weight:bold"' : '') + '>' + imp + '</td>' +
+               '</tr>';
+      }).join('');
+      return '<div class="pp-cli">' +
+               '<div class="pp-cli-h">' +
+                 '<span>' + c.cliente + (c.ref ? ' (' + c.ref + ')' : '') + '</span>' +
+                 '<span>' + fmt(c.total_pendiente) + ' €</span>' +
+               '</div>' +
+               '<table class="pp-t">' +
+                 '<thead><tr><th>Factura</th><th>Emisión</th><th>Vencimiento</th><th>Estado</th><th class="pp-r">Pendiente</th></tr></thead>' +
+                 '<tbody>' + filas + '</tbody>' +
+               '</table>' +
+             '</div>';
+    }).join('');
+
+    return '<div class="pp-wrap">' +
+             '<div class="pp-title">Facturas pendientes — ' + d.vendedor + '</div>' +
+             '<div class="pp-sub">Comercial A. Puchol S.A. · Emitido el ' + hoy + '</div>' +
+             '<div class="pp-tot">' +
+               'TOTAL PENDIENTE: ' + fmt(d.total_pendiente) + ' € &nbsp;·&nbsp; ' +
+               d.num_facturas + ' facturas de ' + d.num_clientes + ' clientes &nbsp;·&nbsp; ' +
+               d.num_vencidas + ' vencidas' +
+             '</div>' +
+             bloques +
+           '</div>';
+  }
+
   document.getElementById('btn-refresh-clients').addEventListener('click', function() {
     var btn = document.getElementById('btn-refresh-clients');
     btn.textContent = '...';
@@ -3057,6 +3261,7 @@ grid.appendChild(card);
   // ── PANEL DE CONTROL ─────────────────────────────────
   document.getElementById('btn-panel-nav').addEventListener('click', function(){
     clientsScreen.style.display = 'none';
+    document.getElementById('pend-screen').style.display = 'none';
     document.getElementById('panel-screen').style.display = 'block';
     document.getElementById('panel-vendor-pill').textContent = vendorName;
     cargarPanel();
@@ -4599,6 +4804,7 @@ grid.appendChild(card);
   window.guardarObjetivo    = guardarObjetivo;
   window.removeOfertaLibreItem = removeOfertaLibreItem;
   window.setPriceEditorMode = setPriceEditorMode;
+  window.togglePendCard     = togglePendCard;
   window.applyCustomPrice   = applyCustomPrice;
   window.applyTarifaPrice   = applyTarifaPrice;
   window.resetCustomPrice   = resetCustomPrice;
