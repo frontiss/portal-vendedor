@@ -3666,16 +3666,18 @@ grid.appendChild(card);
   var productView = localStorage.getItem('productView') || 'grid';
 
   function applyProductView() {
-    var grid = document.querySelector('.products-grid');
+    // Rejilla del catálogo (dentro de productsArea), no la de la sección de ofertas
+    var grid = productsArea ? productsArea.querySelector('.products-grid') : null;
     var btnGrid = document.getElementById('btn-prod-grid');
     var btnList = document.getElementById('btn-prod-list');
-    if (!grid || !btnGrid) return;
+    if (!btnGrid || !btnList) return;
+
     if (productView === 'list') {
-      grid.classList.add('list-view');
+      if (grid) grid.classList.add('list-view');
       btnList.classList.add('active');
       btnGrid.classList.remove('active');
     } else {
-      grid.classList.remove('list-view');
+      if (grid) grid.classList.remove('list-view');
       btnGrid.classList.add('active');
       btnList.classList.remove('active');
     }
