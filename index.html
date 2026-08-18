@@ -2081,20 +2081,21 @@
       sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    // 2) Sección desplegable con las tarjetas
+    // 2) Sección desplegable con las tarjetas (abierta por defecto)
     countEl.textContent = ofertas.length;
     sectionEl.style.display = 'block';
+    sectionEl.classList.add('open');
 
     var grid = document.createElement('div');
     grid.className = 'products-grid ofertas-grid';
     bodyEl.innerHTML = '';
     bodyEl.appendChild(grid);
     renderProductCards(ofertas, grid);
-  }
 
-  document.getElementById('ofertas-section-head').addEventListener('click', function(){
-    document.getElementById('ofertas-section').classList.toggle('open');
-  });
+    // Listener del encabezado (se re-asigna en cada render para evitar duplicados)
+    var headEl = document.getElementById('ofertas-section-head');
+    headEl.onclick = function(){ sectionEl.classList.toggle('open'); };
+  }
 
   function loadProducts() {
     fetch(API + '/products?partner_id=' + selectedClient.id, {
