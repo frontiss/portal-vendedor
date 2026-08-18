@@ -358,6 +358,24 @@
   .pend-cli-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
   .pend-cli-total{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--primary);flex-shrink:0}
   .pend-venc-badge{display:inline-block;background:#FDE8E8;color:var(--danger);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px}
+  /* ── OFERTAS ── */
+  .oferta-badge{display:inline-block;background:#F97316;color:white;font-size:9.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+  .product-card.oferta{border-color:#FBBF77;background:linear-gradient(180deg,#FFF9F3 0%,white 60%)}
+  .precio-tachado{text-decoration:line-through;color:var(--text-muted);font-size:12px;font-weight:500;margin-right:6px}
+  .oferta-banner{display:flex;align-items:center;gap:12px;background:#FFF4E8;border:1.5px solid #F5C08A;border-radius:12px;padding:12px 16px;margin-bottom:16px}
+  .oferta-banner-icon{font-size:20px;flex-shrink:0}
+  .oferta-banner-txt{flex:1;font-size:13px;color:#9A5B18;line-height:1.4}
+  .oferta-banner-btn{background:#F97316;color:white;border:none;border-radius:9px;padding:7px 14px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;transition:background .2s}
+  .oferta-banner-btn:hover{background:#EA6A0C}
+  .ofertas-section{border:1.5px solid #F5C08A;border-radius:14px;margin-bottom:22px;overflow:hidden;background:#FFFCF8}
+  .ofertas-section-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#FFF4E8;transition:background .2s}
+  .ofertas-section-head:hover{background:#FFEEDC}
+  .ofertas-section-title{flex:1;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:#9A5B18}
+  .ofertas-section-count{background:#F97316;color:white;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .ofertas-section-body{display:none;padding:14px 16px 16px}
+  .ofertas-section.open .ofertas-section-body{display:block}
+  .ofertas-chev{color:#9A5B18;transition:transform .2s}
+  .ofertas-section.open .ofertas-chev{transform:rotate(180deg)}
   .pend-card-body{display:none;border-top:1px solid var(--border);padding:6px 18px 12px}
   .pend-card.open .pend-card-body{display:block}
   .pend-fact-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F4F8;font-size:13px}
@@ -1283,6 +1301,16 @@
 
 
     <div id="panel-pedido">
+      <div id="oferta-banner-wrap"></div>
+      <div class="ofertas-section" id="ofertas-section" style="display:none">
+        <div class="ofertas-section-head" id="ofertas-section-head">
+          <span style="font-size:18px">🏷</span>
+          <span class="ofertas-section-title">Productos en oferta</span>
+          <span class="ofertas-section-count" id="ofertas-count">0</span>
+          <svg class="ofertas-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="ofertas-section-body" id="ofertas-section-body"></div>
+      </div>
       <div class="search-bar" id="search-bar" style="display:none">
         <div class="search-wrap">
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -2000,6 +2028,10 @@
     clearImgCache();
     hdImgCache = {};
     quantities = {}; allProducts = [];
+    var _ob = document.getElementById('oferta-banner-wrap');
+    if (_ob) _ob.innerHTML = '';
+    var _os = document.getElementById('ofertas-section');
+    if (_os) { _os.style.display = 'none'; _os.classList.remove('open'); }
     // Ocultar barra del pedido
     var cartBar = document.getElementById('cart-bar');
     cartBar.style.display = 'none';
@@ -2021,6 +2053,48 @@
   // PANTALLA 3: PRODUCTOS Y PEDIDO
   // ═══════════════════════════════════════════════
 
+  // ── OFERTAS ──────────────────────────────────────────
+  function renderOfertas() {
+    var ofertas   = allProducts.filter(function(p){ return p.en_oferta; });
+    var bannerEl  = document.getElementById('oferta-banner-wrap');
+    var sectionEl = document.getElementById('ofertas-section');
+    var bodyEl    = document.getElementById('ofertas-section-body');
+    var countEl   = document.getElementById('ofertas-count');
+
+    if (!ofertas.length) {
+      bannerEl.innerHTML = '';
+      sectionEl.style.display = 'none';
+      return;
+    }
+
+    // 1) Banner de aviso
+    bannerEl.innerHTML =
+      '<div class="oferta-banner">' +
+        '<span class="oferta-banner-icon">🏷</span>' +
+        '<span class="oferta-banner-txt"><strong>' + ofertas.length + ' producto' +
+          (ofertas.length > 1 ? 's' : '') + ' en oferta</strong> para este cliente</span>' +
+        '<button class="oferta-banner-btn" id="btn-ver-ofertas">Ver ofertas</button>' +
+      '</div>';
+    document.getElementById('btn-ver-ofertas').addEventListener('click', function(){
+      sectionEl.classList.add('open');
+      sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // 2) Sección desplegable con las tarjetas
+    countEl.textContent = ofertas.length;
+    sectionEl.style.display = 'block';
+
+    var grid = document.createElement('div');
+    grid.className = 'products-grid';
+    bodyEl.innerHTML = '';
+    bodyEl.appendChild(grid);
+    renderProductCards(ofertas, grid);
+  }
+
+  document.getElementById('ofertas-section-head').addEventListener('click', function(){
+    document.getElementById('ofertas-section').classList.toggle('open');
+  });
+
   function loadProducts() {
     fetch(API + '/products?partner_id=' + selectedClient.id, {
       headers: { 'Authorization': 'Bearer ' + token }
@@ -2038,6 +2112,7 @@
       summaryEl.style.display = 'block';
       document.getElementById('tabs').style.display = 'flex';
       render(allProducts);
+      renderOfertas();
       updateSummary();
       document.getElementById('cart-bar').style.display = 'block';
     })
@@ -2070,6 +2145,16 @@
     }
     var grid = document.createElement('div');
     grid.className = 'products-grid';
+    renderProductCards(products, grid);
+    productsArea.innerHTML = '';
+    productsArea.appendChild(grid);
+    applyProductView();
+    productsArea.querySelectorAll('.qty-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { changeQty(+btn.dataset.id, +btn.dataset.d); });
+    });
+  }
+
+  function renderProductCards(products, grid) {
     products.forEach(function (p) {
       var qty = quantities[p.id] || 0;
       var card = document.createElement('div');
@@ -2083,7 +2168,9 @@
         ? (custom.tarifa
             ? '<span class="price-custom-badge">' + custom.tarifa + '</span>'
             : '<span class="price-custom-badge">-' + custom.discount + '%</span>')
-        : '';
+        : (p.en_oferta ? '<span class="oferta-badge">OFERTA −' + p.oferta_pct + '%</span>' : '');
+      var tachado = (p.en_oferta && !custom && p.precio_normal)
+        ? '<span class="precio-tachado">' + fmt(p.precio_normal) + ' €</span>' : '';
       var unitInfo = boxQty > 1
         ? '<small class="unit-cost" style="color:var(--text-muted);font-size:11px">' + boxQty + ' uds &middot; ' + fmt((custom ? custom.price/boxQty : p.unit_price) || p.price) + '\u20ac/ud</small>'
         : '';
@@ -2104,7 +2191,7 @@
         ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>'
         : '<div class="product-name">' + p.name + '</div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>';
 
-      card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '');
+      card.className = 'product-card' + (qty > 0 ? ' selected' : '') + (custom ? ' habitual' : '') + (p.en_oferta && !custom ? ' oferta' : '');
       card.id = 'card-' + p.id;
       card.innerHTML =
         '<div class="product-ref">' + (p.ref || p.category || '') + '</div>' +
@@ -2113,7 +2200,7 @@
         stockHtml +
         '<div class="product-footer" style="margin-top:8px">' +
           '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
-            fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
+            tachado + fmt(displayPrice) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge + '<br>' +
             vatInfo + '<br>' +
             '<span class="price-edit-hint">\u270f Modificar precio</span>' +
           '</div>' +
@@ -2142,10 +2229,7 @@
         '</div>';
 grid.appendChild(card);
     });
-    productsArea.innerHTML = '';
-    productsArea.appendChild(grid);
-    applyProductView();
-    productsArea.querySelectorAll('.qty-btn').forEach(function (btn) {
+    grid.querySelectorAll('.qty-btn').forEach(function (btn) {
       btn.addEventListener('click', function () { changeQty(+btn.dataset.id, +btn.dataset.d); });
     });
   }
@@ -2153,6 +2237,10 @@ grid.appendChild(card);
   function changeQty(id, d) {
     var n = Math.max(0, (quantities[id] || 0) + d);
     if (n === 0) delete quantities[id]; else quantities[id] = n;
+    setTimeout(function(){
+      var sec = document.getElementById('ofertas-section');
+      if (sec && sec.style.display !== 'none') renderOfertas();
+    }, 0);
     var v = document.getElementById('qv-' + id); if (v) v.textContent = n;
     var c = document.getElementById('card-' + id); if (c) c.classList.toggle('selected', n > 0);
     updateSummary();
@@ -2594,7 +2682,9 @@ grid.appendChild(card);
         ? (custom2.tarifa
             ? '<span class="price-custom-badge">' + custom2.tarifa + '</span>'
             : '<span class="price-custom-badge">-' + custom2.discount + '%</span>')
-        : '';
+        : (p.en_oferta ? '<span class="oferta-badge">OFERTA</span>' : '');
+      var tachado2 = (p.en_oferta && !custom2 && p.precio_normal)
+        ? '<span class="precio-tachado">' + fmt(p.precio_normal) + ' €</span>' : '';
       var vatInfo2 = taxRate > 0
         ? '<small style="color:var(--text-muted);font-size:11px">+ ' + taxRate + '% IVA &rarr; ' + fmt(displayVatPrice2) + '\u20ac c/IVA</small>'
         : '';
@@ -2602,7 +2692,7 @@ grid.appendChild(card);
         ? '<div class="product-name product-name-foto" onclick="abrirFotoProducto(' + p.id + ')">' + p.name + ' <span class="foto-icon">📷</span></div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>'
         : '<div class="product-name">' + p.name + '</div><button class="btn-price-history" onclick="abrirHistorialPrecios(' + p.id + ')" title="Historial de precios">📊</button>';
       var card = document.createElement('div');
-      card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '');
+      card.className = 'product-card' + (esDePedido ? ' habitual' : '') + (qty > 0 ? ' selected' : '') + (custom2 ? ' habitual' : '') + (p.en_oferta && !custom2 ? ' oferta' : '');
       card.id = 'card-' + p.id;
       var stock2 = p.stock !== undefined ? p.stock : null;
       var stockHtml2 = '';
@@ -2620,7 +2710,7 @@ grid.appendChild(card);
         stockHtml2 +
         '<div class="product-footer">' +
           '<div class="product-price product-price-clickable" id="price-display-' + p.id + '" onclick="togglePriceEditor(' + p.id + ')">' +
-            fmt(displayPrice2) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge2 + '<br>' +
+            tachado2 + fmt(displayPrice2) + ' \u20ac<small>/' + boxLabel + ' s/IVA</small>' + customBadge2 + '<br>' +
             vatInfo2 + '<br>' +
             '<span class="price-edit-hint">\u270f Modificar precio</span>' +
           '</div>' +
