@@ -373,6 +373,7 @@
   .ofertas-section-title{flex:1;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:#9A5B18}
   .ofertas-section-count{background:#F97316;color:white;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
   .ofertas-section-body{display:none;padding:14px 16px 16px}
+  .products-grid.ofertas-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:0}
   .ofertas-section.open .ofertas-section-body{display:block}
   .ofertas-chev{color:#9A5B18;transition:transform .2s}
   .ofertas-section.open .ofertas-chev{transform:rotate(180deg)}
@@ -2085,7 +2086,7 @@
     sectionEl.style.display = 'block';
 
     var grid = document.createElement('div');
-    grid.className = 'products-grid';
+    grid.className = 'products-grid ofertas-grid';
     bodyEl.innerHTML = '';
     bodyEl.appendChild(grid);
     renderProductCards(ofertas, grid);
@@ -2145,6 +2146,7 @@
     }
     var grid = document.createElement('div');
     grid.className = 'products-grid';
+    grid.id = 'catalog-grid';
     renderProductCards(products, grid);
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
@@ -2739,6 +2741,7 @@ grid.appendChild(card);
         '</div>';
       grid.appendChild(card);
     });
+    grid.id = 'catalog-grid';
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
     applyProductView();
@@ -3666,8 +3669,8 @@ grid.appendChild(card);
   var productView = localStorage.getItem('productView') || 'grid';
 
   function applyProductView() {
-    // Rejilla del catálogo (dentro de productsArea), no la de la sección de ofertas
-    var grid = productsArea ? productsArea.querySelector('.products-grid') : null;
+    // Rejilla del catálogo (id propio), nunca la de la sección de ofertas
+    var grid = document.getElementById('catalog-grid');
     var btnGrid = document.getElementById('btn-prod-grid');
     var btnList = document.getElementById('btn-prod-list');
     if (!btnGrid || !btnList) return;
