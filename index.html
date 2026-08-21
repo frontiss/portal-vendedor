@@ -2152,9 +2152,6 @@
     productsArea.innerHTML = '';
     productsArea.appendChild(grid);
     applyProductView();
-    productsArea.querySelectorAll('.qty-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { changeQty(+btn.dataset.id, +btn.dataset.d); });
-    });
   }
 
   function renderProductCards(products, grid) {
@@ -2240,12 +2237,14 @@ grid.appendChild(card);
   function changeQty(id, d) {
     var n = Math.max(0, (quantities[id] || 0) + d);
     if (n === 0) delete quantities[id]; else quantities[id] = n;
-    setTimeout(function(){
-      var sec = document.getElementById('ofertas-section');
-      if (sec && sec.style.display !== 'none') renderOfertas();
-    }, 0);
-    var v = document.getElementById('qv-' + id); if (v) v.textContent = n;
-    var c = document.getElementById('card-' + id); if (c) c.classList.toggle('selected', n > 0);
+    // Un producto en oferta aparece en dos rejillas (catálogo y ofertas):
+    // hay que actualizar todas sus apariciones, no solo la primera.
+    document.querySelectorAll('[id="qv-' + id + '"]').forEach(function(v){
+      v.textContent = n;
+    });
+    document.querySelectorAll('[id="card-' + id + '"]').forEach(function(c){
+      c.classList.toggle('selected', n > 0);
+    });
     updateSummary();
   }
 
