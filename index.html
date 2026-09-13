@@ -1353,6 +1353,10 @@
       <div class="cart-panel-title">Productos seleccionados</div>
       <ul class="summary-list" id="summary-list" style="list-style:none;padding:0;margin:0"></ul>
       <div class="cart-notes-wrap">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Fecha de entrega</label>
+        <input type="date" id="order-delivery-date" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:var(--bg);outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
+      </div>
+      <div class="cart-notes-wrap">
         <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Notas para el almac&eacute;n</label>
         <textarea id="order-notes" placeholder="Instrucciones especiales, observaciones..." style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:var(--bg);outline:none;resize:vertical;min-height:72px;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)'"></textarea>
       </div>
@@ -1378,6 +1382,7 @@
     <h2>¿Confirmamos el pedido?</h2>
     <p id="modal-confirm-client">Pedido para el cliente seleccionado:</p>
     <div class="confirm-items" id="confirm-items"></div>
+    <p id="modal-confirm-entrega" style="font-size:13px;color:var(--text-muted);margin-top:12px"></p>
     <div class="modal-buttons">
       <button class="btn-secondary" id="btn-confirm-cancel">Volver a revisar</button>
       <button class="btn-order" id="btn-confirm-ok">Sí, enviar pedido</button>
@@ -2033,6 +2038,7 @@
     if (_ob) _ob.innerHTML = '';
     var _os = document.getElementById('ofertas-section');
     if (_os) { _os.style.display = 'none'; _os.classList.remove('open'); }
+    setDefaultDeliveryDate();
     // Ocultar barra del pedido
     var cartBar = document.getElementById('cart-bar');
     cartBar.style.display = 'none';
@@ -2115,6 +2121,7 @@
       document.getElementById('tabs').style.display = 'flex';
       render(allProducts);
       renderOfertas();
+      setDefaultDeliveryDate();
       updateSummary();
       document.getElementById('cart-bar').style.display = 'block';
     })
@@ -2334,6 +2341,15 @@ grid.appendChild(card);
       var np = document.getElementById('confirm-notes-preview');
       if (np) np.style.display = 'none';
     }
+    // Mostrar la fecha de entrega elegida
+    var fechaEnt = document.getElementById('order-delivery-date').value;
+    var entEl = document.getElementById('modal-confirm-entrega');
+    if (entEl) {
+      entEl.textContent = fechaEnt
+        ? '📅 Entrega prevista: ' + formatDate(fechaEnt)
+        : '';
+    }
+
     document.getElementById('modal-confirm').classList.add('open');
   });
 
@@ -2368,7 +2384,11 @@ grid.appendChild(card);
     fetch(url, {
       method: method,
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ lines: lines, notes: document.getElementById('order-notes').value.trim() || null })
+      body: JSON.stringify({
+        lines: lines,
+        notes: document.getElementById('order-notes').value.trim() || null,
+        delivery_date: document.getElementById('order-delivery-date').value || null
+      })
     })
     .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
     .then(function (res) {
@@ -2402,11 +2422,25 @@ grid.appendChild(card);
     });
   });
 
+  // Fecha de entrega: por defecto el día siguiente
+  function setDefaultDeliveryDate() {
+    var input = document.getElementById('order-delivery-date');
+    if (!input) return;
+    var manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+    var iso = manana.getFullYear() + '-' +
+              String(manana.getMonth() + 1).padStart(2, '0') + '-' +
+              String(manana.getDate()).padStart(2, '0');
+    input.value = iso;
+    input.min = iso;   // no permitir fechas anteriores a mañana
+  }
+
   document.getElementById('btn-reset').addEventListener('click', function () {
     quantities = {};
     modifyingOrderId = null;
     btnOrder.innerHTML = 'Confirmar pedido';
     document.getElementById('order-notes').value = '';
+    setDefaultDeliveryDate();
     modalOk.classList.remove('open');
     document.getElementById('cart-bar').style.display = 'none';
     document.getElementById('cart-bar').classList.remove('open');
