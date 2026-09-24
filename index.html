@@ -1240,6 +1240,7 @@
         <div class="cobro-metodo">
           <button class="metodo-btn active" id="metodo-efectivo" data-journal="">💵 Efectivo</button>
           <button class="metodo-btn" id="metodo-pagare" data-journal="">📄 Pagaré</button>
+          <button class="metodo-btn" id="metodo-tarjeta" data-journal="">💳 Tarjeta TPV</button>
         </div>
         <div class="cobro-ref-wrap" id="cobro-ref-wrap">
           <label class="field-label">Referencia del pagaré</label>
@@ -1279,6 +1280,7 @@
         <div class="cobro-metodo">
           <button class="metodo-btn active" id="metodo-efectivo" data-journal="">Efectivo</button>
           <button class="metodo-btn" id="metodo-pagare" data-journal="">Pagare</button>
+          <button class="metodo-btn" id="metodo-tarjeta" data-journal="">Tarjeta TPV</button>
         </div>
         <div class="cobro-ref-wrap" id="cobro-ref-wrap">
           <label class="field-label">Referencia del pagare</label>
@@ -4158,6 +4160,22 @@ grid.appendChild(card);
       btnPagare.disabled = true;
       btnPagare.textContent = '📄 Pagaré (no configurado)';
     }
+
+    // Tarjeta TPV (diario "Cobros Tarjeta", cuenta 572206)
+    var tarjeta = journals.find(function(j) { return j.metodo === 'tarjeta'; });
+    var btnTarjeta = document.getElementById('metodo-tarjeta');
+    if (tarjeta) {
+      btnTarjeta.dataset.journal = tarjeta.id;
+      btnTarjeta.disabled = false;
+      btnTarjeta.textContent = tarjeta.display_name || '💳 Tarjeta TPV';
+    } else {
+      btnTarjeta.dataset.journal = '';
+      btnTarjeta.disabled = true;
+      btnTarjeta.textContent = '💳 Tarjeta (no configurado)';
+    }
+
+    // Al recargar, volver siempre a efectivo
+    selectMetodo('efectivo');
   }
 
   function toggleInvoice(inv, card) {
@@ -4243,23 +4261,18 @@ grid.appendChild(card);
   });
 
   // Métodos de pago
-  document.getElementById('metodo-efectivo').addEventListener('click', function() {
-    selectedMetodo = 'efectivo';
-    selectedJournalId = +this.dataset.journal || null;
-    document.getElementById('metodo-efectivo').classList.add('active');
-    document.getElementById('metodo-pagare').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display = 'none';
+  function selectMetodo(metodo) {
+    selectedMetodo = metodo;
+    selectedJournalId = +document.getElementById('metodo-' + metodo).dataset.journal || null;
+    ['efectivo', 'pagare', 'tarjeta'].forEach(function(m) {
+      document.getElementById('metodo-' + m).classList.toggle('active', m === metodo);
+    });
+    document.getElementById('cobro-ref-wrap').style.display = metodo === 'pagare' ? 'block' : 'none';
     updateCobroPanel();
-  });
-
-  document.getElementById('metodo-pagare').addEventListener('click', function() {
-    selectedMetodo = 'pagare';
-    selectedJournalId = +this.dataset.journal || null;
-    document.getElementById('metodo-pagare').classList.add('active');
-    document.getElementById('metodo-efectivo').classList.remove('active');
-    document.getElementById('cobro-ref-wrap').style.display = 'block';
-    updateCobroPanel();
-  });
+  }
+  document.getElementById('metodo-efectivo').addEventListener('click', function() { selectMetodo('efectivo'); });
+  document.getElementById('metodo-pagare').addEventListener('click', function() { selectMetodo('pagare'); });
+  document.getElementById('metodo-tarjeta').addEventListener('click', function() { selectMetodo('tarjeta'); });
 
   // Registrar cobro
   document.getElementById('btn-cobrar').addEventListener('click', function() {
@@ -4276,7 +4289,9 @@ grid.appendChild(card);
 
     var memo = selectedMetodo === 'pagare'
       ? (document.getElementById('cobro-ref').value.trim() || 'Pagaré')
-      : 'Cobro en efectivo — ' + vendorName;
+      : selectedMetodo === 'tarjeta'
+        ? 'Cobro con tarjeta TPV — ' + vendorName
+        : 'Cobro en efectivo — ' + vendorName;
 
     fetch(API + '/invoices/pay?partner_id=' + selectedClient.id, {
       method: 'POST',
@@ -4286,7 +4301,7 @@ grid.appendChild(card);
         journal_id: selectedJournalId,
         memo: memo,
         amount: importeCustom,  // importe personalizado (puede ser parcial)
-        metodo: selectedMetodo  // 'efectivo' o 'pagare'
+        metodo: selectedMetodo  // 'efectivo', 'pagare' o 'tarjeta'
       })
     })
     .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
@@ -4300,7 +4315,7 @@ grid.appendChild(card);
       }
       var names = res.data.invoices_paid.join(', ');
       document.getElementById('modal-cobro-msg').textContent =
-        fmt(res.data.amount) + ' € cobrados — ' + (selectedMetodo === 'efectivo' ? 'Efectivo' : 'Pagaré');
+        fmt(res.data.amount) + ' € cobrados — ' + ({efectivo: 'Efectivo', pagare: 'Pagaré', tarjeta: 'Tarjeta TPV'})[selectedMetodo];
       document.getElementById('modal-cobro-ref').textContent = names;
       document.getElementById('modal-cobro-ok').classList.add('open');
       // Recargar facturas
