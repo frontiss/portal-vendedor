@@ -3212,16 +3212,53 @@ grid.appendChild(card);
     }).catch(function(){ content.innerHTML='<div class="liq-empty">Error de conexion.</div>'; });
   }
 
+  // ── Forma de cobro: efectivo / tarjeta TPV / pagaré ──
+  var LIQ_METODOS = [
+    { key: 'efectivo', icon: '💵', label: 'Efectivo',    nota: 'a entregar' },
+    { key: 'tarjeta',  icon: '💳', label: 'Tarjeta TPV', nota: 'cobrado por datáfono' },
+    { key: 'pagare',   icon: '📄', label: 'Pagarés',     nota: '' }
+  ];
+
+  // Agrupa los cobros por forma de pago y, dentro, por cliente
+  function liqSecciones(data) {
+    return LIQ_METODOS.map(function(m) {
+      var clientes = [];
+      data.clientes.forEach(function(cl) {
+        var cobros = cl.cobros.filter(function(co) { return (co.metodo || 'efectivo') === m.key; });
+        if (!cobros.length) return;
+        var sub = 0; cobros.forEach(function(co) { sub += co.importe; });
+        clientes.push({ cliente: cl.cliente, cobros: cobros, subtotal: Math.round(sub * 100) / 100 });
+      });
+      var total = 0, num = 0;
+      clientes.forEach(function(cl) { total += cl.subtotal; num += cl.cobros.length; });
+      return { metodo: m, clientes: clientes, total: Math.round(total * 100) / 100, num: num };
+    }).filter(function(sec) { return sec.num > 0; });
+  }
+
   function renderLiquidacion(data, mode) {
     var content = document.getElementById('liq-content'); var h = '';
+    var secciones = liqSecciones(data);
+    var totEfectivo = 0;
+    secciones.forEach(function(sec){ if (sec.metodo.key === 'efectivo') totEfectivo = sec.total; });
+
     h += '<div class="liq-resumen-card">' +
       '<div class="liq-resumen-dato"><span class="liq-resumen-label">Fecha</span><span class="liq-resumen-valor" style="font-size:20px">'+formatDateES(data.fecha)+'</span></div>' +
       '<div class="liq-resumen-dato"><span class="liq-resumen-label">Clientes</span><span class="liq-resumen-valor">'+data.clientes.length+'</span></div>' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Cobros</span><span class="liq-resumen-valor">'+data.num_cobros+'</span></div>' +
-      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Total</span><span class="liq-resumen-valor grande">'+fmt(data.total)+' \u20ac</span></div>' +
-    '</div>';
-    if (mode !== 'resumen') {
-      data.clientes.forEach(function(cliente, idx) {
+      '<div class="liq-resumen-dato"><span class="liq-resumen-label">Cobros</span><span class="liq-resumen-valor">'+data.num_cobros+'</span></div>';
+    secciones.forEach(function(sec) {
+      var esEfectivo = sec.metodo.key === 'efectivo';
+      h += '<div class="liq-resumen-dato"><span class="liq-resumen-label">'+sec.metodo.icon+' '+sec.metodo.label+(esEfectivo?' a entregar':'')+'</span>' +
+        '<span class="liq-resumen-valor'+(esEfectivo?' grande':'')+'">'+fmt(sec.total)+' \u20ac</span></div>';
+    });
+    h += '</div>';
+
+    var idx = 0;
+    secciones.forEach(function(sec) {
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px;padding:10px 14px;border-radius:10px;background:'+(sec.metodo.key==='efectivo'?'#EBF0F8':(sec.metodo.key==='tarjeta'?'#FFF4E5':'#F3F3F3'))+'">' +
+        '<span style="font-weight:700;color:var(--primary);font-size:15px">'+sec.metodo.icon+' '+sec.metodo.label+' <span style="font-weight:400;color:var(--text-muted);font-size:12px">· '+sec.num+' cobro'+(sec.num>1?'s':'')+(sec.metodo.nota?' · '+sec.metodo.nota:'')+'</span></span>' +
+        '<span style="font-weight:700;color:var(--primary);font-size:17px">'+fmt(sec.total)+' \u20ac</span></div>';
+      if (mode === 'resumen') return;
+      sec.clientes.forEach(function(cliente) {
         h += '<div class="liq-cliente-card" id="liq-card-'+idx+'">' +
           '<div class="liq-cliente-header" onclick="toggleLiqCard('+idx+')">' +
             '<div><div class="liq-cliente-name">'+cliente.cliente+'</div>' +
@@ -3239,9 +3276,14 @@ grid.appendChild(card);
           '</div><div class="liq-cobro-importe">'+fmt(cobro.importe)+' \u20ac</div></div>';
         });
         h += '</div></div>';
+        idx++;
       });
+    });
+
+    h += '<div class="liq-total-bar"><span class="liq-total-bar-label">💵 EFECTIVO A ENTREGAR '+formatDateES(data.fecha).toUpperCase()+'</span><span class="liq-total-bar-amount">'+fmt(totEfectivo)+' \u20ac</span></div>';
+    if (secciones.length > 1 || (secciones.length === 1 && secciones[0].metodo.key !== 'efectivo')) {
+      h += '<div style="text-align:right;font-size:13px;color:var(--text-muted);margin-top:8px">Total cobrado (todas las formas de pago): <strong style="color:var(--primary)">'+fmt(data.total)+' \u20ac</strong></div>';
     }
-    h += '<div class="liq-total-bar"><span class="liq-total-bar-label">TOTAL COBRADO '+formatDateES(data.fecha).toUpperCase()+'</span><span class="liq-total-bar-amount">'+fmt(data.total)+' \u20ac</span></div>';
     content.innerHTML = h;
   }
 
@@ -3249,29 +3291,48 @@ grid.appendChild(card);
   function formatDateES(f) { if(!f) return ''; var p=f.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 
   function buildPrintHTML(data, mode) {
-    var rows='';
-    data.clientes.forEach(function(c){ c.cobros.forEach(function(co){
-      var f=co.facturas.map(function(x){return x.ref;}).join(', ')||'-';
-      rows+='<tr><td>'+c.cliente+'</td><td>'+co.ref+'</td><td>'+co.diario+'</td>'+(mode==='facturas'?'<td>'+f+'</td>':'')+'<td style="text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
-    });});
+    var secciones = liqSecciones(data);
+    var totEfectivo = 0;
+    secciones.forEach(function(sec){ if (sec.metodo.key === 'efectivo') totEfectivo = sec.total; });
+    var cols = mode==='facturas' ? 4 : 3;
+    var th = 'style="padding:10px 12px;text-align:left"';
+    var tablas = '';
+    secciones.forEach(function(sec) {
+      tablas += '<h2 style="font-size:16px;color:#1A3356;margin:22px 0 8px">'+sec.metodo.icon+' '+sec.metodo.label+' — '+sec.num+' cobro'+(sec.num>1?'s':'')+'</h2>';
+      if (mode === 'resumen') {
+        tablas += '<div style="font-size:18px;font-weight:700;color:#1A3356">'+fmt(sec.total)+' \u20ac</div>';
+        return;
+      }
+      var rows = '';
+      sec.clientes.forEach(function(c){ c.cobros.forEach(function(co){
+        var f=co.facturas.map(function(x){return x.ref;}).join(', ')||'-';
+        rows+='<tr><td style="padding:6px 12px">'+c.cliente+'</td><td style="padding:6px 12px">'+co.ref+'</td><td style="padding:6px 12px">'+co.diario+'</td>'+(mode==='facturas'?'<td style="padding:6px 12px">'+f+'</td>':'')+'<td style="padding:6px 12px;text-align:right;font-weight:700">'+fmt(co.importe)+' \u20ac</td></tr>';
+      });});
+      tablas += '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
+        '<thead><tr style="background:#1A3356;color:white"><th '+th+'>Cliente</th><th '+th+'>Referencia</th><th '+th+'>Diario</th>' +
+          (mode==='facturas'?'<th '+th+'>Facturas</th>':'') + '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>' +
+        '<tbody>'+rows+'</tbody>' +
+        '<tfoot><tr style="background:#f5f2ec;font-weight:700"><td colspan="'+cols+'" style="padding:10px 12px">Subtotal '+sec.metodo.label.toLowerCase()+'</td>' +
+          '<td style="padding:10px 12px;text-align:right;font-size:16px">'+fmt(sec.total)+' \u20ac</td></tr></tfoot></table>';
+    });
+    var resumen = '';
+    secciones.forEach(function(sec) {
+      var esEf = sec.metodo.key === 'efectivo';
+      resumen += '<div><div style="font-size:11px;color:#666;text-transform:uppercase">'+sec.metodo.label+(esEf?' a entregar':'')+'</div>' +
+        '<div style="font-size:'+(esEf?'28px':'22px')+';font-weight:700;color:'+(esEf?'#F97316':'#1A3356')+'">'+fmt(sec.total)+' \u20ac</div></div>';
+    });
     return '<div style="font-family:Arial,sans-serif;padding:24px;max-width:800px;margin:0 auto">' +
       '<div style="border-bottom:2px solid #1A3356;padding-bottom:12px;margin-bottom:20px">' +
         '<h1 style="font-size:22px;color:#1A3356;margin:0">Liquidacion de cobros</h1>' +
         '<p style="margin:4px 0 0;color:#666;font-size:14px">Vendedor: '+data.vendedor+' | Fecha: '+formatDateES(data.fecha)+'</p></div>' +
-      '<div style="display:flex;gap:32px;margin-bottom:24px;background:#f5f2ec;padding:16px;border-radius:8px">' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:24px;font-weight:700;color:#1A3356">'+data.clientes.length+'</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:24px;font-weight:700;color:#1A3356">'+data.num_cobros+'</div></div>' +
-        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Total</div><div style="font-size:28px;font-weight:700;color:#F97316">'+fmt(data.total)+' \u20ac</div></div></div>' +
-      (mode!=='resumen'?
-        '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
-          '<thead><tr style="background:#1A3356;color:white">' +
-            '<th style="padding:10px 12px;text-align:left">Cliente</th><th style="padding:10px 12px;text-align:left">Referencia</th><th style="padding:10px 12px;text-align:left">Diario</th>' +
-            (mode==='facturas'?'<th style="padding:10px 12px;text-align:left">Facturas</th>':'') +
-            '<th style="padding:10px 12px;text-align:right">Importe</th></tr></thead>' +
-          '<tbody>'+rows+'</tbody>' +
-          '<tfoot><tr style="background:#f5f2ec;font-weight:700">' +
-            '<td colspan="'+(mode==='facturas'?'4':'3')+'" style="padding:12px;font-size:15px">TOTAL</td>' +
-            '<td style="padding:12px;text-align:right;font-size:18px">'+fmt(data.total)+' \u20ac</td></tr></tfoot></table>':'') +
+      '<div style="display:flex;gap:32px;flex-wrap:wrap;margin-bottom:12px;background:#f5f2ec;padding:16px;border-radius:8px">' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Clientes</div><div style="font-size:22px;font-weight:700;color:#1A3356">'+data.clientes.length+'</div></div>' +
+        '<div><div style="font-size:11px;color:#666;text-transform:uppercase">Cobros</div><div style="font-size:22px;font-weight:700;color:#1A3356">'+data.num_cobros+'</div></div>' +
+        resumen + '</div>' +
+      tablas +
+      '<div style="margin-top:24px;padding:14px 16px;background:#1A3356;color:white;border-radius:8px;display:flex;justify-content:space-between;font-size:16px;font-weight:700">' +
+        '<span>EFECTIVO A ENTREGAR</span><span>'+fmt(totEfectivo)+' \u20ac</span></div>' +
+      '<div style="text-align:right;font-size:12px;color:#666;margin-top:6px">Total cobrado (todas las formas de pago): '+fmt(data.total)+' \u20ac</div>' +
     '</div>';
   }
 
