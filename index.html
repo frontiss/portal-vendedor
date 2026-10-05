@@ -75,6 +75,7 @@
   .client-ref{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
   .client-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--primary);line-height:1.3}
   .client-address{font-size:12px;color:var(--text-muted)}
+  .client-entregas{display:inline-flex;align-items:center;gap:5px;background:#FFF4E5;color:#B45309;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:4px;width:fit-content}
   .client-ruta{display:inline-flex;align-items:center;gap:5px;background:var(--accent-light);color:var(--accent);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:4px;width:fit-content}
   .clients-empty{text-align:center;color:var(--text-muted);padding:60px 20px;font-style:italic}
   .loading-box{text-align:center;padding:60px 20px;color:var(--text-muted)}
@@ -1356,6 +1357,10 @@
     <div class="cart-panel-inner">
       <div class="cart-panel-title">Productos seleccionados</div>
       <ul class="summary-list" id="summary-list" style="list-style:none;padding:0;margin:0"></ul>
+      <div class="cart-notes-wrap" id="shipping-wrap" style="display:none">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">&#128205; Direcci&oacute;n de entrega</label>
+        <select id="order-shipping" style="width:100%;padding:11px 14px;border:1.5px solid var(--accent);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:white;outline:none;box-sizing:border-box"></select>
+      </div>
       <div class="cart-notes-wrap">
         <label style="display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Fecha de entrega</label>
         <input type="date" id="order-delivery-date" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Poppins',sans-serif;font-size:13px;color:var(--primary);background:var(--bg);outline:none;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)';this.style.background='white'" onblur="this.style.borderColor='var(--border)';this.style.background='var(--bg)'">
@@ -1387,6 +1392,7 @@
     <p id="modal-confirm-client">Pedido para el cliente seleccionado:</p>
     <div class="confirm-items" id="confirm-items"></div>
     <p id="modal-confirm-entrega" style="font-size:13px;color:var(--text-muted);margin-top:12px"></p>
+    <p id="modal-confirm-shipping" style="font-size:13px;font-weight:600;color:var(--primary);margin-top:6px"></p>
     <div class="modal-buttons">
       <button class="btn-secondary" id="btn-confirm-cancel">Volver a revisar</button>
       <button class="btn-order" id="btn-confirm-ok">Sí, enviar pedido</button>
@@ -1913,6 +1919,10 @@
         : '';
       var tarifaNombre = c.pricelist_name ? c.pricelist_name.replace(/\s*\(.*?\)/g, '').trim() : '';
       var tarifaHtml2 = tarifaNombre ? '<div class="client-tarifa">' + tarifaNombre + '</div>' : '';
+      var nEntregas = (c.delivery_addresses || []).length;
+      var entregasHtml = nEntregas
+        ? '<span class="client-entregas">📍 ' + nEntregas + (nEntregas === 1 ? ' dirección de entrega' : ' direcciones de entrega') + '</span>'
+        : '';
 
       // Badge de inactividad
       var inactivoHtml = '';
@@ -1930,7 +1940,7 @@
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
         '<div class="client-name">' + c.name + '</div>' +
         '<div class="client-address">' + (c.address || '') + '</div>' +
-        tarifaHtml2 + rutaHtml + inactivoHtml +
+        tarifaHtml2 + rutaHtml + entregasHtml + inactivoHtml +
         '<div class="visited-badge">Pedido realizado hoy</div>';
       card.dataset.clientId = c.id;
       if (visitedClients[c.id]) card.classList.add('visited');
@@ -1944,6 +1954,53 @@
   clientSearch.addEventListener('input', function () { applyFilters(allClients); });
 
   var visitedClients = {};
+
+  // ── DIRECCIÓN DE ENTREGA ────────────────────────────
+  // Solo aparece si el cliente tiene direcciones de entrega en Odoo.
+  // Por defecto se propone la del último pedido; si no hay, la principal.
+  var shippingTouched = false;
+
+  function setupShippingSelect(client) {
+    var wrap = document.getElementById('shipping-wrap');
+    var sel  = document.getElementById('order-shipping');
+    var dirs = client.delivery_addresses || [];
+    shippingTouched = false;
+    sel.innerHTML = '';
+    if (!dirs.length) { wrap.style.display = 'none'; return; }
+
+    var optMain = document.createElement('option');
+    optMain.value = client.id;
+    optMain.textContent = 'Principal — ' + (client.address || client.name);
+    sel.appendChild(optMain);
+    dirs.forEach(function(d) {
+      var o = document.createElement('option');
+      o.value = d.id;
+      var nombre = (d.name || '').replace(client.name, '').replace(/^[\s,(]+|[\s)]+$/g, '') || d.name;
+      o.textContent = nombre + (d.address ? ' — ' + d.address : '');
+      sel.appendChild(o);
+    });
+    var defecto = dirs.some(function(d){ return d.id === client.last_shipping_id; })
+      ? client.last_shipping_id : client.id;
+    sel.value = String(defecto);
+    wrap.style.display = 'block';
+  }
+
+  document.getElementById('order-shipping').addEventListener('change', function() {
+    shippingTouched = true;
+  });
+
+  function getShippingId() {
+    var sel = document.getElementById('order-shipping');
+    if (!selectedClient || !(selectedClient.delivery_addresses || []).length) return null;
+    if (modifyingOrderId && !shippingTouched) return null;  // al modificar, no tocar si no la han cambiado
+    return +sel.value || null;
+  }
+
+  function getShippingText() {
+    var sel = document.getElementById('order-shipping');
+    if (!selectedClient || !(selectedClient.delivery_addresses || []).length || !sel.options.length) return '';
+    return '📍 Entrega en: ' + sel.options[sel.selectedIndex].textContent;
+  }
 
   function selectClient(client) {
     selectedClient = client;
@@ -1987,6 +2044,8 @@
     } else {
       deliveryEl.style.display = 'none';
     }
+
+    setupShippingSelect(client);
 
     // Reset estado del pedido
     facturasLoaded = false;
@@ -2354,6 +2413,9 @@ grid.appendChild(card);
         : '';
     }
 
+    var shipEl = document.getElementById('modal-confirm-shipping');
+    if (shipEl) shipEl.textContent = getShippingText();
+
     document.getElementById('modal-confirm').classList.add('open');
   });
 
@@ -2391,7 +2453,8 @@ grid.appendChild(card);
       body: JSON.stringify({
         lines: lines,
         notes: document.getElementById('order-notes').value.trim() || null,
-        delivery_date: document.getElementById('order-delivery-date').value || null
+        delivery_date: document.getElementById('order-delivery-date').value || null,
+        shipping_id: getShippingId()
       })
     })
     .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
@@ -2603,7 +2666,8 @@ grid.appendChild(card);
   function applyFilters(clients) {
     var q = clientSearch.value.toLowerCase();
     var filtered = clients.filter(function(c) {
-      var textOk = !q || (c.name+(c.ref||'')+(c.address||'')).toLowerCase().indexOf(q) !== -1;
+      var entregasTxt = (c.delivery_addresses || []).map(function(d){ return (d.name || '') + ' ' + (d.address || ''); }).join(' ');
+      var textOk = !q || (c.name+(c.ref||'')+(c.address||'')+' '+entregasTxt).toLowerCase().indexOf(q) !== -1;
       var dayOk = activeDayFilter==='todos' ||
         (activeDayFilter==='sin-dia' && (!c.ruta||!c.ruta.trim())) ||
         (c.ruta && c.ruta.trim()===activeDayFilter);
