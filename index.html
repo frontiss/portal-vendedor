@@ -75,6 +75,11 @@
   .client-ref{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
   .client-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--primary);line-height:1.3}
   .client-address{font-size:12px;color:var(--text-muted)}
+  .client-address.entrega{color:var(--primary);font-weight:600}
+  .client-address-fiscal{font-size:11px;color:var(--text-muted);opacity:.8;margin-top:2px}
+  .client-name-place{display:none}
+  .clients-grid.list-view .client-name-place{display:inline;font-weight:400;color:var(--text-muted);font-size:11px}
+  .clients-grid.list-view .client-address-fiscal{display:none}
   .client-entregas{display:inline-flex;align-items:center;gap:5px;background:#FFF4E5;color:#B45309;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:4px;width:fit-content}
   .client-ruta{display:inline-flex;align-items:center;gap:5px;background:var(--accent-light);color:var(--accent);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:4px;width:fit-content}
   .clients-empty{text-align:center;color:var(--text-muted);padding:60px 20px;font-style:italic}
@@ -1898,6 +1903,20 @@
     });
   }
 
+  // Dirección de entrega que se usará por defecto para un cliente:
+  //  1) la del último pedido, si es una dirección de entrega real
+  //  2) si el último pedido fue a la principal (o a una copia suya), la principal
+  //  3) si no hay pedidos, la primera dirección de entrega (igual que hace Odoo)
+  function getDefaultShipping(client) {
+    var dirs = client.delivery_addresses || [];
+    if (!dirs.length) return null;
+    var last = client.last_shipping_id;
+    var match = dirs.filter(function(d){ return d.id === last; })[0];
+    if (match) return match;
+    if (last) return null;      // último pedido a la dirección principal
+    return dirs[0];
+  }
+
   function renderClients(list) {
     clientsGrid.innerHTML = '';
     // Cabecera tabla en modo lista
@@ -1920,8 +1939,8 @@
       var tarifaNombre = c.pricelist_name ? c.pricelist_name.replace(/\s*\(.*?\)/g, '').trim() : '';
       var tarifaHtml2 = tarifaNombre ? '<div class="client-tarifa">' + tarifaNombre + '</div>' : '';
       var nEntregas = (c.delivery_addresses || []).length;
-      var entregasHtml = nEntregas
-        ? '<span class="client-entregas">📍 ' + nEntregas + (nEntregas === 1 ? ' dirección de entrega' : ' direcciones de entrega') + '</span>'
+      var entregasHtml = nEntregas > 1
+        ? '<span class="client-entregas">📍 ' + nEntregas + ' direcciones de entrega</span>'
         : '';
 
       // Badge de inactividad
@@ -1936,10 +1955,17 @@
         card.classList.add('inactivo');
       }
 
+      var entrega = getDefaultShipping(c);
+      var lugar = entrega ? entrega.address : (c.address || '');
+      var direccionHtml = entrega
+        ? '<div class="client-address entrega">🚚 ' + entrega.address + '</div>' +
+          '<div class="client-address-fiscal">Fiscal: ' + (c.address || '') + '</div>'
+        : '<div class="client-address">' + (c.address || '') + '</div>';
       card.innerHTML =
         '<div class="client-ref">' + (c.ref || '') + '</div>' +
-        '<div class="client-name">' + c.name + '</div>' +
-        '<div class="client-address">' + (c.address || '') + '</div>' +
+        '<div class="client-name">' + c.name +
+          (lugar ? '<span class="client-name-place"> · ' + lugar + '</span>' : '') + '</div>' +
+        direccionHtml +
         tarifaHtml2 + rutaHtml + entregasHtml + inactivoHtml +
         '<div class="visited-badge">Pedido realizado hoy</div>';
       card.dataset.clientId = c.id;
@@ -1968,20 +1994,19 @@
     sel.innerHTML = '';
     if (!dirs.length) { wrap.style.display = 'none'; return; }
 
-    var optMain = document.createElement('option');
-    optMain.value = client.id;
-    optMain.textContent = 'Principal — ' + (client.address || client.name);
-    sel.appendChild(optMain);
     dirs.forEach(function(d) {
       var o = document.createElement('option');
       o.value = d.id;
-      var nombre = (d.name || '').replace(client.name, '').replace(/^[\s,(]+|[\s)]+$/g, '') || d.name;
-      o.textContent = nombre + (d.address ? ' — ' + d.address : '');
+      var nombre = (d.name || '').replace(client.name, '').replace(/^[\s,(]+|[\s)]+$/g, '');
+      o.textContent = '🚚 ' + (nombre ? nombre + ' — ' : '') + (d.address || d.name);
       sel.appendChild(o);
     });
-    var defecto = dirs.some(function(d){ return d.id === client.last_shipping_id; })
-      ? client.last_shipping_id : client.id;
-    sel.value = String(defecto);
+    var optMain = document.createElement('option');
+    optMain.value = client.id;
+    optMain.textContent = 'Dirección fiscal — ' + (client.address || client.name);
+    sel.appendChild(optMain);
+    var def = getDefaultShipping(client);
+    sel.value = String(def ? def.id : client.id);
     wrap.style.display = 'block';
   }
 
@@ -2022,7 +2047,8 @@
     storeBadge.onclick = function(){ openEditClient(); };
     vendorBadgeApp.textContent = '👤 ' + vendorName;
 
-    var parts = [client.name, client.address].filter(function (x) { return x && x.trim() !== '' && x !== 'False'; });
+    var entregaSel = getDefaultShipping(client);
+    var parts = [client.name, entregaSel ? '🚚 ' + entregaSel.address : client.address].filter(function (x) { return x && x.trim() !== '' && x !== 'False'; });
     storeInfo.textContent = parts.join(' — ') + ' · Selecciona las cajas que necesitas';
 
     document.getElementById('page-title').textContent = 'Pedido para ' + client.name;
