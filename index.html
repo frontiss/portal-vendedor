@@ -308,6 +308,25 @@
   .deuda-cli-dias{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:#FFF4E5;color:#B45309;white-space:nowrap}
   .deuda-cli-dias.grave{background:#FDE2E2;color:#C62828}
   .deuda-cli-imp{font-weight:700;color:var(--primary);white-space:nowrap}
+  .deuda-cli{cursor:pointer;transition:background .15s}
+  .deuda-cli:hover{background:#F1F4F9}
+  .modal-facturas{background:white;border-radius:18px;max-width:640px;width:94%;max-height:86vh;display:flex;flex-direction:column;text-align:left;animation:fadeUp .3s ease;overflow:hidden}
+  .modal-facturas-head{padding:20px 22px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .modal-facturas-body{overflow-y:auto;padding:6px 0}
+  .mf-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:11px 22px;border-bottom:1px solid var(--border);font-size:13px}
+  .mf-row:last-child{border-bottom:none}
+  .mf-ref{font-weight:700;color:var(--primary)}
+  .mf-ref a{color:var(--primary)}
+  .mf-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .mf-dias{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;background:#EEF2F8;color:#1A3356}
+  .mf-dias.v{background:#FFF4E5;color:#B45309}
+  .mf-dias.g{background:#FDE2E2;color:#C62828}
+  .mf-imp{font-weight:700;color:var(--primary);white-space:nowrap;text-align:right}
+  .mf-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-weight:700;color:var(--primary);background:#FAFAF8}
+  .dto-tipo{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+  .dto-tipo.regalo{background:#FDE2E2;color:#C62828}
+  .dto-tipo.descuento{background:#FFF4E5;color:#B45309}
+  .dto-tipo.precio_libre{background:#EEF2F8;color:#1A3356}
   .panel-empty{text-align:center;color:var(--text-muted);padding:30px 0;font-size:14px}
   .obj-row{padding:16px 0;border-bottom:1px solid var(--border)}
   .obj-row:last-child{border-bottom:none}
@@ -1170,6 +1189,10 @@
         <div class="panel-section-title">⚠️ Deuda vencida por comercial</div>
         <div id="panel-deuda"></div>
       </div>
+      <div class="panel-section">
+        <div class="panel-section-title">🏷️ Regalos, descuentos y precios rebajados (este mes)</div>
+        <div id="panel-descuentos"><div class="loading-box" style="padding:24px"><div class="big-spinner"></div>Cargando...</div></div>
+      </div>
 
       <div class="panel-section">
         <div class="panel-section-title">📦 Pedidos de hoy</div>
@@ -1710,6 +1733,20 @@
       <button class="btn-secondary" id="btn-edit-cancel">Cancelar</button>
       <button class="btn-save" id="btn-edit-save">Guardar cambios</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-facturas-cli">
+  <div class="modal-facturas">
+    <div class="modal-facturas-head">
+      <div>
+        <div id="mf-cliente" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--primary)"></div>
+        <div id="mf-info" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
+      </div>
+      <button class="btn-back" id="mf-cerrar" style="font-size:13px;padding:6px 12px">✕</button>
+    </div>
+    <div class="modal-facturas-body" id="mf-body"></div>
+    <div class="mf-foot" id="mf-foot"></div>
   </div>
 </div>
 
@@ -3806,7 +3843,7 @@ grid.appendChild(card);
         deudaWrap.innerHTML = comsDeuda.map(function(c, i){
           var clientes = (c.top_clientes || []).map(function(cl){
             var dias = cl.dias_max || 0;
-            return '<div class="deuda-cli">' +
+            return '<div class="deuda-cli" onclick="abrirFacturasCliente(' + cl.partner_id + ')" title="Ver facturas">' +
               '<div><div style="font-weight:600;color:var(--primary)">' + cl.cliente + '</div>' +
                 '<div style="font-size:11px;color:var(--text-muted)">' + cl.facturas + ' factura' + (cl.facturas !== 1 ? 's' : '') + '</div></div>' +
               '<span class="deuda-cli-dias' + (dias > 60 ? ' grave' : '') + '">' + dias + ' días</span>' +
@@ -3831,6 +3868,8 @@ grid.appendChild(card);
         deudaWrap.innerHTML = '<div class="panel-empty">No hay facturas vencidas. 👌</div>';
       }
 
+      cargarDescuentosPanel();
+
       // Pedidos de hoy
       var pedWrap = document.getElementById('panel-pedidos-lista');
       if (d.pedidos_hoy_lista && d.pedidos_hoy_lista.length) {
@@ -3849,6 +3888,98 @@ grid.appendChild(card);
     .catch(function(){
       document.getElementById('panel-loading').innerHTML = 'Error cargando el panel.';
     });
+  }
+
+  // ── PANEL: facturas de un cliente con deuda ─────────
+  function abrirFacturasCliente(partnerId) {
+    var modal = document.getElementById('modal-facturas-cli');
+    var body = document.getElementById('mf-body');
+    document.getElementById('mf-cliente').textContent = 'Cargando...';
+    document.getElementById('mf-info').textContent = '';
+    document.getElementById('mf-foot').innerHTML = '';
+    body.innerHTML = '<div class="loading-box" style="padding:30px"><div class="big-spinner"></div></div>';
+    modal.classList.add('open');
+    fetchWithTimeout(API + '/dashboard/facturas?partner_id=' + partnerId,
+      { headers: { 'Authorization': 'Bearer ' + token } }, 30000)
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { body.innerHTML = '<div class="panel-empty">' + (res.data.detail || 'Error cargando facturas') + '</div>'; return; }
+      var d = res.data;
+      document.getElementById('mf-cliente').textContent = d.cliente;
+      document.getElementById('mf-info').innerHTML = [d.ref, d.telefono ? '📞 <a href="tel:' + d.telefono.replace(/\s/g, '') + '">' + d.telefono + '</a>' : '']
+        .filter(Boolean).join(' · ');
+      if (!d.facturas.length) { body.innerHTML = '<div class="panel-empty">Sin facturas pendientes.</div>'; return; }
+      body.innerHTML = d.facturas.map(function(f){
+        var badge;
+        if (f.es_abono) badge = '<span class="mf-dias">ABONO</span>';
+        else if (f.dias > 60) badge = '<span class="mf-dias g">' + f.dias + ' días</span>';
+        else if (f.dias > 0) badge = '<span class="mf-dias v">' + f.dias + ' días</span>';
+        else badge = '<span class="mf-dias">vence ' + formatDateES(f.vencimiento) + '</span>';
+        var ref = f.url ? '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.name + ' ↗</a>' : f.name;
+        return '<div class="mf-row">' +
+          '<div><div class="mf-ref">' + ref + '</div>' +
+            '<div class="mf-sub">Emitida ' + formatDateES(f.fecha) + ' · Total ' + fmt(f.total) + ' €' +
+              (f.parcial ? ' · pago parcial' : '') + (f.comercial ? ' · ' + f.comercial : '') + '</div></div>' +
+          badge +
+          '<div class="mf-imp">' + fmt(f.pendiente) + ' €</div>' +
+        '</div>';
+      }).join('');
+      document.getElementById('mf-foot').innerHTML =
+        '<span>Vencido: <span style="color:#C62828">' + fmt(d.vencido) + ' €</span></span>' +
+        '<span>Total pendiente: ' + fmt(d.total) + ' €</span>';
+    })
+    .catch(function(){ body.innerHTML = '<div class="panel-empty">Error de conexión.</div>'; });
+  }
+  document.getElementById('mf-cerrar').addEventListener('click', function(){
+    document.getElementById('modal-facturas-cli').classList.remove('open');
+  });
+  document.getElementById('modal-facturas-cli').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  // ── PANEL: regalos, descuentos y precios rebajados ──
+  var DTO_TIPOS = { regalo: 'Regalo', descuento: 'Dto.', precio_libre: 'Precio libre' };
+  function cargarDescuentosPanel() {
+    var wrap = document.getElementById('panel-descuentos');
+    wrap.innerHTML = '<div class="loading-box" style="padding:24px"><div class="big-spinner"></div>Cargando...</div>';
+    fetchWithTimeout(API + '/dashboard/descuentos', { headers: { 'Authorization': 'Bearer ' + token } }, 45000)
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { wrap.innerHTML = '<div class="panel-empty">No se pudo cargar.</div>'; return; }
+      var coms = (res.data.comerciales || []).filter(function(c){ return c.num > 0; });
+      if (!coms.length) { wrap.innerHTML = '<div class="panel-empty">Ninguna línea por debajo de tarifa este mes.</div>'; return; }
+      var MAX = 30;
+      wrap.innerHTML =
+        '<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Total dejado de facturar este mes: <strong style="color:var(--primary)">' + fmt(res.data.total) + ' €</strong> en ' + res.data.num + ' líneas</div>' +
+        coms.map(function(c, i){
+          var partes = [];
+          if (c.regalos) partes.push(c.regalos + ' regalo' + (c.regalos !== 1 ? 's' : ''));
+          if (c.descuentos) partes.push(c.descuentos + ' con descuento');
+          if (c.precio_libre) partes.push(c.precio_libre + ' con precio libre');
+          var filas = c.lineas.slice(0, MAX).map(function(l){
+            var etiqueta = l.tipo === 'regalo' ? 'Regalo' : (DTO_TIPOS[l.tipo] + ' −' + String(l.pct).replace('.', ',') + '%');
+            return '<div class="deuda-cli" style="cursor:default">' +
+              '<div><div style="font-weight:600;color:var(--primary)">' + l.producto + '</div>' +
+                '<div style="font-size:11px;color:var(--text-muted)">' + l.cliente + ' · ' + l.pedido + ' · ' + formatDateES(l.fecha) +
+                  ' · ' + String(Math.round(l.cantidad * 100) / 100).replace('.', ',') + ' uds</div></div>' +
+              '<span class="dto-tipo ' + l.tipo + '">' + etiqueta + '</span>' +
+              '<span class="deuda-cli-imp">−' + fmt(l.perdido) + ' €</span>' +
+            '</div>';
+          }).join('');
+          var resto = c.lineas.length - MAX;
+          return '<div class="deuda-com" id="dto-com-' + i + '">' +
+            '<div class="deuda-com-head" onclick="document.getElementById(\'dto-com-' + i + '\').classList.toggle(\'open\')">' +
+              '<div><div class="deuda-com-name">' + c.name + '</div>' +
+                '<div class="deuda-com-sub">' + partes.join(' · ') + '</div></div>' +
+              '<div style="display:flex;align-items:center;gap:10px"><span class="deuda-com-total" style="color:#B45309">−' + fmt(c.importe) + ' €</span><span class="liq-chevron">▾</span></div>' +
+            '</div>' +
+            '<div class="deuda-com-body">' + filas +
+              (resto > 0 ? '<div style="padding:8px 14px;font-size:12px;color:var(--text-muted)">+ ' + resto + ' líneas más</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+    })
+    .catch(function(){ wrap.innerHTML = '<div class="panel-empty">Error de conexión.</div>'; });
   }
 
   function guardarObjetivo(uid, nombre, year, month) {
@@ -5283,6 +5414,7 @@ grid.appendChild(card);
   window.toggleLiqCard      = toggleLiqCard;
   window.loadClients        = function(){ return loadClients(); };
   window.loadProducts       = function(){ return loadProducts(); };
+  window.abrirFacturasCliente = abrirFacturasCliente;
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
