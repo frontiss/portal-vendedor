@@ -327,6 +327,13 @@
   .dto-tipo.regalo{background:#FDE2E2;color:#C62828}
   .dto-tipo.descuento{background:#FFF4E5;color:#B45309}
   .dto-tipo.precio_libre{background:#EEF2F8;color:#1A3356}
+  .perd-estado{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+  .perd-estado.enfriandose{background:#FFF4E5;color:#B45309}
+  .perd-estado.d30_60{background:#FDEBD3;color:#9A3412}
+  .perd-estado.perdido{background:#FDE2E2;color:#C62828}
+  .perd-deuda{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;color:#C62828;background:#FDE2E2;padding:1px 7px;border-radius:20px}
+  .perd-resumen{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .perd-resumen span{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
   .panel-empty{text-align:center;color:var(--text-muted);padding:30px 0;font-size:14px}
   .obj-row{padding:16px 0;border-bottom:1px solid var(--border)}
   .obj-row:last-child{border-bottom:none}
@@ -1188,6 +1195,10 @@
       <div class="panel-section">
         <div class="panel-section-title">⚠️ Deuda vencida por comercial</div>
         <div id="panel-deuda"></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-section-title">📉 Clientes que se están perdiendo</div>
+        <div id="panel-perdidos"><div class="loading-box" style="padding:24px"><div class="big-spinner"></div>Cargando...</div></div>
       </div>
       <div class="panel-section">
         <div class="panel-section-title">🏷️ Regalos, descuentos y precios rebajados (este mes)</div>
@@ -3868,6 +3879,7 @@ grid.appendChild(card);
         deudaWrap.innerHTML = '<div class="panel-empty">No hay facturas vencidas. 👌</div>';
       }
 
+      cargarPerdidosPanel();
       cargarDescuentosPanel();
 
       // Pedidos de hoy
@@ -3936,6 +3948,57 @@ grid.appendChild(card);
   document.getElementById('modal-facturas-cli').addEventListener('click', function(e){
     if (e.target === this) this.classList.remove('open');
   });
+
+  // ── PANEL: clientes que se están perdiendo ───────────
+  var PERD_ETQ = { enfriandose: 'Enfriándose', d30_60: '30–60 días', perdido: '+60 días' };
+  function cargarPerdidosPanel() {
+    var wrap = document.getElementById('panel-perdidos');
+    wrap.innerHTML = '<div class="loading-box" style="padding:24px"><div class="big-spinner"></div>Cargando...</div>';
+    fetchWithTimeout(API + '/dashboard/clientes-perdidos', { headers: { 'Authorization': 'Bearer ' + token } }, 45000)
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { wrap.innerHTML = '<div class="panel-empty">No se pudo cargar.</div>'; return; }
+      var coms = (res.data.comerciales || []).filter(function(c){ return c.num > 0; });
+      if (!coms.length) { wrap.innerHTML = '<div class="panel-empty">Ningún cliente habitual ha dejado de pedir. 👌</div>'; return; }
+      var MAX = 25;
+      wrap.innerHTML =
+        '<div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">' +
+          res.data.num + ' clientes habituales han bajado o dejado de pedir · compraban unos ' +
+          '<strong style="color:var(--primary)">' + fmt(res.data.en_riesgo_mes) + ' €/mes</strong>' +
+          '<div style="font-size:11px;margin-top:4px">Enfriándose = lleva más del doble de lo que suele tardar entre pedidos (mín. 14 días).</div>' +
+        '</div>' +
+        coms.map(function(c, i){
+          var res2 = [];
+          if (c.enfriandose) res2.push('<span class="perd-estado enfriandose">' + c.enfriandose + ' enfriándose</span>');
+          if (c.d30_60) res2.push('<span class="perd-estado d30_60">' + c.d30_60 + ' de 30–60 días</span>');
+          if (c.perdidos) res2.push('<span class="perd-estado perdido">' + c.perdidos + ' de +60 días</span>');
+          var filas = c.clientes.slice(0, MAX).map(function(cl){
+            var ritmo = cl.intervalo ? 'Pedía cada ' + cl.intervalo + ' días · ' : '';
+            var tel = cl.telefono ? ' · <a href="tel:' + cl.telefono.replace(/\s/g, '') + '" onclick="event.stopPropagation()">📞 ' + cl.telefono + '</a>' : '';
+            return '<div class="deuda-cli" onclick="abrirFacturasCliente(' + cl.partner_id + ')" title="Ver facturas pendientes">' +
+              '<div><div style="font-weight:600;color:var(--primary)">' + cl.cliente + '</div>' +
+                '<div style="font-size:11px;color:var(--text-muted)">' + ritmo + cl.pedidos + ' pedidos · último ' + formatDateES(cl.ultimo) + tel + '</div>' +
+                (cl.deuda_vencida > 0 ? '<span class="perd-deuda">Debe ' + fmt(cl.deuda_vencida) + ' € vencidos</span>' : '') +
+              '</div>' +
+              '<span class="perd-estado ' + (cl.estado === '30_60' ? 'd30_60' : cl.estado) + '">' + cl.dias_sin + ' días</span>' +
+              '<span class="deuda-cli-imp" title="Compra media mensual">' + fmt(cl.media_mes) + ' €/mes</span>' +
+            '</div>';
+          }).join('');
+          var resto = c.clientes.length - MAX;
+          return '<div class="deuda-com" id="perd-com-' + i + '">' +
+            '<div class="deuda-com-head" onclick="document.getElementById(\'perd-com-' + i + '\').classList.toggle(\'open\')">' +
+              '<div><div class="deuda-com-name">' + c.name + '</div><div class="perd-resumen">' + res2.join('') + '</div></div>' +
+              '<div style="display:flex;align-items:center;gap:10px;text-align:right"><span><span class="deuda-com-total" style="color:#B45309">' + fmt(c.en_riesgo_mes) + ' €</span>' +
+                '<div style="font-size:10px;color:var(--text-muted)">al mes en riesgo</div></span><span class="liq-chevron">▾</span></div>' +
+            '</div>' +
+            '<div class="deuda-com-body">' + filas +
+              (resto > 0 ? '<div style="padding:8px 14px;font-size:12px;color:var(--text-muted)">+ ' + resto + ' clientes más</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+    })
+    .catch(function(){ wrap.innerHTML = '<div class="panel-empty">Error de conexión.</div>'; });
+  }
 
   // ── PANEL: regalos, descuentos y precios rebajados ──
   var DTO_TIPOS = { regalo: 'Regalo', descuento: 'Dto.', precio_libre: 'Precio libre' };
