@@ -334,6 +334,8 @@
   .perd-deuda{display:inline-block;margin-top:3px;font-size:10px;font-weight:700;color:#C62828;background:#FDE2E2;padding:1px 7px;border-radius:20px}
   .perd-resumen{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
   .perd-resumen span{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+  .btn-pdf-deuda{font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--primary);cursor:pointer;white-space:nowrap;font-family:'Poppins',sans-serif}
+  .btn-pdf-deuda:hover{border-color:var(--primary)}
   .panel-empty{text-align:center;color:var(--text-muted);padding:30px 0;font-size:14px}
   .obj-row{padding:16px 0;border-bottom:1px solid var(--border)}
   .obj-row:last-child{border-bottom:none}
@@ -1193,11 +1195,13 @@
         <div id="panel-ranking"></div>
       </div>
       <div class="panel-section">
-        <div class="panel-section-title">⚠️ Deuda vencida por comercial</div>
+        <div class="panel-section-title" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">⚠️ Deuda vencida por comercial
+          <button class="btn-pdf-deuda" onclick="imprimirDeuda(null)">🖨 PDF de todos</button></div>
         <div id="panel-deuda"></div>
       </div>
       <div class="panel-section">
-        <div class="panel-section-title">📉 Clientes que se están perdiendo</div>
+        <div class="panel-section-title" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">📉 Clientes que se están perdiendo
+          <button class="btn-pdf-deuda" onclick="imprimirPerdidos(null)">🖨 PDF de todos</button></div>
         <div id="panel-perdidos"><div class="loading-box" style="padding:24px"><div class="big-spinner"></div>Cargando...</div></div>
       </div>
       <div class="panel-section">
@@ -3868,7 +3872,9 @@ grid.appendChild(card);
                 '<div class="deuda-com-sub">' + c.num_facturas + ' facturas · ' + c.num_clientes + ' clientes' +
                   (c.mas_60 > 0 ? ' · <span style="color:#C62828;font-weight:600">' + fmt(c.mas_60) + ' € con más de 60 días</span>' : '') +
                 '</div></div>' +
-              '<div style="display:flex;align-items:center;gap:10px"><span class="deuda-com-total">' + fmt(c.total) + ' €</span><span class="liq-chevron">▾</span></div>' +
+              '<div style="display:flex;align-items:center;gap:10px"><span class="deuda-com-total">' + fmt(c.total) + ' €</span>' +
+                '<button class="btn-pdf-deuda" onclick="event.stopPropagation();imprimirDeuda(' + c.uid + ')" title="PDF para entregar a ' + c.name + '">🖨 PDF</button>' +
+                '<span class="liq-chevron">▾</span></div>' +
             '</div>' +
             '<div class="deuda-com-body">' + clientes +
               (resto > 0 ? '<div style="padding:8px 14px;font-size:12px;color:var(--text-muted)">+ ' + resto + ' cliente' + (resto !== 1 ? 's' : '') + ' más con deuda vencida</div>' : '') +
@@ -3900,6 +3906,172 @@ grid.appendChild(card);
     .catch(function(){
       document.getElementById('panel-loading').innerHTML = 'Error cargando el panel.';
     });
+  }
+
+  // ── PANEL: PDF de deuda vencida para entregar a los comerciales ──
+  function escHtml(t) {
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(ch){
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
+    });
+  }
+
+  function htmlDeudaComercial(com, fecha) {
+    var filas = com.clientes.map(function(cl){
+      var cab = '<tr class="cli"><td colspan="5">' +
+          '<strong>' + escHtml(cl.cliente) + '</strong>' + (cl.ref ? ' <span class="muted">' + escHtml(cl.ref) + '</span>' : '') +
+          '<div class="muted">' + [cl.direccion, cl.ruta ? 'Reparto: ' + cl.ruta : '', cl.telefono ? 'Tel. ' + cl.telefono : '']
+              .filter(Boolean).map(escHtml).join(' · ') + '</div></td>' +
+          '<td class="num"><strong>' + fmt(cl.total) + ' €</strong></td><td></td></tr>';
+      var fs = cl.facturas.map(function(f){
+        return '<tr class="fac">' +
+          '<td>' + escHtml(f.name) + (f.parcial ? ' <span class="muted">(parcial)</span>' : '') + '</td>' +
+          '<td>' + formatDateES(f.fecha) + '</td>' +
+          '<td>' + formatDateES(f.vencimiento) + '</td>' +
+          '<td class="num' + (f.dias > 60 ? ' grave' : '') + '">' + f.dias + '</td>' +
+          '<td class="num">' + fmt(f.total) + ' €</td>' +
+          '<td class="num">' + fmt(f.pendiente) + ' €</td>' +
+          '<td class="nota"></td></tr>';
+      }).join('');
+      return '<tbody class="bloque">' + cab + fs + '</tbody>';
+    }).join('');
+    return '<section class="hoja">' +
+      '<div class="cab">' +
+        '<div><div class="empresa">Comercial A. Puchol</div>' +
+          '<h1>Deuda vencida — ' + escHtml(com.name) + '</h1>' +
+          '<div class="muted">Facturas vencidas y pendientes de cobro a ' + formatDateES(fecha) + '</div></div>' +
+        '<div class="resumen">' +
+          '<div><span>Total vencido</span><strong>' + fmt(com.total) + ' €</strong></div>' +
+          '<div><span>Clientes</span><strong>' + com.num_clientes + '</strong></div>' +
+          '<div><span>Facturas</span><strong>' + com.num_facturas + '</strong></div>' +
+          (com.mas_60 > 0 ? '<div class="grave"><span>Más de 60 días</span><strong>' + fmt(com.mas_60) + ' €</strong></div>' : '') +
+        '</div></div>' +
+      '<table><thead><tr>' +
+        '<th>Factura</th><th>Emisión</th><th>Vencimiento</th><th class="num">Días</th>' +
+        '<th class="num">Total</th><th class="num">Pendiente</th><th class="nota">Cobrado / notas</th>' +
+      '</tr></thead>' + filas +
+      '<tfoot><tr><td colspan="5">TOTAL VENCIDO</td><td class="num">' + fmt(com.total) + ' €</td><td></td></tr></tfoot>' +
+      '</table>' +
+      '<div class="firma"><div>Entregado a: ' + escHtml(com.name) + '</div><div>Fecha: ____ / ____ / ______</div><div>Firma: ______________________</div></div>' +
+    '</section>';
+  }
+
+  var CSS_DEUDA_PDF =
+    '@page{size:A4;margin:14mm 12mm}' +
+    '*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#1a2433;font-size:11px;margin:0}' +
+    '.hoja{page-break-after:always}.hoja:last-child{page-break-after:auto}' +
+    '.cab{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid #1A3356;padding-bottom:10px;margin-bottom:12px}' +
+    '.empresa{font-size:11px;font-weight:700;color:#1A3356;letter-spacing:.06em;text-transform:uppercase}' +
+    'h1{font-size:19px;color:#1A3356;margin:4px 0 2px}' +
+    '.resumen{display:flex;gap:14px}.resumen div{text-align:right}.resumen span{display:block;font-size:9px;color:#666;text-transform:uppercase}' +
+    '.resumen strong{font-size:15px;color:#1A3356}.resumen .grave strong{color:#C62828}' +
+    'table{width:100%;border-collapse:collapse}th{background:#1A3356;color:#fff;text-align:left;padding:6px;font-size:10px}' +
+    'td{padding:4px 6px;border-bottom:1px solid #e3e7ee;vertical-align:top}.num{text-align:right;white-space:nowrap}' +
+    '.bloque{page-break-inside:avoid}.cli td{background:#f2f5fa;border-top:1.5px solid #c9d3e3;padding-top:7px}' +
+    '.muted{color:#6b7684;font-size:10px;font-weight:400}.grave{color:#C62828;font-weight:700}' +
+    '.nota{width:22%}.fac td.nota{border-bottom:1px dotted #9aa5b5}' +
+    'tfoot td{background:#1A3356;color:#fff;font-weight:700;font-size:12px;padding:7px 6px}' +
+    '.firma{display:flex;justify-content:space-between;margin-top:22px;font-size:11px;color:#444}' +
+    '.no-print{position:fixed;top:10px;right:10px}@media print{.no-print{display:none}}';
+
+  function imprimirDeuda(uid) {
+    // Abrir la ventana ya (si se abre después de esperar al servidor, el navegador la bloquea)
+    var w = window.open('', '_blank');
+    if (!w) { showToast('Permite las ventanas emergentes para generar el PDF'); return; }
+    w.document.write('<p style="font-family:Arial;padding:30px">Generando PDF de deuda vencida…</p>');
+    fetchWithTimeout(API + '/dashboard/deuda-detalle' + (uid ? '?uid=' + uid : ''),
+      { headers: { 'Authorization': 'Bearer ' + token } }, 60000)
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">Error: ' + escHtml(res.data.detail || 'no se pudo generar') + '</p>'; return; }
+      var coms = (res.data.comerciales || []).filter(function(c){ return c.num_facturas > 0; });
+      if (!coms.length) { w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">No hay facturas vencidas.</p>'; return; }
+      var titulo = 'Deuda vencida ' + (uid && coms[0] ? coms[0].name + ' ' : '') + formatDateES(res.data.fecha).replace(/\//g, '-');
+      var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + escHtml(titulo) + '</title>' +
+        '<style>' + CSS_DEUDA_PDF + '</style></head><body>' +
+        '<button class="no-print" onclick="window.print()" style="padding:10px 16px;font-size:14px;cursor:pointer">🖨 Imprimir / Guardar PDF</button>' +
+        coms.map(function(c){ return htmlDeudaComercial(c, res.data.fecha); }).join('') +
+        '</body></html>';
+      w.document.open(); w.document.write(html); w.document.close();
+      w.focus();
+      setTimeout(function(){ w.print(); }, 500);
+    })
+    .catch(function(){ w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">Error de conexión.</p>'; });
+  }
+
+  // ── PANEL: PDF de clientes que se están perdiendo ──
+  var PERD_GRUPOS = [
+    { key: 'enfriandose', titulo: 'Enfriándose — llamar o visitar esta semana', nota: 'Llevan más del doble de lo habitual sin pedir. Todavía se recuperan con una visita.' },
+    { key: '30_60',       titulo: 'Entre 30 y 60 días sin pedir', nota: '' },
+    { key: 'perdido',     titulo: 'Más de 60 días sin pedir', nota: '' }
+  ];
+
+  function htmlPerdidosComercial(com, fecha) {
+    var grupos = PERD_GRUPOS.map(function(g){
+      var cls = com.clientes.filter(function(c){ return c.estado === g.key; });
+      if (!cls.length) return '';
+      var filas = cls.map(function(cl){
+        return '<tbody class="bloque"><tr class="fac">' +
+          '<td><strong>' + escHtml(cl.cliente) + '</strong>' + (cl.ref ? ' <span class="muted">' + escHtml(cl.ref) + '</span>' : '') +
+            '<div class="muted">' + [cl.direccion, cl.ruta ? 'Reparto: ' + cl.ruta : '', cl.telefono ? 'Tel. ' + cl.telefono : '']
+              .filter(Boolean).map(escHtml).join(' · ') + '</div>' +
+            (cl.deuda_vencida > 0 ? '<div class="grave" style="font-size:10px">Debe ' + fmt(cl.deuda_vencida) + ' € vencidos</div>' : '') +
+          '</td>' +
+          '<td>' + formatDateES(cl.ultimo) + '</td>' +
+          '<td class="num' + (cl.dias_sin > 60 ? ' grave' : '') + '">' + cl.dias_sin + '</td>' +
+          '<td class="num">' + (cl.intervalo ? 'cada ' + cl.intervalo + ' d' : '—') + '</td>' +
+          '<td class="num">' + cl.pedidos + '</td>' +
+          '<td class="num">' + fmt(cl.media_mes) + ' €</td>' +
+          '<td class="nota"></td></tr></tbody>';
+      }).join('');
+      var sub = 0; cls.forEach(function(c){ sub += c.media_mes; });
+      return '<tbody><tr class="cli"><td colspan="5"><strong>' + g.titulo + '</strong> <span class="muted">(' + cls.length + ')</span>' +
+          (g.nota ? '<div class="muted">' + g.nota + '</div>' : '') + '</td>' +
+          '<td class="num"><strong>' + fmt(sub) + ' €</strong></td><td></td></tr></tbody>' + filas;
+    }).join('');
+    return '<section class="hoja">' +
+      '<div class="cab">' +
+        '<div><div class="empresa">Comercial A. Puchol</div>' +
+          '<h1>Clientes que se están perdiendo — ' + escHtml(com.name) + '</h1>' +
+          '<div class="muted">Clientes habituales que han bajado o dejado de pedir, a ' + formatDateES(fecha) + '</div></div>' +
+        '<div class="resumen">' +
+          '<div><span>Compraban al mes</span><strong>' + fmt(com.en_riesgo_mes) + ' €</strong></div>' +
+          '<div><span>Clientes</span><strong>' + com.num + '</strong></div>' +
+          (com.enfriandose ? '<div><span>Enfriándose</span><strong>' + com.enfriandose + '</strong></div>' : '') +
+          (com.perdidos ? '<div class="grave"><span>+60 días</span><strong>' + com.perdidos + '</strong></div>' : '') +
+        '</div></div>' +
+      '<table><thead><tr>' +
+        '<th>Cliente</th><th>Último pedido</th><th class="num">Días sin pedir</th><th class="num">Pedía</th>' +
+        '<th class="num">Pedidos</th><th class="num">Compra media / mes</th><th class="nota">Visitado / resultado</th>' +
+      '</tr></thead>' + grupos +
+      '<tfoot><tr><td colspan="5">VENTA MENSUAL EN RIESGO</td><td class="num">' + fmt(com.en_riesgo_mes) + ' €</td><td></td></tr></tfoot>' +
+      '</table>' +
+      '<div class="muted" style="margin-top:8px">Compra media / mes: lo que compraba el cliente de media mientras pedía. "Pedía": cada cuántos días hacía pedido.</div>' +
+      '<div class="firma"><div>Entregado a: ' + escHtml(com.name) + '</div><div>Fecha: ____ / ____ / ______</div><div>Firma: ______________________</div></div>' +
+    '</section>';
+  }
+
+  function imprimirPerdidos(uid) {
+    var w = window.open('', '_blank');
+    if (!w) { showToast('Permite las ventanas emergentes para generar el PDF'); return; }
+    w.document.write('<p style="font-family:Arial;padding:30px">Generando PDF de clientes que se están perdiendo…</p>');
+    fetchWithTimeout(API + '/dashboard/clientes-perdidos', { headers: { 'Authorization': 'Bearer ' + token } }, 60000)
+    .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+    .then(function(res){
+      if (!res.ok) { w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">Error: ' + escHtml(res.data.detail || 'no se pudo generar') + '</p>'; return; }
+      var coms = (res.data.comerciales || []).filter(function(c){ return c.num > 0 && (!uid || c.uid === uid); });
+      if (!coms.length) { w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">No hay clientes que se estén perdiendo.</p>'; return; }
+      var hoy = new Date().toISOString().slice(0, 10);
+      var titulo = 'Clientes perdiendo ' + (uid ? coms[0].name + ' ' : '') + formatDateES(hoy).replace(/\//g, '-');
+      var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + escHtml(titulo) + '</title>' +
+        '<style>' + CSS_DEUDA_PDF + '</style></head><body>' +
+        '<button class="no-print" onclick="window.print()" style="padding:10px 16px;font-size:14px;cursor:pointer">🖨 Imprimir / Guardar PDF</button>' +
+        coms.map(function(c){ return htmlPerdidosComercial(c, hoy); }).join('') +
+        '</body></html>';
+      w.document.open(); w.document.write(html); w.document.close();
+      w.focus();
+      setTimeout(function(){ w.print(); }, 500);
+    })
+    .catch(function(){ w.document.body.innerHTML = '<p style="font-family:Arial;padding:30px">Error de conexión.</p>'; });
   }
 
   // ── PANEL: facturas de un cliente con deuda ─────────
@@ -3989,7 +4161,9 @@ grid.appendChild(card);
             '<div class="deuda-com-head" onclick="document.getElementById(\'perd-com-' + i + '\').classList.toggle(\'open\')">' +
               '<div><div class="deuda-com-name">' + c.name + '</div><div class="perd-resumen">' + res2.join('') + '</div></div>' +
               '<div style="display:flex;align-items:center;gap:10px;text-align:right"><span><span class="deuda-com-total" style="color:#B45309">' + fmt(c.en_riesgo_mes) + ' €</span>' +
-                '<div style="font-size:10px;color:var(--text-muted)">al mes en riesgo</div></span><span class="liq-chevron">▾</span></div>' +
+                '<div style="font-size:10px;color:var(--text-muted)">al mes en riesgo</div></span>' +
+                '<button class="btn-pdf-deuda" onclick="event.stopPropagation();imprimirPerdidos(' + c.uid + ')" title="PDF para entregar a ' + c.name + '">🖨 PDF</button>' +
+                '<span class="liq-chevron">▾</span></div>' +
             '</div>' +
             '<div class="deuda-com-body">' + filas +
               (resto > 0 ? '<div style="padding:8px 14px;font-size:12px;color:var(--text-muted)">+ ' + resto + ' clientes más</div>' : '') +
@@ -5478,6 +5652,8 @@ grid.appendChild(card);
   window.loadClients        = function(){ return loadClients(); };
   window.loadProducts       = function(){ return loadProducts(); };
   window.abrirFacturasCliente = abrirFacturasCliente;
+  window.imprimirDeuda = imprimirDeuda;
+  window.imprimirPerdidos = imprimirPerdidos;
 
   function fmt(n) { return (n || 0).toFixed(2).replace('.', ','); }
 
